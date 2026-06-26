@@ -10,9 +10,17 @@ import { registerSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useTurnstile } from "@/hooks/use-turnstile";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Create account — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["auth"]),
+  head: () => ({
+    meta: [
+      { title: "Create account — VegaPal" },
+      { name: "description", content: "Create your VegaPal account to send USDT invoices and accept crypto payments." },
+      { name: "robots", content: "index, follow" },
+    ],
+  }),
   component: RegisterPage,
 });
 

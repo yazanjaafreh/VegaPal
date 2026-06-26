@@ -10,9 +10,17 @@ import { forgotPasswordSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useTurnstile } from "@/hooks/use-turnstile";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset password — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["auth"]),
+  head: () => ({
+    meta: [
+      { title: "Reset password — VegaPal" },
+      { name: "description", content: "Reset your VegaPal account password securely." },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ForgotPassword,
 });
 

@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowUpRight, Download, FileText, Plus, Search } from "lucide-react";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 const STATUS_SEARCH_VALUES = [
   "paid",
@@ -42,7 +43,13 @@ export const Route = createFileRoute("/invoices/")({
     }
     return {};
   },
-  head: () => ({ meta: [{ title: "Invoices — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
+  head: () => ({
+    meta: [
+      { title: "Invoices — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => <AppShell><InvoicesPage /></AppShell>,
 });
 

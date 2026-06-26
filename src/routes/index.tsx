@@ -1,25 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { qrCodeToDataUrl } from "@/lib/qrcode-lazy";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/Logo";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { cn } from "@/lib/utils";
+import { LANDING_JSON_LD } from "@/lib/seo/landing-json-ld";
 import {
   ShieldCheck, Zap, Globe2, ArrowRight, Check, FileText, BarChart3,
   Sparkles, Banknote, Menu, Mail, Headphones,
-  Copy, AlertTriangle,
 } from "lucide-react";
-import type { TFunction } from "i18next";
 
 const LiveCurrencyConverter = lazy(() =>
   import("@/components/landing/LiveCurrencyConverter").then((m) => ({
@@ -27,20 +17,27 @@ const LiveCurrencyConverter = lazy(() =>
   })),
 );
 
+const LanguageSwitcher = lazy(() =>
+  import("@/components/LanguageSwitcher").then((m) => ({ default: m.LanguageSwitcher })),
+);
+
+const SubscriptionPaymentModal = lazy(() =>
+  import("@/components/landing/SubscriptionPaymentModal").then((m) => ({
+    default: m.SubscriptionPaymentModal,
+  })),
+);
+
+const DemoPaymentQr = lazy(() =>
+  import("@/components/landing/PaymentQr").then((m) => ({
+    default: function DeferredDemoQr({ value }: { value: string }) {
+      return <m.PaymentQr value={value} defer />;
+    },
+  })),
+);
+
+type SubscriptionPlan = import("@/components/landing/SubscriptionPaymentModal").SubscriptionPlan;
+
 const DEMO_WALLET = "TUckRdnGxRY7VehPLfu5RLz6QspQ8T4Sj5";
-
-const SUBSCRIPTION_WALLETS = [
-  {
-    network: "TRON TRC20",
-    address: "TUckRdnGxRY7VehPLfu5RLz6QspQ8T4Sj5",
-  },
-  {
-    network: "BNB Smart Chain BEP20",
-    address: "0xFB597F1b4Cf04F4a60bA36730C08e9180Fd932c2",
-  },
-] as const;
-
-type SubscriptionPlan = { planKey: "pro" | "business"; price: number };
 
 const LANDING_NAV_LINKS = [
   { href: "#features", labelKey: "features" },
@@ -69,7 +66,7 @@ function LandingHeader() {
     <header className="absolute top-0 inset-x-0 z-20 overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:pl-10 lg:pr-6 h-16 sm:h-20 flex items-center justify-between gap-2">
         <Logo light size="hero" className="shrink-0 origin-left scale-[0.85] sm:scale-100" />
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-navy-foreground/70">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-navy-foreground/70" aria-label="Main navigation">
           {LANDING_NAV_LINKS.map((link) => (
             <a key={link.href} href={link.href} className={landingNavLinkClass}>
               {tc(`nav.${link.labelKey}`)}
@@ -78,18 +75,22 @@ function LandingHeader() {
         </nav>
         <div className="flex items-center gap-1 sm:gap-2 shrink-0">
           <div className="hidden md:flex items-center gap-2">
-            <LanguageSwitcher variant="landing" />
+            <Suspense fallback={<span className="h-9 w-16" aria-hidden />}>
+              <LanguageSwitcher variant="landing" />
+            </Suspense>
             <Button asChild variant="ghostLight" size="sm">
-              <Link to="/login">{tc("nav.signIn")}</Link>
+              <Link to="/login" preload="intent">{tc("nav.signIn")}</Link>
             </Button>
             <Button asChild variant="hero" size="sm" className="whitespace-nowrap">
-              <Link to="/register">
+              <Link to="/register" preload="intent">
                 {tc("nav.getStarted")} <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
           </div>
           <div className="flex md:hidden items-center gap-1">
-            <LanguageSwitcher variant="landing" compact />
+            <Suspense fallback={<span className="h-9 w-9" aria-hidden />}>
+              <LanguageSwitcher variant="landing" compact />
+            </Suspense>
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
                 <button
@@ -133,12 +134,6 @@ function LandingHeader() {
       </div>
     </header>
   );
-}
-
-function getSubscriptionNetworkLabel(network: string, t: TFunction<"landing">): string {
-  if (network === "TRON TRC20") return t("subscriptionModal.networkTron");
-  if (network === "BNB Smart Chain BEP20") return t("subscriptionModal.networkBep20");
-  return network;
 }
 
 function PricingCard({
@@ -203,160 +198,6 @@ function PricingCard({
   );
 }
 
-function PaymentQr({ value, className }: { value: string; className?: string }) {
-  const { t: tc } = useTranslation("common");
-  const [src, setSrc] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    qrCodeToDataUrl(value, { margin: 1, width: 168 })
-      .then((dataUrl) => {
-        if (!cancelled) setSrc(dataUrl);
-      })
-      .catch(() => {
-        if (!cancelled) setSrc(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [value]);
-
-  if (!src) {
-    return <div className={cn("h-[132px] w-[132px] rounded-xl bg-muted animate-pulse shrink-0", className)} />;
-  }
-
-  return (
-    <img
-      src={src}
-      alt={tc("qr.walletAlt")}
-      className={cn("h-[132px] w-[132px] rounded-xl border border-border bg-white p-1.5 shrink-0", className)}
-    />
-  );
-}
-
-function CopyWalletButton({ address }: { address: string }) {
-  const { t: tc } = useTranslation("common");
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(address);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      setCopied(false);
-    }
-  };
-
-  return (
-    <Button type="button" variant="outline" size="sm" onClick={copy} className="gap-1.5">
-      <Copy className="h-3.5 w-3.5" />
-      {copied ? tc("buttons.copied") : tc("buttons.copyWallet")}
-    </Button>
-  );
-}
-
-function SubscriptionPaymentModal({
-  plan,
-  open,
-  onOpenChange,
-}: {
-  plan: SubscriptionPlan | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const { t } = useTranslation("landing");
-  const { t: tc } = useTranslation("common");
-
-  if (!plan) return null;
-
-  const planName = t(`pricing.plans.${plan.planKey}.name`);
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("subscriptionModal.title", { plan: planName })}</DialogTitle>
-          <DialogDescription>{t("subscriptionModal.description")}</DialogDescription>
-        </DialogHeader>
-
-        <div className="rounded-xl border border-border bg-muted/30 p-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">{tc("labels.plan")}</p>
-              <p className="font-semibold">{planName}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">{t("subscriptionModal.amountLabel")}</p>
-              <p className="text-2xl font-bold tabular-nums">
-                ${plan.price} <span className="text-sm font-medium text-muted-foreground">{tc("usdtPerMonth")}</span>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <p className="text-sm font-medium">{t("subscriptionModal.paymentMethods")}</p>
-          {SUBSCRIPTION_WALLETS.map((wallet) => (
-            <div key={wallet.address} className="rounded-xl border border-border p-4 space-y-4">
-              <div>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">{tc("labels.network")}</p>
-                <p className="text-sm font-semibold">{getSubscriptionNetworkLabel(wallet.network, t)}</p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <PaymentQr value={wallet.address} />
-                <div className="flex-1 min-w-0 space-y-3">
-                  <div>
-                    <p className="text-xs text-muted-foreground">{tc("labels.walletAddress")}</p>
-                    <p className="text-sm font-mono break-all leading-snug">{wallet.address}</p>
-                  </div>
-                  <CopyWalletButton address={wallet.address} />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="rounded-xl border border-border bg-muted/20 p-4 text-sm text-muted-foreground leading-relaxed">
-          {t("subscriptionModal.instructions")}
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button asChild variant="outline" className="flex-1">
-            <a href="https://t.me/vegapal" target="_blank" rel="noopener noreferrer">
-              <TelegramIcon className="h-4 w-4" />
-              {t("subscriptionModal.telegram")}
-            </a>
-          </Button>
-          <Button asChild variant="outline" className="flex-1">
-            <a href="mailto:support@vegapal.com">
-              <Mail className="h-4 w-4" />
-              support@vegapal.com
-            </a>
-          </Button>
-        </div>
-
-        <div className="flex gap-3 rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm">
-          <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
-          <p className="text-muted-foreground">{t("subscriptionModal.networkWarning")}</p>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function TelegramIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.71a.2.2 0 0 0-.05-.18c-.05-.04-.14-.03-.2-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.22-1.55-.4-.63-.21-1.13-.31-1.08-.66.02-.18.27-.36.92-.55 3.6-1.57 6.01-2.61 7.21-3.11 3.43-1.43 4.14-1.68 4.61-1.69.1 0 .33.02.48.14.12.1.16.24.17.34.01.1.03.32.01.49z" />
-    </svg>
-  );
-}
-
-function DemoPaymentQr({ value }: { value: string }) {
-  return <PaymentQr value={value} />;
-}
-
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -374,34 +215,22 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "https://vegapal.com/" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      {
+        name: "twitter:description",
+        content:
+          "Create professional USDT invoices and accept crypto payments. Built for freelancers and businesses.",
+      },
     ],
     links: [{ rel: "canonical", href: "https://vegapal.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(LANDING_JSON_LD),
+      },
+    ],
   }),
   component: Landing,
 });
-
-function LandingStructuredData() {
-  useEffect(() => {
-    const id = "vegapal-ld-json";
-    if (document.getElementById(id)) return;
-    const script = document.createElement("script");
-    script.id = id;
-    script.type = "application/ld+json";
-    script.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      name: "VegaPal",
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      description: "Create professional USDT invoices and accept crypto payments.",
-      url: "https://vegapal.com/",
-    });
-    document.head.appendChild(script);
-    return () => script.remove();
-  }, []);
-  return null;
-}
 
 const FEATURE_ITEMS = [
   { icon: Zap, key: "fastPayments" },
@@ -439,14 +268,17 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <LandingStructuredData />
-      <SubscriptionPaymentModal
-        plan={subscriptionPlan}
-        open={subscriptionPlan !== null}
-        onOpenChange={(open) => {
-          if (!open) setSubscriptionPlan(null);
-        }}
-      />
+      {subscriptionPlan !== null && (
+        <Suspense fallback={null}>
+          <SubscriptionPaymentModal
+            plan={subscriptionPlan}
+            open
+            onOpenChange={(open) => {
+              if (!open) setSubscriptionPlan(null);
+            }}
+          />
+        </Suspense>
+      )}
       <LandingHeader />
 
       {/* HERO */}
@@ -472,7 +304,7 @@ function Landing() {
             </p>
             <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
               <Button asChild variant="hero" size="xl" className="w-full sm:w-auto">
-                <Link to="/register">
+                <Link to="/register" preload="intent">
                   {t("hero.createFirstInvoice")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
@@ -532,7 +364,16 @@ function Landing() {
                     {t("hero.demo.cryptoPayment")}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <DemoPaymentQr value={DEMO_WALLET} />
+                    <Suspense
+                      fallback={
+                        <div
+                          className="h-[132px] w-[132px] rounded-xl bg-muted animate-pulse shrink-0"
+                          aria-hidden
+                        />
+                      }
+                    >
+                      <DemoPaymentQr value={DEMO_WALLET} />
+                    </Suspense>
                     <div className="flex-1 min-w-0 space-y-3">
                       <div>
                         <p className="text-xs text-muted-foreground">{tc("labels.network")}</p>

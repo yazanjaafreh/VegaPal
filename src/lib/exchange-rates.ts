@@ -94,7 +94,9 @@ export async function getExchangeRates(forceRefresh = false): Promise<ExchangeRa
     Object.assign(usdPerUnit, fiat);
     fiatAvailable = true;
   } catch (error) {
-    console.error("[exchange-rates] Frankfurter API failed:", error);
+    if (import.meta.env.DEV) {
+      console.error("[exchange-rates] Frankfurter API failed:", error);
+    }
   }
 
   try {
@@ -102,7 +104,9 @@ export async function getExchangeRates(forceRefresh = false): Promise<ExchangeRa
     Object.assign(usdPerUnit, crypto);
     cryptoAvailable = true;
   } catch (error) {
-    console.error("[exchange-rates] CoinGecko API failed:", error);
+    if (import.meta.env.DEV) {
+      console.error("[exchange-rates] CoinGecko API failed:", error);
+    }
   }
 
   const data: ExchangeRates = {

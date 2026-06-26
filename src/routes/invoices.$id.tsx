@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
+import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/AppShell";
-import { PaymentMethodCards } from "@/components/invoice/PaymentMethodCards";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { useInvoice, invoices, notifyInvoices, type InvoiceStatus } from "@/lib/vegapal-store";
 import {
   formatInvoiceAmount,
@@ -10,7 +11,6 @@ import {
 } from "@/lib/invoice-display";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
-import { useState } from "react";
 import {
   ArrowLeft,
   Copy,
@@ -31,8 +31,20 @@ async function downloadInvoicePdf(inv: import("@/lib/vegapal-store").Invoice) {
   await generateInvoicePDF(inv);
 }
 
+const PaymentMethodCards = lazy(() =>
+  import("@/components/invoice/PaymentMethodCards").then((m) => ({
+    default: m.PaymentMethodCards,
+  })),
+);
+
 export const Route = createFileRoute("/invoices/$id")({
-  head: () => ({ meta: [{ title: "Invoice — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
+  head: () => ({
+    meta: [
+      { title: "Invoice — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => (
     <AppShell>
       <InvoiceDetails />
@@ -357,7 +369,9 @@ function InvoiceDetails() {
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
                 {tc("labels.paymentMethods")}
               </p>
-              <PaymentMethodCards inv={inv} />
+              <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-muted" aria-hidden />}>
+                <PaymentMethodCards inv={inv} />
+              </Suspense>
             </div>
           )}
 

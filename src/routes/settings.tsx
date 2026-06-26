@@ -10,9 +10,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Check, LogOut, Upload, Trash2 } from "lucide-react";
 import { settingsSchema, firstZodError } from "@/lib/validation/schemas";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/settings")({
-  head: () => ({ meta: [{ title: "Settings — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["settings"]),
+  head: () => ({
+    meta: [
+      { title: "Settings — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => <AppShell><Settings /></AppShell>,
 });
 

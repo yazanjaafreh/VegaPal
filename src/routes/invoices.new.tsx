@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "@/lib/i18n";
 import { invoiceCreateSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { AppShell } from "@/components/AppShell";
@@ -45,9 +44,16 @@ import {
 } from "@/lib/vegapal-store";
 import { ArrowLeft, Banknote, Building2, Coins, Layers, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/invoices/new")({
-  head: () => ({ meta: [{ title: i18n.t("meta.create", { ns: "invoices" }) }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
+  head: () => ({
+    meta: [
+      { title: "Create invoice — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => <AppShell><CreateInvoice /></AppShell>,
 });
 

@@ -1,6 +1,7 @@
 import i18n from "./index";
 import { I18N_NAMESPACES } from "./index";
 import type { SupportedLanguage } from "./languages";
+import { markNamespacesLoaded } from "./load-namespace";
 
 const loaded = new Set<SupportedLanguage>(["en"]);
 
@@ -22,5 +23,6 @@ export async function ensureLanguageLoaded(lng: SupportedLanguage) {
     i18n.addResourceBundle(lng, ns, data, true, true);
   }
 
+  markNamespacesLoaded(I18N_NAMESPACES);
   loaded.add(lng);
 }

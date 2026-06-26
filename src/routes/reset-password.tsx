@@ -6,9 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthLayout } from "./login";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set new password — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["auth"]),
+  head: () => ({
+    meta: [
+      { title: "Set new password — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ResetPassword,
 });
 

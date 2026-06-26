@@ -43,6 +43,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
+                aria-current={active ? "page" : undefined}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   active
                     ? "bg-primary/10 text-primary"
@@ -93,13 +94,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </div>
         </header>
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex pb-[env(safe-area-inset-bottom,0px)]">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex pb-[env(safe-area-inset-bottom,0px)]" aria-label="App navigation">
           {nav.map((n) => {
             const active = isActive(n);
             return (
               <Link
                 key={n.to}
                 to={n.to}
+                aria-current={active ? "page" : undefined}
                 className={`flex-1 flex flex-col items-center justify-center gap-0.5 px-1 py-2 min-h-[3.5rem] text-[10px] font-medium leading-tight ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}

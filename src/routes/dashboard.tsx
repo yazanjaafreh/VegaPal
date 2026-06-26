@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/AppShell";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { useInvoices, type Invoice, type InvoiceStatus } from "@/lib/vegapal-store";
 import { formatInvoiceAmountWithCurrency } from "@/lib/invoice-display";
 import { Button } from "@/components/ui/button";
@@ -15,10 +17,15 @@ import {
   Activity,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["dashboard"]),
+  head: () => ({
+    meta: [
+      { title: "Dashboard — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: () => (
     <AppShell>
       <Dashboard />
@@ -125,9 +132,9 @@ function Dashboard() {
   const { t } = useTranslation("dashboard");
   const { t: tc } = useTranslation("common");
   const { data: all, loading } = useInvoices();
-  const paid = all.filter((i) => i.status === "paid");
-  const pending = all.filter((i) => i.status === "pending");
-  const overdue = all.filter((i) => i.status === "overdue");
+  const paid = useMemo(() => all.filter((i) => i.status === "paid"), [all]);
+  const pending = useMemo(() => all.filter((i) => i.status === "pending"), [all]);
+  const overdue = useMemo(() => all.filter((i) => i.status === "overdue"), [all]);
 
   const goToInvoices = (statusFilter?: InvoiceStatusFilter) => {
     if (statusFilter) {

@@ -1,6 +1,7 @@
 import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 import { useInvoice } from "@/lib/vegapal-store";
-import { PaymentMethodCards } from "@/components/invoice/PaymentMethodCards";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import {
   formatInvoiceAmount,
   formatInvoiceAmountWithCurrency,
@@ -18,7 +19,14 @@ async function downloadInvoicePdf(inv: Invoice) {
   await generateInvoicePDF(inv);
 }
 
+const PaymentMethodCards = lazy(() =>
+  import("@/components/invoice/PaymentMethodCards").then((m) => ({
+    default: m.PaymentMethodCards,
+  })),
+);
+
 export const Route = createFileRoute("/pay/$id")({
+  beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
   head: () => ({
     meta: [
       { title: "Pay invoice — VegaPal" },
@@ -308,7 +316,11 @@ function PublicInvoice() {
                 </div>
               </div>
             ) : (
-              d.showPaymentInstructions && <PaymentMethodCards inv={inv} />
+              d.showPaymentInstructions && (
+                <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-muted" aria-hidden />}>
+                  <PaymentMethodCards inv={inv} />
+                </Suspense>
+              )
             )}
 
             {d.showVegapalLogo && (

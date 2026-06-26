@@ -12,9 +12,17 @@ import { loginSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useTurnstile } from "@/hooks/use-turnstile";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [{ title: "Sign in — VegaPal" }] }),
+  beforeLoad: () => ensureNamespacesLoaded(["auth"]),
+  head: () => ({
+    meta: [
+      { title: "Sign in — VegaPal" },
+      { name: "description", content: "Sign in to VegaPal to manage invoices, payments, and your business profile." },
+      { name: "robots", content: "index, follow" },
+    ],
+  }),
   component: LoginPage,
 });
 

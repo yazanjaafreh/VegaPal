@@ -39,7 +39,6 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
   const { t } = useTranslation("common");
 
@@ -77,7 +76,33 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: () => {
+    const links: Array<{
+      rel: string;
+      href: string;
+      crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
+    }> = [
+      { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: "https://vegapal.com/" },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap",
+      },
+      { rel: "dns-prefetch", href: "https://challenges.cloudflare.com" },
+    ];
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+    if (supabaseUrl) {
+      try {
+        links.push({ rel: "preconnect", href: new URL(supabaseUrl).origin });
+      } catch {
+        /* ignore invalid URL */
+      }
+    }
+
+    return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -91,17 +116,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "VegaPal helps freelancers and businesses create professional USDT invoices and accept crypto payments securely." },
       { property: "og:url", content: "https://vegapal.com/" },
       { name: "robots", content: "index, follow" },
+      { name: "theme-color", content: "#0B1220" },
+      { property: "og:site_name", content: "VegaPal" },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5bca70e8-c221-4739-abe1-d5adcc1be3b7/id-preview-6aef7401--fe66886f-3dfd-4ac9-867a-b0a2c3483bbd.lovable.app-1782281956253.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5bca70e8-c221-4739-abe1-d5adcc1be3b7/id-preview-6aef7401--fe66886f-3dfd-4ac9-867a-b0a2c3483bbd.lovable.app-1782281956253.png" },
     ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "canonical", href: "https://vegapal.com/" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
-    ],
-  }),
+    links,
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

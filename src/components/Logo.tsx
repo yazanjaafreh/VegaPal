@@ -31,7 +31,11 @@ export function Logo({
 }) {
   const s = LOGO_SIZES[size];
   return (
-    <div className={`inline-flex items-center ${s.gap} ${className}`}>
+    <div
+      className={`inline-flex items-center ${s.gap} ${className}`}
+      role="img"
+      aria-label="VegaPal"
+    >
       <div
         className={`relative ${s.box} rounded-lg flex items-center justify-center shadow-sm ${
           light ? "bg-white/10 ring-1 ring-white/20" : "bg-navy"
