@@ -344,20 +344,23 @@ function CreateInvoice() {
   const cashVisible = showCashFields(paymentMethod, cash);
 
   return (
-    <div className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto min-w-0 pb-6 lg:pb-10">
+    <div className="box-border mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden px-4 sm:px-6 lg:px-10 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-10">
       <Link
         to="/invoices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
       >
         <ArrowLeft className="h-4 w-4" /> {t("create.backToInvoices")}
       </Link>
-      <h1 className="text-3xl font-bold tracking-tight">
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
         {editId ? t("create.editTitle") : t("create.createTitle")}
       </h1>
       <p className="text-muted-foreground mt-1">{t("create.subtitle")}</p>
 
-      <form onSubmit={submit} className="mt-8 grid lg:grid-cols-[1.6fr_1fr] gap-8">
-        <div className="space-y-6">
+      <form
+        onSubmit={submit}
+        className="mt-8 grid w-full min-w-0 max-w-full grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
+      >
+        <div className="min-w-0 max-w-full space-y-6">
           <Section title={t("create.sections.invoiceDetails")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field label={t("create.fields.invoiceCurrency")}>
@@ -486,11 +489,11 @@ function CreateInvoice() {
           <Section title={t("create.sections.sellerClient")}>
             <div className="space-y-6">
               <div>
-                <div className="flex items-center justify-between gap-3 mb-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-0">
                     {t("create.fields.sellerFromProfile")}
                   </p>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 max-w-full">
                     <ShowToggle
                       id="showVegapalLogo"
                       label={tc("labels.logo")}
@@ -522,8 +525,8 @@ function CreateInvoice() {
                 </div>
               </div>
               <div>
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider min-w-0">
                     {t("create.fields.clientInfo")}
                   </p>
                   <ShowToggle
@@ -564,8 +567,8 @@ function CreateInvoice() {
           </Section>
 
           <Section title={t("create.sections.lineItems")}>
-            <div className="space-y-3">
-              <div className="hidden sm:grid grid-cols-[1fr_80px_120px_120px_32px] gap-3 text-xs uppercase tracking-wider text-muted-foreground px-1">
+            <div className="min-w-0 max-w-full space-y-3">
+              <div className="hidden md:grid grid-cols-[minmax(0,1fr)_80px_120px_120px_32px] gap-3 text-xs uppercase tracking-wider text-muted-foreground px-1">
                 <span>{tc("labels.description")}</span>
                 <span className="text-right">{tc("labels.qty")}</span>
                 <span className="text-right">{tc("labels.unitPrice")}</span>
@@ -573,48 +576,106 @@ function CreateInvoice() {
                 <span />
               </div>
               {items.map((it, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[1fr_80px_120px_120px_32px] gap-3 items-center"
-                >
-                  <Input
-                    value={it.description}
-                    onChange={(e) => updateItem(idx, { description: e.target.value })}
-                    placeholder={t("create.fields.itemDescriptionPlaceholder")}
-                    required
-                  />
-                  <Input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={it.quantity}
-                    onChange={(e) =>
-                      updateItem(idx, { quantity: parseFloat(e.target.value) || 0 })
-                    }
-                    className="text-right tabular-nums"
-                  />
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={it.unitPrice}
-                    onChange={(e) =>
-                      updateItem(idx, { unitPrice: parseFloat(e.target.value) || 0 })
-                    }
-                    className="text-right tabular-nums"
-                  />
-                  <div className="text-right font-medium tabular-nums text-sm">
-                    {fmtAmount(it.total, invoiceCurrency)}
+                <div key={idx} className="min-w-0 max-w-full">
+                  <div className="md:hidden rounded-lg border border-border bg-muted/20 p-3 space-y-3 min-w-0 max-w-full">
+                    <div className="space-y-1.5 min-w-0">
+                      <Label className="text-xs text-muted-foreground">{tc("labels.description")}</Label>
+                      <Input
+                        value={it.description}
+                        onChange={(e) => updateItem(idx, { description: e.target.value })}
+                        placeholder={t("create.fields.itemDescriptionPlaceholder")}
+                        required
+                        className="w-full min-w-0 max-w-full"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 min-w-0">
+                      <div className="min-w-0 space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">{tc("labels.qty")}</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={it.quantity}
+                          onChange={(e) =>
+                            updateItem(idx, { quantity: parseFloat(e.target.value) || 0 })
+                          }
+                          className="w-full min-w-0 max-w-full text-right tabular-nums"
+                        />
+                      </div>
+                      <div className="min-w-0 space-y-1.5">
+                        <Label className="text-xs text-muted-foreground">{tc("labels.unitPrice")}</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={it.unitPrice}
+                          onChange={(e) =>
+                            updateItem(idx, { unitPrice: parseFloat(e.target.value) || 0 })
+                          }
+                          className="w-full min-w-0 max-w-full text-right tabular-nums"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 min-w-0">
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground">{tc("labels.total")}</p>
+                        <p className="font-medium tabular-nums text-sm break-all">
+                          {fmtAmount(it.total, invoiceCurrency)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(idx)}
+                        className="shrink-0 text-muted-foreground hover:text-destructive disabled:opacity-30 p-2"
+                        disabled={items.length === 1}
+                        aria-label={t("create.fields.removeItem")}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeItem(idx)}
-                    className="text-muted-foreground hover:text-destructive disabled:opacity-30"
-                    disabled={items.length === 1}
-                    aria-label={t("create.fields.removeItem")}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+
+                  <div className="hidden md:grid grid-cols-[minmax(0,1fr)_80px_120px_120px_32px] gap-3 items-center min-w-0">
+                    <Input
+                      value={it.description}
+                      onChange={(e) => updateItem(idx, { description: e.target.value })}
+                      placeholder={t("create.fields.itemDescriptionPlaceholder")}
+                      required
+                      className="min-w-0"
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={it.quantity}
+                      onChange={(e) =>
+                        updateItem(idx, { quantity: parseFloat(e.target.value) || 0 })
+                      }
+                      className="min-w-0 text-right tabular-nums"
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={it.unitPrice}
+                      onChange={(e) =>
+                        updateItem(idx, { unitPrice: parseFloat(e.target.value) || 0 })
+                      }
+                      className="min-w-0 text-right tabular-nums"
+                    />
+                    <div className="min-w-0 text-right font-medium tabular-nums text-sm truncate">
+                      {fmtAmount(it.total, invoiceCurrency)}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(idx)}
+                      className="text-muted-foreground hover:text-destructive disabled:opacity-30"
+                      disabled={items.length === 1}
+                      aria-label={t("create.fields.removeItem")}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
               <Button type="button" variant="outline" size="sm" onClick={addItem}>
@@ -928,11 +989,11 @@ function CreateInvoice() {
           </div>
         </div>
 
-        <aside className="space-y-4">
+        <aside className="min-w-0 max-w-full w-full space-y-4">
           <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             {t("create.preview.livePreview")}
           </p>
-          <div className="rounded-2xl border border-border bg-card p-6 sticky top-6 space-y-4">
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 lg:sticky lg:top-6 space-y-4 min-w-0 max-w-full box-border">
             {displayOptions.showVegapalLogo && (
               <p className="text-xs font-bold text-primary tracking-wide">VegaPal</p>
             )}
@@ -1016,7 +1077,7 @@ function CreateInvoice() {
               )}
             </div>
 
-            <p className="text-2xl font-bold tracking-tight tabular-nums">
+            <p className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums break-all">
               {fmtAmount(total, invoiceCurrency)}
             </p>
 
@@ -1094,8 +1155,7 @@ function PaymentMethodCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-xl border p-4 text-left transition cursor-pointer",
-        fullWidth ? "w-full" : "",
+        "box-border w-full min-w-0 max-w-full rounded-xl border p-4 text-left transition cursor-pointer",
         selected
           ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20"
           : "border-border bg-card hover:border-primary/30 hover:shadow-sm",
@@ -1129,12 +1189,17 @@ function Section({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 lg:p-8">
-      <div className={`flex items-center gap-3 mb-5 ${action ? "justify-between" : ""}`}>
-        <h2 className="font-semibold">{title}</h2>
-        {action}
+    <div className="box-border w-full max-w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card p-4 sm:p-6 lg:p-8">
+      <div
+        className={cn(
+          "mb-5 flex flex-wrap items-start gap-x-3 gap-y-2",
+          action ? "justify-between" : "",
+        )}
+      >
+        <h2 className="min-w-0 font-semibold">{title}</h2>
+        {action ? <div className="flex max-w-full flex-wrap">{action}</div> : null}
       </div>
-      {children}
+      <div className="min-w-0 max-w-full">{children}</div>
     </div>
   );
 }
@@ -1153,8 +1218,11 @@ function ShowToggle({
   const { t } = useTranslation("common");
 
   return (
-    <div className="flex items-center gap-1.5 shrink-0">
-      <Label htmlFor={id} className="text-[11px] font-normal text-muted-foreground cursor-pointer">
+    <div className="flex max-w-full flex-wrap items-center gap-x-1.5 gap-y-1">
+      <Label
+        htmlFor={id}
+        className="min-w-0 text-[11px] font-normal leading-tight text-muted-foreground cursor-pointer"
+      >
         {checked ? t("toggle.hide") : t("toggle.show")}
         {label ? ` ${label}` : ""}
       </Label>
@@ -1180,9 +1248,9 @@ function Field({
   showToggle?: { id: string; checked: boolean; onChange: (v: boolean) => void };
 }) {
   return (
-    <div className={`space-y-2 min-w-0 ${full ? "md:col-span-2" : ""}`}>
-      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-        <Label className="min-w-0">{label}</Label>
+    <div className={`box-border min-w-0 max-w-full space-y-2 ${full ? "md:col-span-2" : ""}`}>
+      <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-x-3 sm:gap-y-1">
+        <Label className="min-w-0 max-w-full">{label}</Label>
         {showToggle && (
           <ShowToggle
             id={showToggle.id}
@@ -1191,7 +1259,9 @@ function Field({
           />
         )}
       </div>
-      {children}
+      <div className="w-full min-w-0 max-w-full [&_input]:w-full [&_input]:min-w-0 [&_input]:max-w-full [&_textarea]:w-full [&_textarea]:min-w-0 [&_textarea]:max-w-full [&_button[role=combobox]]:w-full [&_button[role=combobox]]:min-w-0 [&_button[role=combobox]]:max-w-full">
+        {children}
+      </div>
     </div>
   );
 }
