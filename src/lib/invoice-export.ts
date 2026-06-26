@@ -1,4 +1,3 @@
-import * as XLSX from "xlsx";
 import type { Invoice } from "@/lib/vegapal-store";
 
 const PAYMENT_METHOD_LABELS: Record<Invoice["paymentMethods"]["method"], string> = {
@@ -54,9 +53,10 @@ function invoiceToExportRow(inv: Invoice) {
   };
 }
 
-export function exportInvoicesToExcel(invoices: Invoice[]): boolean {
+export async function exportInvoicesToExcel(invoices: Invoice[]): Promise<boolean> {
   if (invoices.length === 0) return false;
 
+  const XLSX = await import("xlsx");
   const worksheet = XLSX.utils.json_to_sheet(invoices.map(invoiceToExportRow));
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Invoices");

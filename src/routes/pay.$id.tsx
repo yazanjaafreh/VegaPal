@@ -10,7 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { StatusPill } from "@/components/StatusBadge";
 import { Check, ShieldCheck, Sparkles, Download, Ban } from "lucide-react";
-import { generateInvoicePDF } from "@/lib/invoice-pdf";
+
+import type { Invoice } from "@/lib/vegapal-store";
+
+async function downloadInvoicePdf(inv: Invoice) {
+  const { generateInvoicePDF } = await import("@/lib/invoice-pdf");
+  await generateInvoicePDF(inv);
+}
 
 export const Route = createFileRoute("/pay/$id")({
   head: () => ({
@@ -63,9 +69,9 @@ function PublicInvoice() {
     1 + (d.showDueDate ? 1 : 0);
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 overflow-x-hidden">
       <header className="border-b border-border bg-background">
-        <div className="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 h-16 flex items-center justify-between gap-3 min-w-0">
           {d.showVegapalLogo ? (
             <Link to="/">
               <Logo />
@@ -79,9 +85,9 @@ function PublicInvoice() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10 lg:py-16">
+      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8 sm:py-10 lg:py-16 min-w-0">
         {d.showSellerInfo && (
-          <div className="rounded-2xl border border-border bg-card p-6 mb-6 flex items-center gap-4">
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 mb-6 flex flex-col sm:flex-row items-start gap-4">
             {inv.sellerLogoUrl ? (
               <img
                 src={inv.sellerLogoUrl}
@@ -105,8 +111,8 @@ function PublicInvoice() {
                 </p>
               )}
             </div>
-            <div className="ml-auto shrink-0">
-              <Button variant="outline" size="sm" onClick={() => generateInvoicePDF(inv)}>
+            <div className="w-full sm:w-auto sm:ml-auto shrink-0">
+              <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => downloadInvoicePdf(inv)}>
                 <Download className="h-4 w-4" /> Download PDF
               </Button>
             </div>
@@ -115,7 +121,7 @@ function PublicInvoice() {
 
         {!d.showSellerInfo && (
           <div className="flex justify-end mb-6">
-            <Button variant="outline" size="sm" onClick={() => generateInvoicePDF(inv)}>
+            <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => downloadInvoicePdf(inv)}>
               <Download className="h-4 w-4" /> Download PDF
             </Button>
           </div>
@@ -124,7 +130,7 @@ function PublicInvoice() {
         <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10">
           <div>
             <p className="text-sm font-mono text-muted-foreground">{inv.number}</p>
-            <h1 className="mt-2 text-3xl lg:text-4xl font-bold tracking-tight text-balance">
+            <h1 className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-balance">
               {inv.title}
             </h1>
 

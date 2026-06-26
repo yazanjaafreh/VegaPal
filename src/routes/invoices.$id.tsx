@@ -25,7 +25,11 @@ import {
   XCircle,
   User,
 } from "lucide-react";
-import { generateInvoicePDF } from "@/lib/invoice-pdf";
+
+async function downloadInvoicePdf(inv: import("@/lib/vegapal-store").Invoice) {
+  const { generateInvoicePDF } = await import("@/lib/invoice-pdf");
+  await generateInvoicePDF(inv);
+}
 
 export const Route = createFileRoute("/invoices/$id")({
   head: () => ({ meta: [{ title: "Invoice — VegaPal" }] }),
@@ -98,7 +102,7 @@ function InvoiceDetails() {
     showReferenceField(d, "showProjectCode", inv.projectCode);
 
   return (
-    <div className="p-6 lg:p-10 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto min-w-0">
       <Link
         to="/invoices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
@@ -109,7 +113,7 @@ function InvoiceDetails() {
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold tracking-tight">{inv.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{inv.title}</h1>
             {d.showStatus && <StatusBadge status={inv.status} />}
           </div>
           <p className="text-muted-foreground font-mono text-sm mt-1">{inv.number}</p>
@@ -119,7 +123,7 @@ function InvoiceDetails() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => generateInvoicePDF(inv)}>
+          <Button variant="outline" onClick={() => downloadInvoicePdf(inv)}>
             <Download className="h-4 w-4" /> {tc("buttons.pdf")}
           </Button>
           <Button variant="outline" asChild>

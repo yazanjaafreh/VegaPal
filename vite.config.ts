@@ -4,7 +4,19 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
-  nitro: { preset: "vercel" },
+  nitro: {
+    preset: "vercel",
+    routeRules: {
+      "/**": {
+        headers: {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "SAMEORIGIN",
+          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        },
+      },
+    },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     server: { entry: "server" },

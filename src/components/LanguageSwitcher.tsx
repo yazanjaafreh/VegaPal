@@ -13,9 +13,11 @@ import { cn } from "@/lib/utils";
 type LanguageSwitcherProps = {
   variant?: "landing" | "default";
   className?: string;
+  /** Flag-only on narrow screens — keeps landing nav from overflowing */
+  compact?: boolean;
 };
 
-export function LanguageSwitcher({ variant = "default", className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({ variant = "default", className, compact }: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation("common");
   const current =
     SUPPORTED_LANGUAGES.find((lang) => lang.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
@@ -31,12 +33,16 @@ export function LanguageSwitcher({ variant = "default", className }: LanguageSwi
           type="button"
           variant={variant === "landing" ? "ghostLight" : "outline"}
           size="sm"
-          className={cn("gap-1.5 font-normal", className)}
+          className={cn(
+            "gap-1.5 font-normal",
+            compact && "px-2 sm:px-3",
+            className,
+          )}
           aria-label={t("language.label")}
         >
           <span aria-hidden>{current.flag}</span>
-          <span>{current.label}</span>
-          <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+          <span className={cn(compact && "hidden sm:inline")}>{current.label}</span>
+          <ChevronDown className={cn("h-3.5 w-3.5 opacity-60", compact && "hidden sm:block")} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[10rem]">

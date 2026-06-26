@@ -93,24 +93,26 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </div>
         </header>
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex">
+        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex pb-[env(safe-area-inset-bottom,0px)]">
           {nav.map((n) => {
             const active = isActive(n);
             return (
               <Link
                 key={n.to}
                 to={n.to}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium ${
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 px-1 py-2 min-h-[3.5rem] text-[10px] font-medium leading-tight ${
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <n.icon className="h-4 w-4" />
-                {n.label}
+                <n.icon className="h-4 w-4 shrink-0" />
+                <span className="max-w-[4.5rem] truncate text-center">{n.label}</span>
               </Link>
             );
           })}
         </nav>
-        <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+        <main className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] lg:pb-0 overflow-x-hidden min-w-0">
+          {children}
+        </main>
       </div>
     </div>
   );

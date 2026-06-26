@@ -344,7 +344,7 @@ function CreateInvoice() {
   const cashVisible = showCashFields(paymentMethod, cash);
 
   return (
-    <div className="p-6 lg:p-10 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto min-w-0 pb-6 lg:pb-10">
       <Link
         to="/invoices"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4"
@@ -359,7 +359,7 @@ function CreateInvoice() {
       <form onSubmit={submit} className="mt-8 grid lg:grid-cols-[1.6fr_1fr] gap-8">
         <div className="space-y-6">
           <Section title={t("create.sections.invoiceDetails")}>
-            <div className="grid sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field label={t("create.fields.invoiceCurrency")}>
                 <Select value={invoiceCurrency} onValueChange={setInvoiceCurrency}>
                   <SelectTrigger>
@@ -533,7 +533,7 @@ function CreateInvoice() {
                     onChange={(v) => setDisplay("showClientInfo", v)}
                   />
                 </div>
-                <div className="grid sm:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <Field label={t("create.fields.clientName")}>
                   <Input
                     required
@@ -624,7 +624,7 @@ function CreateInvoice() {
           </Section>
 
           <Section title={t("create.sections.totals")}>
-            <div className="grid sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field
                 label={t("create.fields.discountLabel", { currency: invoiceCurrency })}
                 showToggle={{
@@ -674,7 +674,7 @@ function CreateInvoice() {
             }
           >
             <div className="space-y-5">
-              <div className="grid sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {primaryPaymentMethods.map((opt) => (
                   <PaymentMethodCard
                     key={opt.value}
@@ -701,7 +701,7 @@ function CreateInvoice() {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     {t("create.paymentMethods.enableMethods")}
                   </p>
-                  <div className="grid sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {primaryPaymentMethods.map((opt) => {
                       const enabled =
                         opt.value === "cash"
@@ -740,7 +740,7 @@ function CreateInvoice() {
               {cryptoVisible && (
                 <div className="rounded-lg border border-border p-4 space-y-4">
                   <p className="text-sm font-medium">{t("create.paymentMethods.cryptoPayment")}</p>
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Field label={t("create.paymentMethods.cryptoCurrency")}>
                       <Select
                         value={crypto.currency}
@@ -792,7 +792,7 @@ function CreateInvoice() {
               {bankVisible && (
                 <div className="rounded-lg border border-border p-4 space-y-4">
                   <p className="text-sm font-medium">{t("create.paymentMethods.bankTransferTitle")}</p>
-                  <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Field label={tc("labels.bankName")}>
                       <Input
                         value={bank.bankName ?? ""}
@@ -918,7 +918,7 @@ function CreateInvoice() {
             </div>
           </Section>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => navigate({ to: "/invoices" })}>
               {tc("buttons.cancel")}
             </Button>
@@ -1129,7 +1129,7 @@ function Section({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
+    <div className="rounded-2xl border border-border bg-card p-4 sm:p-6 lg:p-8">
       <div className={`flex items-center gap-3 mb-5 ${action ? "justify-between" : ""}`}>
         <h2 className="font-semibold">{title}</h2>
         {action}
@@ -1180,9 +1180,9 @@ function Field({
   showToggle?: { id: string; checked: boolean; onChange: (v: boolean) => void };
 }) {
   return (
-    <div className={`space-y-2 ${full ? "sm:col-span-2" : ""}`}>
-      <div className="flex items-center justify-between gap-2">
-        <Label>{label}</Label>
+    <div className={`space-y-2 min-w-0 ${full ? "md:col-span-2" : ""}`}>
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+        <Label className="min-w-0">{label}</Label>
         {showToggle && (
           <ShowToggle
             id={showToggle.id}

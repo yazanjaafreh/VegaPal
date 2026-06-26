@@ -174,7 +174,7 @@ function Dashboard() {
   ];
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto min-w-0">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
           <p className="text-xs font-medium text-primary uppercase tracking-wider">{t("overview")}</p>

@@ -111,13 +111,13 @@ export function AuthLayout({
           {t("panel.copyright", { year: new Date().getFullYear() })}
         </div>
       </div>
-      <div className="flex items-center justify-center p-6 lg:p-12 bg-background relative">
+      <div className="flex items-center justify-center p-4 sm:p-6 lg:p-12 bg-background relative min-w-0">
         <div className="absolute top-4 right-4">
           <LanguageSwitcher />
         </div>
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm min-w-0 px-1">
           <div className="lg:hidden mb-8"><Link to="/"><Logo /></Link></div>
-          <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
           <p className="mt-2 text-muted-foreground">{subtitle}</p>
           <div className="mt-8">{children}</div>
         </div>

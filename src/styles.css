@@ -120,12 +120,16 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html {
+    overflow-x: hidden;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     font-feature-settings: "cv11", "ss01", "ss03";
+    overflow-x: hidden;
   }
   h1, h2, h3, h4 {
     font-family: var(--font-display);

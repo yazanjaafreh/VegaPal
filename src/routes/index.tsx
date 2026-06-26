@@ -70,54 +70,69 @@ function LandingHeader() {
   }, []);
 
   return (
-    <header className="absolute top-0 inset-x-0 z-20">
-      <div className="mx-auto max-w-7xl pl-8 pr-6 lg:pl-10 h-20 flex items-center justify-between">
-        <Logo light size="hero" />
-        <nav className="hidden md:flex items-center gap-8 text-sm text-navy-foreground/70">
+    <header className="absolute top-0 inset-x-0 z-20 overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:pl-10 lg:pr-6 h-16 sm:h-20 flex items-center justify-between gap-2">
+        <Logo light size="hero" className="shrink-0 origin-left scale-[0.85] sm:scale-100" />
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm text-navy-foreground/70">
           {LANDING_NAV_LINKS.map((link) => (
             <a key={link.href} href={link.href} className={landingNavLinkClass}>
               {tc(`nav.${link.labelKey}`)}
             </a>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button
-                type="button"
-                className="inline-flex md:hidden h-10 w-10 items-center justify-center rounded-lg text-navy-foreground/70 transition-colors hover:text-navy-foreground hover:bg-white/5"
-                aria-label={tc("nav.openMenu")}
+        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="hidden md:flex items-center gap-2">
+            <LanguageSwitcher variant="landing" />
+            <Button asChild variant="ghostLight" size="sm">
+              <Link to="/login">{tc("nav.signIn")}</Link>
+            </Button>
+            <Button asChild variant="hero" size="sm" className="whitespace-nowrap">
+              <Link to="/register">
+                {tc("nav.getStarted")} <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <div className="flex md:hidden items-center gap-1">
+            <LanguageSwitcher variant="landing" compact />
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-navy-foreground/70 transition-colors hover:text-navy-foreground hover:bg-white/5"
+                  aria-label={tc("nav.openMenu")}
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="border-white/10 bg-navy text-navy-foreground w-[min(100vw-2rem,20rem)] flex flex-col"
               >
-                <Menu className="h-5 w-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="border-white/10 bg-navy text-navy-foreground w-[min(100vw-2rem,20rem)]"
-            >
-              <nav className="mt-10 flex flex-col gap-6 text-base text-navy-foreground/70">
-                {LANDING_NAV_LINKS.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className={landingNavLinkClass}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {tc(`nav.${link.labelKey}`)}
-                  </a>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <LanguageSwitcher variant="landing" />
-          <Button asChild variant="ghostLight" size="sm">
-            <Link to="/login">{tc("nav.signIn")}</Link>
-          </Button>
-          <Button asChild variant="hero" size="sm">
-            <Link to="/register">
-              {tc("nav.getStarted")} <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
+                <nav className="mt-10 flex flex-col gap-5 text-base text-navy-foreground/70">
+                  {LANDING_NAV_LINKS.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className={landingNavLinkClass}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {tc(`nav.${link.labelKey}`)}
+                    </a>
+                  ))}
+                </nav>
+                <div className="mt-auto pt-8 border-t border-white/10 flex flex-col gap-3">
+                  <Button asChild variant="ghostLight" className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link to="/login">{tc("nav.signIn")}</Link>
+                  </Button>
+                  <Button asChild variant="hero" className="w-full" onClick={() => setMobileOpen(false)}>
+                    <Link to="/register">
+                      {tc("nav.getStarted")} <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>
@@ -139,7 +154,7 @@ const CURRENCY_META: Record<CurrencyCode, { icon: string }> = {
 };
 
 const amountFieldClass =
-  "w-full rounded-[20px] bg-slate-50/80 px-5 py-4 text-3xl lg:text-4xl font-semibold tracking-tight tabular-nums text-foreground shadow-[0_2px_16px_rgba(15,23,42,0.06)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:shadow-[0_4px_24px_rgba(15,23,42,0.08)] placeholder:text-muted-foreground/40";
+  "w-full min-w-0 max-w-full rounded-[20px] bg-slate-50/80 px-4 sm:px-5 py-3.5 sm:py-4 text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight tabular-nums text-foreground shadow-[0_2px_16px_rgba(15,23,42,0.06)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/15 focus:shadow-[0_4px_24px_rgba(15,23,42,0.08)] placeholder:text-muted-foreground/40";
 
 function formatUpdatedAgo(updatedAt: Date, now: number, t: TFunction): string {
   const sec = Math.max(0, Math.floor((now - updatedAt.getTime()) / 1000));
@@ -333,7 +348,7 @@ function LiveCurrencyConverter() {
 
   return (
     <div id="converter" className="relative border-t border-white/5 bg-navy/40 backdrop-blur py-14 lg:py-20 scroll-mt-28">
-      <div className="mx-auto max-w-4xl px-6">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="mb-10 text-center">
           <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-navy-foreground">
             {t("converter.title")}
@@ -343,7 +358,7 @@ function LiveCurrencyConverter() {
           </p>
         </div>
 
-        <div className="rounded-[20px] bg-white p-6 sm:p-8 lg:p-10 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+        <div className="rounded-[20px] bg-white p-4 sm:p-6 lg:p-10 shadow-[0_24px_80px_rgba(15,23,42,0.12)] min-w-0 overflow-hidden">
           <div className="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-start md:gap-5 lg:gap-8">
             <div className="space-y-4">
               <p className="text-[11px] font-bold tracking-[0.18em] text-muted-foreground">{t("converter.from")}</p>
@@ -477,7 +492,7 @@ function PricingCard({
       )}
       <h3 className="font-semibold text-lg">{name}</h3>
       <p className="text-sm text-muted-foreground mt-1">{description}</p>
-      <p className="mt-6 text-5xl font-bold tracking-tight">
+      <p className="mt-6 text-3xl sm:text-5xl font-bold tracking-tight">
         ${price}
         <span className="text-base text-muted-foreground font-medium">{tc("monthly")}</span>
       </p>
@@ -693,7 +708,7 @@ function Landing() {
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan | null>(null);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <SubscriptionPaymentModal
         plan={subscriptionPlan}
         open={subscriptionPlan !== null}
@@ -706,35 +721,35 @@ function Landing() {
       {/* HERO */}
       <section className="relative bg-hero overflow-hidden">
         <div className="absolute inset-0 bg-mesh opacity-60" />
-        <div className="relative mx-auto max-w-7xl px-6 pt-36 pb-24 lg:pt-44 lg:pb-32 grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-navy-foreground">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur px-5 py-2.5 text-lg font-bold text-navy-foreground/85 mb-6">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-28 sm:pt-36 pb-16 sm:pb-24 lg:pt-44 lg:pb-32 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="text-navy-foreground min-w-0">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur px-3 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-lg font-bold text-navy-foreground/85 mb-5 sm:mb-6">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse shrink-0" />
               {t("hero.badge")}
             </div>
-            <h1 className="text-5xl lg:text-[3.35rem] font-bold tracking-tight text-balance text-navy-foreground">
+            <h1 className="text-[1.75rem] leading-[1.15] sm:text-4xl lg:text-[3.35rem] font-bold tracking-tight text-balance text-navy-foreground">
               <span className="block">{t("hero.headlineLine1")}</span>
               <span className="block mt-2 lg:mt-3">
                 {t("hero.headlineLine2Prefix")}{" "}
-                <span className="text-primary text-[1.1em]">{t("hero.headlineLine2Highlight")}</span>{" "}
+                <span className="text-primary text-[1.05em] sm:text-[1.1em]">{t("hero.headlineLine2Highlight")}</span>{" "}
                 {t("hero.headlineLine2Suffix")}
               </span>
               <span className="block mt-2 lg:mt-3">{t("hero.headlineLine3")}</span>
             </h1>
-            <p className="mt-6 text-lg text-navy-foreground/70 max-w-xl leading-relaxed">
+            <p className="mt-5 sm:mt-6 text-base sm:text-lg text-navy-foreground/70 max-w-xl leading-relaxed">
               {t("hero.description")}
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Button asChild variant="hero" size="xl">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+              <Button asChild variant="hero" size="xl" className="w-full sm:w-auto">
                 <Link to="/register">
                   {t("hero.createFirstInvoice")} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="ghostLight" size="xl">
+              <Button asChild variant="ghostLight" size="xl" className="w-full sm:w-auto">
                 <a href="#demo-invoice">{t("hero.viewDemoInvoice")}</a>
               </Button>
             </div>
-            <ul className="mt-10 flex flex-col sm:flex-row sm:flex-wrap gap-x-8 gap-y-3 text-sm text-navy-foreground/70">
+            <ul className="mt-8 sm:mt-10 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-3 text-sm text-navy-foreground/70">
               <li className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary shrink-0" />
                 {t("hero.features.pdfInvoices")}
@@ -751,10 +766,10 @@ function Landing() {
           </div>
 
           {/* Mock invoice card */}
-          <div id="demo-invoice" className="relative scroll-mt-28">
-            <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full" />
-            <div className="relative rounded-2xl bg-background shadow-elevated border border-border overflow-hidden">
-              <div className="flex items-center justify-between p-5 border-b border-border">
+          <div id="demo-invoice" className="relative scroll-mt-24 sm:scroll-mt-28 w-full min-w-0 max-w-full">
+            <div className="absolute -inset-4 bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="relative rounded-2xl bg-background shadow-elevated border border-border overflow-hidden w-full">
+              <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-destructive/70" />
                   <div className="h-2 w-2 rounded-full bg-warning/70" />
@@ -762,14 +777,14 @@ function Landing() {
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">INV-0042</span>
               </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start gap-4 mb-5">
+              <div className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-5">
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">{t("hero.demo.billedTo")}</p>
                     <p className="font-semibold">{t("hero.demo.clientName")}</p>
-                    <p className="text-sm text-muted-foreground">{t("hero.demo.clientEmail")}</p>
+                    <p className="text-sm text-muted-foreground break-all">{t("hero.demo.clientEmail")}</p>
                   </div>
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-success/15 text-success text-sm font-semibold ring-1 ring-success/25 shrink-0">
+                  <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-success/15 text-success text-xs sm:text-sm font-semibold ring-1 ring-success/25 self-start shrink-0">
                     <Check className="h-4 w-4" strokeWidth={2.5} />
                     {t("hero.demo.paid")}
                   </span>
@@ -777,9 +792,9 @@ function Landing() {
                 <p className="text-sm text-[#111827] font-semibold mb-2">
                   {t("hero.demo.title")}
                 </p>
-                <p className="text-[2.75rem] lg:text-5xl font-bold tracking-tight tabular-nums leading-none">
+                <p className="text-[1.75rem] sm:text-[2.75rem] lg:text-5xl font-bold tracking-tight tabular-nums leading-none break-all sm:break-normal">
                   200,000.00{" "}
-                  <span className="text-xl lg:text-2xl text-muted-foreground font-semibold">USDT</span>
+                  <span className="text-lg sm:text-xl lg:text-2xl text-muted-foreground font-semibold">USDT</span>
                 </p>
                 <div className="mt-6 rounded-xl bg-muted/50 border border-border p-4">
                   <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
@@ -815,10 +830,10 @@ function Landing() {
 
       {/* FEATURES */}
       <section id="features" className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="max-w-2xl">
             <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("features.eyebrow")}</p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight text-balance">
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-balance">
               {t("features.title")}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -842,10 +857,10 @@ function Landing() {
 
       {/* HOW IT WORKS */}
       <section id="how" className="py-24 bg-muted/40 border-y border-border">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("howItWorks.eyebrow")}</p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight">{t("howItWorks.title")}</h2>
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("howItWorks.title")}</h2>
           </div>
           <div className="mt-14 grid md:grid-cols-3 gap-6">
             {HOW_IT_WORKS_STEPS.map((s) => (
@@ -860,10 +875,10 @@ function Landing() {
 
       {/* PRICING */}
       <section id="pricing" className="py-24">
-        <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("pricing.eyebrow")}</p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight">{t("pricing.title")}</h2>
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">{t("pricing.title")}</h2>
             <p className="mt-4 text-muted-foreground">
               {t("pricing.subtitle")}
             </p>
@@ -903,19 +918,19 @@ function Landing() {
 
       {/* CTA */}
       <section className="pb-24">
-        <div className="mx-auto max-w-6xl px-6">
-          <div className="rounded-3xl bg-hero relative overflow-hidden p-12 lg:p-16 text-navy-foreground">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="rounded-3xl bg-hero relative overflow-hidden p-6 sm:p-10 lg:p-16 text-navy-foreground">
             <div className="absolute inset-0 bg-mesh opacity-60" />
-            <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-              <div>
-                <h2 className="text-4xl font-bold tracking-tight max-w-xl text-balance">
+            <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6 lg:gap-8">
+              <div className="min-w-0">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight max-w-xl text-balance">
                   {t("cta.title")}
                 </h2>
                 <p className="mt-3 text-navy-foreground/70 max-w-lg">
                   {t("cta.subtitle")}
                 </p>
               </div>
-              <Button asChild variant="hero" size="xl">
+              <Button asChild variant="hero" size="xl" className="w-full sm:w-auto shrink-0">
                 <Link to="/register">
                   {t("cta.button")} <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -928,10 +943,10 @@ function Landing() {
       {/* CONTACT */}
       <section id="contact" className="relative py-24 bg-hero overflow-hidden scroll-mt-28">
         <div className="absolute inset-0 bg-mesh opacity-60" />
-        <div className="relative mx-auto max-w-7xl px-6">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto">
             <p className="text-sm font-semibold text-primary uppercase tracking-wider">{t("contact.eyebrow")}</p>
-            <h2 className="mt-3 text-4xl font-bold tracking-tight text-navy-foreground">{t("contact.title")}</h2>
+            <h2 className="mt-3 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-navy-foreground">{t("contact.title")}</h2>
             <p className="mt-4 text-lg text-navy-foreground/70">
               {t("contact.subtitle")}
             </p>
@@ -979,7 +994,7 @@ function Landing() {
 
       {/* FOOTER */}
       <footer className="border-t border-border py-10">
-        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <Logo />
           <p className="text-sm text-muted-foreground">
             {tc("footer.copyright", { year: new Date().getFullYear() })}
