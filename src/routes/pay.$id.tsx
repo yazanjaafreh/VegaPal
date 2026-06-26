@@ -1,0 +1,331 @@
+import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { useInvoice } from "@/lib/vegapal-store";
+import { PaymentMethodCards } from "@/components/invoice/PaymentMethodCards";
+import {
+  formatInvoiceAmount,
+  formatInvoiceAmountWithCurrency,
+  showReferenceField,
+} from "@/lib/invoice-display";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/Logo";
+import { StatusPill } from "@/components/StatusBadge";
+import { Check, ShieldCheck, Sparkles, Download, Ban } from "lucide-react";
+import { generateInvoicePDF } from "@/lib/invoice-pdf";
+
+export const Route = createFileRoute("/pay/$id")({
+  head: () => ({
+    meta: [
+      { title: "Pay invoice — VegaPal" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: PublicInvoice,
+});
+
+function PublicInvoice() {
+  const { id } = useParams({ from: "/pay/$id" });
+  const { data: inv, loading } = useInvoice(id);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading invoice…</p>
+      </div>
+    );
+  }
+
+  if (!inv) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/40 p-6">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Invoice not found</h1>
+          <p className="text-muted-foreground mt-2">The link may be invalid or expired.</p>
+          <Button asChild variant="outline" className="mt-6">
+            <Link to="/">Back to VegaPal</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const { displayOptions: d } = inv;
+  const currency = inv.invoiceCurrency;
+  const cancelled = inv.status === "cancelled";
+  const paid = inv.status === "paid";
+  const payable = !cancelled && !paid;
+
+  const hasReferences =
+    showReferenceField(d, "showPoNumber", inv.poNumber) ||
+    showReferenceField(d, "showReferenceNumber", inv.referenceNumber) ||
+    showReferenceField(d, "showProjectCode", inv.projectCode);
+
+  const metaCols =
+    1 + (d.showDueDate ? 1 : 0);
+
+  return (
+    <div className="min-h-screen bg-muted/30">
+      <header className="border-b border-border bg-background">
+        <div className="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
+          {d.showVegapalLogo ? (
+            <Link to="/">
+              <Logo />
+            </Link>
+          ) : (
+            <span className="text-sm font-semibold text-foreground">Invoice payment</span>
+          )}
+          <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Secure payment page
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-5xl px-6 py-10 lg:py-16">
+        {d.showSellerInfo && (
+          <div className="rounded-2xl border border-border bg-card p-6 mb-6 flex items-center gap-4">
+            {inv.sellerLogoUrl ? (
+              <img
+                src={inv.sellerLogoUrl}
+                alt=""
+                className="h-12 w-12 rounded-lg object-cover bg-muted shrink-0"
+              />
+            ) : (
+              <div
+                className="h-12 w-12 rounded-lg flex items-center justify-center text-white font-bold shrink-0"
+                style={{ background: inv.brandColor || "#16C784" }}
+              >
+                {(inv.sellerBusiness || inv.sellerName).charAt(0)}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold truncate">{inv.sellerBusiness || inv.sellerName}</p>
+              <p className="text-sm text-muted-foreground truncate">{inv.sellerEmail}</p>
+              {inv.sellerAddress && (
+                <p className="text-xs text-muted-foreground whitespace-pre-line mt-1 line-clamp-2">
+                  {inv.sellerAddress}
+                </p>
+              )}
+            </div>
+            <div className="ml-auto shrink-0">
+              <Button variant="outline" size="sm" onClick={() => generateInvoicePDF(inv)}>
+                <Download className="h-4 w-4" /> Download PDF
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!d.showSellerInfo && (
+          <div className="flex justify-end mb-6">
+            <Button variant="outline" size="sm" onClick={() => generateInvoicePDF(inv)}>
+              <Download className="h-4 w-4" /> Download PDF
+            </Button>
+          </div>
+        )}
+
+        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-6 lg:gap-10">
+          <div>
+            <p className="text-sm font-mono text-muted-foreground">{inv.number}</p>
+            <h1 className="mt-2 text-3xl lg:text-4xl font-bold tracking-tight text-balance">
+              {inv.title}
+            </h1>
+
+            {d.showClientInfo && (
+              <p className="mt-3 text-muted-foreground">
+                Billed to{" "}
+                <span className="text-foreground font-medium">
+                  {inv.clientCompany || inv.clientName}
+                </span>
+                {inv.clientEmail && (
+                  <span className="block text-sm mt-0.5">{inv.clientEmail}</span>
+                )}
+              </p>
+            )}
+
+            {hasReferences && (
+              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+                {showReferenceField(d, "showPoNumber", inv.poNumber) && (
+                  <span>
+                    <span className="text-muted-foreground">PO: </span>
+                    <span className="font-medium">{inv.poNumber}</span>
+                  </span>
+                )}
+                {showReferenceField(d, "showReferenceNumber", inv.referenceNumber) && (
+                  <span>
+                    <span className="text-muted-foreground">Reference: </span>
+                    <span className="font-medium">{inv.referenceNumber}</span>
+                  </span>
+                )}
+                {showReferenceField(d, "showProjectCode", inv.projectCode) && (
+                  <span>
+                    <span className="text-muted-foreground">Project: </span>
+                    <span className="font-medium">{inv.projectCode}</span>
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="mt-8 rounded-2xl border border-border bg-card p-6 lg:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Total due
+                  </p>
+                  <p className="mt-1 text-5xl font-bold tracking-tight tabular-nums">
+                    {formatInvoiceAmount(inv.total, currency)}
+                    <span className="text-xl text-muted-foreground font-medium ml-2">
+                      {currency}
+                    </span>
+                  </p>
+                </div>
+                {d.showStatus && <StatusPill status={inv.status} />}
+              </div>
+
+              {(d.showDueDate || inv.issueDate) && (
+                <div
+                  className={`mt-6 pt-6 border-t border-border grid gap-4 text-sm ${
+                    metaCols === 2 ? "grid-cols-2" : "grid-cols-1"
+                  }`}
+                >
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                      Issued
+                    </p>
+                    <p className="mt-1 font-medium">{inv.issueDate}</p>
+                  </div>
+                  {d.showDueDate && (
+                    <div>
+                      <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                        Due
+                      </p>
+                      <p className="mt-1 font-medium">{inv.dueDate}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
+                  Items
+                </p>
+                <div className="space-y-2">
+                  {inv.items.map((it, i) => (
+                    <div key={i} className="flex justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">
+                        {it.description}{" "}
+                        <span className="text-foreground/60">× {it.quantity}</span>
+                      </span>
+                      <span className="tabular-nums font-medium shrink-0">
+                        {formatInvoiceAmountWithCurrency(it.total, currency)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 ml-auto max-w-xs space-y-1 text-sm">
+                  <TotalLine
+                    label="Subtotal"
+                    value={formatInvoiceAmountWithCurrency(inv.subtotal, currency)}
+                  />
+                  {d.showDiscount && inv.discount > 0 && (
+                    <TotalLine
+                      label="Discount"
+                      value={`- ${formatInvoiceAmountWithCurrency(inv.discount, currency)}`}
+                    />
+                  )}
+                  {d.showTax && inv.tax > 0 && (
+                    <TotalLine
+                      label="Tax"
+                      value={formatInvoiceAmountWithCurrency(inv.tax, currency)}
+                    />
+                  )}
+                  <div className="flex justify-between pt-2 border-t border-border font-semibold text-foreground gap-3">
+                    <span>Total due</span>
+                    <span className="tabular-nums text-right">
+                      {formatInvoiceAmountWithCurrency(inv.total, currency)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {d.showNotes && inv.description && (
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    Notes
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                    {inv.description}
+                  </p>
+                </div>
+              )}
+
+              {d.showTerms && inv.termsAndConditions && (
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                    Terms & conditions
+                  </p>
+                  <p className="text-sm whitespace-pre-wrap leading-relaxed text-muted-foreground">
+                    {inv.termsAndConditions}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {payable && d.showPaymentInstructions && (
+              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                Use the payment options on the right to complete this invoice.
+              </div>
+            )}
+          </div>
+
+          <aside className="lg:sticky lg:top-6 self-start space-y-4">
+            {cancelled ? (
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="rounded-xl bg-muted border border-border p-5 text-center">
+                  <div className="mx-auto h-12 w-12 rounded-full bg-muted-foreground/20 text-muted-foreground flex items-center justify-center">
+                    <Ban className="h-6 w-6" />
+                  </div>
+                  <p className="mt-3 font-semibold">Invoice cancelled</p>
+                  <p className="text-sm text-muted-foreground">
+                    This invoice is no longer payable.
+                  </p>
+                </div>
+              </div>
+            ) : paid ? (
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="rounded-xl bg-success/10 border border-success/30 p-5 text-center">
+                  <div className="mx-auto h-12 w-12 rounded-full bg-success text-success-foreground flex items-center justify-center">
+                    <Check className="h-6 w-6" />
+                  </div>
+                  <p className="mt-3 font-semibold">Payment received</p>
+                  <p className="text-sm text-muted-foreground">
+                    This invoice has been marked as paid.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              d.showPaymentInstructions && <PaymentMethodCards inv={inv} />
+            )}
+
+            {d.showVegapalLogo && (
+              <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Powered by{" "}
+                <Link to="/" className="font-semibold text-foreground hover:underline">
+                  VegaPal
+                </Link>
+              </div>
+            )}
+          </aside>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function TotalLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between text-muted-foreground gap-3">
+      <span>{label}</span>
+      <span className="tabular-nums text-foreground text-right">{value}</span>
+    </div>
+  );
+}

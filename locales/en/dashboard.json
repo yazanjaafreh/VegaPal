@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "Dashboard — VegaPal"
+  },
+  "overview": "Overview",
+  "welcomeBack": "Welcome back",
+  "subtitle": "An overview of your invoicing activity.",
+  "stats": {
+    "totalInvoices": "Total invoices",
+    "paidInvoices": "Paid invoices",
+    "pendingInvoices": "Pending invoices",
+    "overdue": "Overdue",
+    "totalVolume": "Total volume"
+  },
+  "recentInvoices": "Recent invoices",
+  "recentActivity": "Recent activity",
+  "empty": {
+    "title": "No invoices yet",
+    "description": "Create your first invoice to get started."
+  }
+}

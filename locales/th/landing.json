@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "title": "VegaPal — ใบแจ้งหนี้ USDT และรับชำระคริปโตอย่างปลอดภัย",
+    "description": "สร้างใบแจ้งหนี้ USDT มืออาชีพและรับชำระคริปโต สำหรับฟรีแลนซ์และธุรกิจที่ต้องการความปลอดภัยและความน่าเชื่อถือ",
+    "ogTitle": "VegaPal — ใบแจ้งหนี้ USDT ที่ปลอดภัย",
+    "ogDescription": "ระบบออกใบแจ้งหนี้คริปโตสำหรับฟรีแลนซ์และธุรกิจ"
+  },
+  "hero": {
+    "badge": "ใบแจ้งหนี้ปลอดภัย รับเงินเร็วขึ้น",
+    "headlineLine1": "สร้างใบแจ้งหนี้",
+    "headlineLine2Prefix": "ภายใน",
+    "headlineLine2Highlight": "30",
+    "headlineLine2Suffix": "วินาที",
+    "headlineLine3": "รับเงินได้ทุกที่",
+    "description": "สร้างใบแจ้งหนี้ที่ปลอดภัยในไม่กี่วินาที แชร์ลิงก์ชำระเงินเดียว ให้ลูกค้าจ่ายด้วย USDT โอนธนาคาร หรือเงินสด — พร้อมยืนยันการชำระอย่างมืออาชีพ",
+    "createFirstInvoice": "สร้างใบแจ้งหนี้แรก",
+    "viewDemoInvoice": "ดูตัวอย่างใบแจ้งหนี้",
+    "features": {
+      "pdfInvoices": "ใบแจ้งหนี้ PDF มืออาชีพ",
+      "paymentMethods": "รับคริปโต โอนธนาคาร และเงินสด",
+      "verifiedPages": "หน้าชำระเงินที่ตรวจสอบได้"
+    },
+    "demo": {
+      "billedTo": "เรียกเก็บเงิน",
+      "clientName": "Acme Trading LLC",
+      "clientEmail": "finance@acmetrading.com",
+      "paid": "ชำระแล้ว",
+      "title": "Exchange USDT → AED",
+      "cryptoPayment": "ชำระด้วยคริปโต",
+      "networkTron": "TRON TRC20"
+    }
+  },
+  "converter": {
+    "title": "แปลงสกุลเงินแบบเรียลไทม์",
+    "subtitle": "เช็คอัตราแลกเปลี่ยนก่อนสร้างใบแจ้งหนี้",
+    "from": "จาก",
+    "to": "เป็น",
+    "enterAmount": "กรอกจำนวนเงิน",
+    "swapCurrencies": "สลับสกุลเงิน",
+    "fiatUnavailable": "อัตราแลกเปลี่ยนชั่วคราวไม่พร้อมใช้งาน",
+    "cryptoUnavailable": "อัตราคริปโตชั่วคราวไม่พร้อมใช้งาน",
+    "rateLine": "1 {{from}} = {{amount}} {{to}}",
+    "currencies": {
+      "USD": "ดอลลาร์สหรัฐ",
+      "AED": "เดอร์แฮมสหรัฐอาหรับเอมิเรตส์",
+      "EUR": "ยูโร",
+      "SAR": "ริยาลซาอุดีอาระเบีย",
+      "CNY": "หยวนจีน",
+      "RUB": "รูเบิลรัสเซีย",
+      "INR": "รูปีอินเดีย",
+      "USDT": "Tether",
+      "USDC": "USD Coin",
+      "BTC": "Bitcoin",
+      "ETH": "Ethereum"
+    }
+  },
+  "features": {
+    "eyebrow": "ทำไมต้อง VegaPal",
+    "title": "วิธีที่เร็วที่สุดในการออกใบแจ้งหนี้คริปโต",
+    "subtitle": "ประสบการณ์ใช้งานระดับ Stripe ความน่าเชื่อถือระดับ Wise ครอบคลุมระดับ PayPal — ออกแบบมาสำหรับสเตเบิลคอยน์โดยเฉพาะ",
+    "items": {
+      "fastPayments": {
+        "title": "รับเงินคริปโตได้เร็ว",
+        "desc": "รับเงินภายในไม่กี่นาทีด้วย USDT ผ่านลิงก์ชำระเงินง่ายๆ"
+      },
+      "directWallet": {
+        "title": "เงินเข้ากระเป๋าคุณโดยตรง",
+        "desc": "เงินเข้ากระเป๋าของคุณทันที VegaPal ไม่เก็บเงินแทนคุณ"
+      },
+      "multiplePayments": {
+        "title": "รับชำระหลายช่องทาง",
+        "desc": "รับคริปโต โอนธนาคาร หรือเงินสด จากใบแจ้งหนี้เดียว"
+      },
+      "professionalInvoices": {
+        "title": "ใบแจ้งหนี้มืออาชีพ",
+        "desc": "สร้างใบแจ้งหนี้สวยงาม พร้อม QR Code และลิงก์ชำระเงินที่ปลอดภัย"
+      },
+      "dashboard": {
+        "title": "แดชบอร์ดแบบเรียลไทม์",
+        "desc": "ติดตามใบแจ้งหนี้ที่ชำระแล้ว รอชำระ และเกินกำหนด ในที่เดียว"
+      },
+      "trusted": {
+        "title": "ลูกค้าเชื่อมั่น",
+        "desc": "ใบแจ้งหนี้มืออาชีพที่ช่วยให้ลูกค้าชำระเงินได้อย่างมั่นใจ"
+      }
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "วิธีใช้งาน",
+    "title": "จากใบแจ้งหนี้สู่การรับเงิน ใน 3 ขั้นตอน",
+    "steps": {
+      "create": "สร้างใบแจ้งหนี้",
+      "share": "แชร์ PDF ใบแจ้งหนี้",
+      "getPaid": "รับเงิน"
+    }
+  },
+  "pricing": {
+    "eyebrow": "ราคา",
+    "title": "เรียบง่าย โปร่งใส เป็นธรรม",
+    "subtitle": "ทุกแพ็กเกจมี VegaPal บน PDF และหน้าชำระเงินของคุณเสมอ",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "เริ่มออกใบแจ้งหนี้พร้อมทุกสิ่งที่จำเป็น",
+        "cta": "เริ่มใช้ฟรี",
+        "features": {
+          "invoices": "5 ใบแจ้งหนี้ / เดือน",
+          "pdf": "ใบแจ้งหนี้ PDF",
+          "paymentPages": "หน้าชำระเงินสาธารณะ",
+          "payments": "รับคริปโต โอนธนาคาร และเงินสด",
+          "dashboard": "แดชบอร์ด",
+          "branding": "ปรับแต่งแบรนด์",
+          "qr": "QR Code",
+          "excel": "ส่งออก Excel",
+          "reports": "รายงาน",
+          "multiCurrency": "ใบแจ้งหนี้หลายสกุลเงิน",
+          "footer": "แสดง Powered by VegaPal"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "สำหรับฟรีแลนซ์และธุรกิจขนาดเล็กที่กำลังเติบโต",
+        "cta": "ชำระด้วย USDT",
+        "features": {
+          "invoices": "90 ใบแจ้งหนี้ / เดือน",
+          "users": "1 ผู้ใช้",
+          "everythingFree": "ทุกอย่างใน Free",
+          "prioritySupport": "ซัพพอร์ตพิเศษ",
+          "earlyAccess": "เข้าถึงฟีเจอร์ใหม่ก่อนใคร",
+          "footer": "แสดง Powered by VegaPal"
+        }
+      },
+      "business": {
+        "name": "Business",
+        "description": "สำหรับทีมที่ต้องการปริมาณมากขึ้นและควบคุมได้มากขึ้น",
+        "cta": "ชำระด้วย USDT",
+        "features": {
+          "invoices": "ใบแจ้งหนี้ไม่จำกัด",
+          "users": "2 ผู้ใช้",
+          "everythingPro": "ทุกอย่างใน Pro",
+          "teamManagement": "จัดการทีม",
+          "multipleWallets": "หลายกระเป๋า",
+          "analytics": "วิเคราะห์ขั้นสูง",
+          "api": "API เร็วๆ นี้",
+          "prioritySupport": "ซัพพอร์ตพิเศษ",
+          "footer": "แสดง Powered by VegaPal"
+        }
+      }
+    }
+  },
+  "subscriptionModal": {
+    "title": "ชำระด้วย USDT — {{plan}}",
+    "description": "โอนจำนวนเงินตามแพ็กเกจรายเดือนเป็น USDT เราจะเปิดใช้แพ็กเกจให้หลังยืนยันการชำระเงิน",
+    "amountLabel": "จำนวนเงิน",
+    "paymentMethods": "ช่องทางชำระเงิน",
+    "networkTron": "TRON TRC20",
+    "networkBep20": "BNB Smart Chain BEP20",
+    "instructions": "หลังชำระเงิน กรุณาส่ง TXID หรือภาพหน้าจอการชำระเงินมาที่ Telegram หรืออีเมลของเรา เพื่อเปิดใช้แพ็กเกจ",
+    "telegram": "Telegram",
+    "networkWarning": "กรุณาเลือกเครือข่ายให้ถูกต้องก่อนส่ง USDT หากส่งผิดเครือข่าย เงินอาจสูญหาย"
+  },
+  "cta": {
+    "title": "พร้อมส่งใบแจ้งหนี้ USDT แรกของคุณหรือยัง?",
+    "subtitle": "เข้าร่วมกับฟรีแลนซ์และธุรกิจที่รับเงินได้เร็วขึ้นด้วย VegaPal",
+    "button": "เริ่มใช้ฟรี"
+  },
+  "contact": {
+    "eyebrow": "ซัพพอร์ต",
+    "title": "ติดต่อเรา",
+    "subtitle": "ต้องการความช่วยเหลือเรื่องใบแจ้งหนี้หรือการชำระเงิน? ทีมซัพพอร์ตพร้อมให้บริการตลอด 24 ชม.",
+    "email": {
+      "title": "ซัพพอร์ตทางอีเมล"
+    },
+    "telegram": {
+      "title": "ซัพพอร์ตทาง Telegram",
+      "description": "แชทกับเราบน Telegram"
+    },
+    "liveSupport": {
+      "title": "ซัพพอร์ตตลอด 24 ชม.",
+      "description": "ช่วยเหลือได้ทุกที่ ทุกเวลา"
+    }
+  }
+}

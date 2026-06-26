@@ -1,0 +1,21 @@
+{
+  "meta": {
+    "title": "แดชบอร์ด — VegaPal"
+  },
+  "overview": "ภาพรวม",
+  "welcomeBack": "ยินดีต้อนรับกลับ",
+  "subtitle": "ภาพรวมกิจกรรมใบแจ้งหนี้ของคุณ",
+  "stats": {
+    "totalInvoices": "ใบแจ้งหนี้ทั้งหมด",
+    "paidInvoices": "ชำระแล้ว",
+    "pendingInvoices": "รอชำระ",
+    "overdue": "เกินกำหนด",
+    "totalVolume": "ยอดรวมทั้งหมด"
+  },
+  "recentInvoices": "ใบแจ้งหนี้ล่าสุด",
+  "recentActivity": "กิจกรรมล่าสุด",
+  "empty": {
+    "title": "ยังไม่มีใบแจ้งหนี้",
+    "description": "สร้างใบแจ้งหนี้แรกของคุณเพื่อเริ่มต้น"
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "list": "ใบแจ้งหนี้ — VegaPal",
+    "create": "สร้างใบแจ้งหนี้ — VegaPal",
+    "detail": "ใบแจ้งหนี้ — VegaPal"
+  },
+  "list": {
+    "title": "ใบแจ้งหนี้",
+    "subtitle": "จัดการใบแจ้งหนี้ทั้งหมดที่คุณออก",
+    "searchPlaceholder": "ค้นหาใบแจ้งหนี้...",
+    "loading": "กำลังโหลดใบแจ้งหนี้…",
+    "filters": {
+      "all": "ทั้งหมด",
+      "pending": "รอชำระ",
+      "paid": "ชำระแล้ว",
+      "overdue": "เกินกำหนด",
+      "cancelled": "ยกเลิกแล้ว"
+    },
+    "empty": {
+      "title": "ไม่พบใบแจ้งหนี้",
+      "noInvoices": "สร้างใบแจ้งหนี้ USDT แรกของคุณเพื่อเริ่มต้น",
+      "tryDifferent": "ลองเปลี่ยนตัวกรองหรือคำค้นหา"
+    }
+  },
+  "create": {
+    "backToInvoices": "กลับไปใบแจ้งหนี้",
+    "editTitle": "แก้ไขใบแจ้งหนี้",
+    "createTitle": "สร้างใบแจ้งหนี้",
+    "subtitle": "กรอกรายละเอียดด้านล่าง ลูกค้าจะได้รับลิงก์ชำระเงินที่ปลอดภัย",
+    "loading": "กำลังโหลดใบแจ้งหนี้…",
+    "sections": {
+      "invoiceDetails": "รายละเอียดใบแจ้งหนี้",
+      "sellerClient": "ข้อมูลผู้ขาย / ลูกค้า",
+      "lineItems": "รายการ",
+      "totals": "ยอดรวม",
+      "paymentMethod": "ช่องทางชำระเงิน",
+      "notesTerms": "หมายเหตุและเงื่อนไข"
+    },
+    "fields": {
+      "invoiceCurrency": "สกุลเงินในใบแจ้งหนี้",
+      "fiatCurrencies": "สกุลเงินเฟียต",
+      "cryptoCurrencies": "สกุลเงินคริปโต",
+      "invoiceTitle": "หัวข้อใบแจ้งหนี้",
+      "invoiceTitlePlaceholder": "Exchange USDT → AED",
+      "issueDate": "วันที่ออก",
+      "poNumber": "เลข PO",
+      "referenceNumber": "เลขอ้างอิง",
+      "projectCode": "รหัสโปรเจกต์",
+      "optionalPlaceholder": "ไม่บังคับ",
+      "sellerInfo": "ข้อมูลผู้ขาย",
+      "sellerFromProfile": "ผู้ขาย (จากโปรไฟล์ของคุณ)",
+      "clientInfo": "ข้อมูลลูกค้า",
+      "editInSettings": "แก้ไขในตั้งค่า →",
+      "editCompanyInfo": "แก้ไขข้อมูลบริษัท",
+      "clientName": "ชื่อลูกค้า",
+      "clientNamePlaceholder": "ชื่อลูกค้า",
+      "clientEmail": "อีเมลลูกค้า",
+      "clientEmailPlaceholder": "client@email.com",
+      "companyOptional": "บริษัท (ไม่บังคับ)",
+      "companyPlaceholder": "ชื่อบริษัท (ไม่บังคับ)",
+      "itemDescriptionPlaceholder": "Exchange USDT → AED",
+      "removeItem": "ลบ",
+      "discountLabel": "ส่วนลด ({{currency}})",
+      "taxLabel": "ภาษี ({{currency}})",
+      "paymentInstructions": "คำแนะนำการชำระเงิน",
+      "notes": "หมายเหตุ",
+      "notesPlaceholder": "ข้อมูลเพิ่มเติมสำหรับลูกค้า (ไม่บังคับ)",
+      "termsPlaceholder": "ต้องชำระล่วงหน้า 100%",
+      "showOnInvoice": "แสดงบนใบแจ้งหนี้"
+    },
+    "paymentMethods": {
+      "cash": "เงินสด",
+      "cashDesc": "ชำระต่อหน้าหรือด้วยตนเอง",
+      "bankTransfer": "โอนธนาคาร",
+      "bankDesc": "โอนเงินหรือบัญชีธนาคารในประเทศ",
+      "crypto": "คริปโต",
+      "cryptoDesc": "ที่อยู่กระเป๋าบนเชน",
+      "multiple": "หลายช่องทาง",
+      "multipleDesc": "ให้ลูกค้าเลือกชำระได้หลายวิธี",
+      "enableMethods": "เปิดใช้ช่องทางชำระเงิน",
+      "shownOnInvoice": "แสดงบนใบแจ้งหนี้",
+      "tapToEnable": "แตะเพื่อเปิดใช้",
+      "cryptoPayment": "ชำระด้วยคริปโต",
+      "cryptoCurrency": "สกุลเงินคริปโต",
+      "walletPlaceholder": "กรอกที่อยู่กระเป๋า",
+      "bankTransferTitle": "โอนธนาคาร",
+      "bankInstructionsPlaceholder": "กรุณาส่งสลิปโอนเงินหลังชำระ",
+      "cashPayment": "ชำระเงินสด",
+      "cashInstructionsPlaceholder": "เวลาและสถานที่ชำระเงินสด",
+      "cashLocation": "สถานที่หรือหมายเหตุการชำระ",
+      "cashLocationPlaceholder": "ที่อยู่สำนักงานหรือจุดนัดพบ"
+    },
+    "preview": {
+      "livePreview": "ตัวอย่างสด",
+      "invoiceTitleFallback": "หัวข้อใบแจ้งหนี้",
+      "sellerFallback": "ผู้ขาย",
+      "clientFallback": "ลูกค้า",
+      "itemFallback": "รายการ {{index}}"
+    }
+  },
+  "detail": {
+    "backToInvoices": "กลับไปใบแจ้งหนี้",
+    "cancel": "ยกเลิก",
+    "invoiceCurrencyLabel": "สกุลเงินในใบแจ้งหนี้:",
+    "updateStatus": "อัปเดตสถานะ",
+    "markAsPaid": "ทำเครื่องหมายว่าชำระแล้ว",
+    "markAsPending": "ทำเครื่องหมายว่ารอชำระ",
+    "markAsDraft": "ทำเครื่องหมายว่าเป็นฉบับร่าง",
+    "markAsCancelled": "ทำเครื่องหมายว่ายกเลิกแล้ว",
+    "shareTitle": "แชร์ให้ลูกค้า",
+    "shareDescription": "ส่งลิงก์นี้เพื่อรับชำระเงิน"
+  },
+  "paymentCards": {
+    "cryptoPayment": "ชำระด้วยคริปโต"
+  }
+}

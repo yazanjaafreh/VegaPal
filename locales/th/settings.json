@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "title": "ตั้งค่า — VegaPal"
+  },
+  "title": "ตั้งค่า",
+  "subtitle": "จัดการแบรนด์ การรับเงิน และการแจ้งเตือน",
+  "sections": {
+    "branding": {
+      "title": "แบรนด์",
+      "desc": "โลโก้ สีแบรนด์ และชื่อธุรกิจที่แสดงบนใบแจ้งหนี้และ PDF"
+    },
+    "companyInfo": {
+      "title": "ข้อมูลบริษัท",
+      "desc": "ข้อมูลที่ลูกค้าของคุณจะเห็นบนใบแจ้งหนี้"
+    },
+    "payments": {
+      "title": "การรับเงิน",
+      "desc": "กระเป๋าที่จะรับเงินจากใบแจ้งหนี้"
+    },
+    "notifications": {
+      "title": "การแจ้งเตือน",
+      "desc": "วิธีที่ VegaPal อัปเดตข่าวสารให้คุณ"
+    }
+  },
+  "fields": {
+    "logo": "โลโก้",
+    "noLogo": "ยังไม่มีโลโก้",
+    "businessName": "ชื่อธุรกิจ",
+    "businessPlaceholder": "ชื่อบริษัทของคุณ",
+    "brandColor": "สีแบรนด์",
+    "fullName": "ชื่อ-นามสกุล",
+    "accountEmail": "อีเมลบัญชี",
+    "contactEmail": "อีเมลติดต่อ",
+    "website": "เว็บไซต์",
+    "websitePlaceholder": "https://yourbusiness.com",
+    "companyAddress": "ที่อยู่บริษัท",
+    "companyAddressPlaceholder": "ที่อยู่สำนักงาน",
+    "network": "เครือข่าย",
+    "walletAddress": "ที่อยู่กระเป๋า",
+    "walletPlaceholder": "กรอกที่อยู่กระเป๋าของคุณ",
+    "emailNotifications": "แจ้งเตือนทางอีเมล",
+    "emailNotificationsDesc": "รับอีเมลเกี่ยวกับบัญชีและความปลอดภัย",
+    "invoiceUpdates": "อัปเดตใบแจ้งหนี้",
+    "invoiceUpdatesDesc": "แจ้งเตือนเมื่อมีการชำระหรือเกินกำหนด"
+  },
+  "networks": {
+    "trc20": "USDT — TRC20 (TRON)",
+    "erc20": "USDT — ERC20 (Ethereum)",
+    "bep20": "USDT — BEP20 (BNB Chain)"
+  },
+  "signOut": {
+    "title": "ออกจากระบบ",
+    "description": "ออกจากบัญชีบนอุปกรณ์นี้"
+  }
+}
