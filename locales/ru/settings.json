@@ -1,47 +1,47 @@
 {
   "meta": {
-    "title": "Settings — VegaPal"
+    "title": "Настройки — VegaPal"
   },
-  "title": "Settings",
-  "subtitle": "Manage your branding, payouts, and notifications.",
+  "title": "Настройки",
+  "subtitle": "Управляйте брендом, выплатами и уведомлениями.",
   "sections": {
     "branding": {
-      "title": "Branding",
-      "desc": "Logo, brand color, and business name shown on invoices and PDFs."
+      "title": "Брендинг",
+      "desc": "Логотип, фирменный цвет и название компании на счетах и в PDF."
     },
     "companyInfo": {
-      "title": "Company info",
-      "desc": "Information shown to your clients on invoices."
+      "title": "Данные компании",
+      "desc": "Информация для клиентов на счетах."
     },
     "payments": {
-      "title": "Payments",
-      "desc": "Wallet where invoice payments will be received."
+      "title": "Платежи",
+      "desc": "Кошелёк для получения оплаты по счетам."
     },
     "notifications": {
-      "title": "Notifications",
-      "desc": "How VegaPal keeps you in the loop."
+      "title": "Уведомления",
+      "desc": "Как VegaPal держит вас в курсе."
     }
   },
   "fields": {
-    "logo": "Logo",
-    "noLogo": "No logo",
-    "businessName": "Business name",
-    "businessPlaceholder": "Your Business",
-    "brandColor": "Brand color",
-    "fullName": "Full name",
-    "accountEmail": "Account email",
-    "contactEmail": "Contact email",
-    "website": "Website",
+    "logo": "Логотип",
+    "noLogo": "Нет логотипа",
+    "businessName": "Название компании",
+    "businessPlaceholder": "Ваша компания",
+    "brandColor": "Фирменный цвет",
+    "fullName": "Полное имя",
+    "accountEmail": "Email аккаунта",
+    "contactEmail": "Контактный email",
+    "website": "Сайт",
     "websitePlaceholder": "https://yourbusiness.com",
-    "companyAddress": "Company address",
-    "companyAddressPlaceholder": "Office address",
-    "network": "Network",
-    "walletAddress": "Wallet address",
-    "walletPlaceholder": "Enter your wallet address",
-    "emailNotifications": "Email notifications",
-    "emailNotificationsDesc": "Receive account & security emails.",
-    "invoiceUpdates": "Invoice updates",
-    "invoiceUpdatesDesc": "Be notified when an invoice is paid or overdue."
+    "companyAddress": "Адрес компании",
+    "companyAddressPlaceholder": "Офисный адрес",
+    "network": "Сеть",
+    "walletAddress": "Адрес кошелька",
+    "walletPlaceholder": "Введите адрес кошелька",
+    "emailNotifications": "Email-уведомления",
+    "emailNotificationsDesc": "Письма об аккаунте и безопасности.",
+    "invoiceUpdates": "Обновления по счетам",
+    "invoiceUpdatesDesc": "Уведомления об оплате или просрочке счёта."
   },
   "networks": {
     "trc20": "USDT — TRC20 (TRON)",
@@ -49,7 +49,7 @@
     "bep20": "USDT — BEP20 (BNB Chain)"
   },
   "signOut": {
-    "title": "Sign out",
-    "description": "End your session on this device."
+    "title": "Выйти",
+    "description": "Завершить сеанс на этом устройстве."
   }
 }

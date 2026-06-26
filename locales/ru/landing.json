@@ -1,53 +1,53 @@
 {
   "meta": {
-    "title": "VegaPal — Secure USDT Invoices & Crypto Payments",
-    "description": "Create professional USDT invoices and accept crypto payments. Built for freelancers and businesses who want secure, trusted deals.",
-    "ogTitle": "VegaPal — Secure USDT Invoices",
-    "ogDescription": "Professional crypto invoicing for freelancers and businesses."
+    "title": "VegaPal — Безопасные счета USDT и крипто-платежи",
+    "description": "Создавайте профессиональные счета в USDT и принимайте криптоплатежи. Для фрилансеров и бизнеса, которым нужны безопасные и надёжные сделки.",
+    "ogTitle": "VegaPal — Безопасные счета USDT",
+    "ogDescription": "Профессиональное крипто-выставление счетов для фрилансеров и бизнеса."
   },
   "hero": {
-    "badge": "Secure invoices. Faster payments.",
-    "headlineLine1": "Create your invoice",
-    "headlineLine2Prefix": "in",
+    "badge": "Безопасные счета. Быстрые платежи.",
+    "headlineLine1": "Создайте счёт",
+    "headlineLine2Prefix": "за",
     "headlineLine2Highlight": "30",
-    "headlineLine2Suffix": "Seconds.",
-    "headlineLine3": "Get paid anywhere.",
-    "description": "Create a secure invoice in seconds, share one payment link, and let your client pay by USDT, bank transfer, or cash — with a professional paid confirmation.",
-    "createFirstInvoice": "Create your first invoice",
-    "viewDemoInvoice": "View demo invoice",
+    "headlineLine2Suffix": "секунд.",
+    "headlineLine3": "Получайте оплату где угодно.",
+    "description": "Создайте безопасный счёт за секунды, отправьте одну ссылку на оплату — клиент платит USDT, банковским переводом или наличными с профессиональным подтверждением.",
+    "createFirstInvoice": "Создать первый счёт",
+    "viewDemoInvoice": "Посмотреть демо-счёт",
     "features": {
-      "pdfInvoices": "Professional PDF invoices",
-      "paymentMethods": "Crypto, Bank & Cash Payments",
-      "verifiedPages": "Verified payment pages"
+      "pdfInvoices": "Профессиональные PDF-счета",
+      "paymentMethods": "Крипто, банк и наличные",
+      "verifiedPages": "Проверенные страницы оплаты"
     },
     "demo": {
-      "billedTo": "Billed to",
+      "billedTo": "Плательщик",
       "clientName": "Acme Trading LLC",
       "clientEmail": "finance@acmetrading.com",
-      "paid": "Paid",
-      "title": "Exchange USDT → AED",
-      "cryptoPayment": "Crypto payment",
+      "paid": "Оплачен",
+      "title": "Обмен USDT → AED",
+      "cryptoPayment": "Оплата криптовалютой",
       "networkTron": "TRON TRC20"
     }
   },
   "converter": {
-    "title": "Live Currency Converter",
-    "subtitle": "Check live exchange rates before creating your invoice.",
-    "from": "FROM",
-    "to": "TO",
-    "enterAmount": "Enter amount",
-    "swapCurrencies": "Swap currencies",
-    "fiatUnavailable": "Live rates are temporarily unavailable.",
-    "cryptoUnavailable": "Crypto live rates are temporarily unavailable.",
+    "title": "Конвертер валют в реальном времени",
+    "subtitle": "Проверьте курс перед созданием счёта.",
+    "from": "ИЗ",
+    "to": "В",
+    "enterAmount": "Введите сумму",
+    "swapCurrencies": "Поменять валюты",
+    "fiatUnavailable": "Курсы временно недоступны.",
+    "cryptoUnavailable": "Курсы криптовалют временно недоступны.",
     "rateLine": "1 {{from}} = {{amount}} {{to}}",
     "currencies": {
-      "USD": "US Dollar",
-      "AED": "UAE Dirham",
-      "EUR": "Euro",
-      "SAR": "Saudi Riyal",
-      "CNY": "Chinese Yuan",
-      "RUB": "Russian Ruble",
-      "INR": "Indian Rupee",
+      "USD": "Доллар США",
+      "AED": "Дирхам ОАЭ",
+      "EUR": "Евро",
+      "SAR": "Саудовский риял",
+      "CNY": "Китайский юань",
+      "RUB": "Российский рубль",
+      "INR": "Индийская рупия",
       "USDT": "Tether",
       "USDC": "USD Coin",
       "BTC": "Bitcoin",
@@ -55,129 +55,129 @@
     }
   },
   "features": {
-    "eyebrow": "Why VegaPal",
-    "title": "The fastest way to invoice in crypto.",
-    "subtitle": "Stripe-grade UX. Wise-grade reliability. PayPal-grade reach — built natively for stablecoins.",
+    "eyebrow": "Почему VegaPal",
+    "title": "Самый быстрый способ выставлять счета в крипто.",
+    "subtitle": "UX уровня Stripe. Надёжность Wise. Охват PayPal — создано для стейблкоинов.",
     "items": {
       "fastPayments": {
-        "title": "Fast crypto payments",
-        "desc": "Get paid in minutes using USDT with a simple payment link."
+        "title": "Быстрые крипто-платежи",
+        "desc": "Получайте оплату за минуты через USDT по простой ссылке."
       },
       "directWallet": {
-        "title": "Direct to your wallet",
-        "desc": "Payments go straight to your wallet. VegaPal never holds your money."
+        "title": "Прямо на ваш кошелёк",
+        "desc": "Платежи поступают на ваш кошелёк. VegaPal не хранит ваши средства."
       },
       "multiplePayments": {
-        "title": "Accept multiple payments",
-        "desc": "Accept Crypto, Bank Transfer, or Cash from one invoice."
+        "title": "Несколько способов оплаты",
+        "desc": "Принимайте крипто, банковский перевод или наличные по одному счёту."
       },
       "professionalInvoices": {
-        "title": "Professional invoices",
-        "desc": "Create clean, modern invoices with QR codes and secure payment links."
+        "title": "Профессиональные счета",
+        "desc": "Современные счета с QR-кодами и безопасными ссылками на оплату."
       },
       "dashboard": {
-        "title": "Real-time dashboard",
-        "desc": "Track Paid, Pending, and Overdue invoices in one place."
+        "title": "Панель в реальном времени",
+        "desc": "Отслеживайте оплаченные, ожидающие и просроченные счета в одном месте."
       },
       "trusted": {
-        "title": "Trusted by clients",
-        "desc": "Professional invoices that make it easy for clients to pay with confidence."
+        "title": "Доверие клиентов",
+        "desc": "Профессиональные счета, с которыми клиентам удобно платить."
       }
     }
   },
   "howItWorks": {
-    "eyebrow": "How it works",
-    "title": "From invoice to paid in 3 steps.",
+    "eyebrow": "Как это работает",
+    "title": "От счёта до оплаты за 3 шага.",
     "steps": {
-      "create": "Create Invoice",
-      "share": "Share PDF Invoice",
-      "getPaid": "Get Paid"
+      "create": "Создать счёт",
+      "share": "Отправить PDF-счёт",
+      "getPaid": "Получить оплату"
     }
   },
   "pricing": {
-    "eyebrow": "Pricing",
-    "title": "Simple, transparent, fair.",
-    "subtitle": "Every plan includes VegaPal on your PDF invoices and payment pages — always.",
+    "eyebrow": "Тарифы",
+    "title": "Просто, прозрачно, честно.",
+    "subtitle": "На всех тарифах VegaPal на PDF-счетах и страницах оплаты — всегда.",
     "plans": {
       "free": {
         "name": "Free",
-        "description": "Start invoicing with everything you need.",
-        "cta": "Start Free",
+        "description": "Всё необходимое для старта.",
+        "cta": "Начать бесплатно",
         "features": {
-          "invoices": "5 invoices / month",
-          "pdf": "PDF invoices",
-          "paymentPages": "Public payment pages",
-          "payments": "Crypto, Bank & Cash payments",
-          "dashboard": "Dashboard",
-          "branding": "Custom branding",
-          "qr": "QR Code",
-          "excel": "Excel export",
-          "reports": "Reports",
-          "multiCurrency": "Multi-currency invoices",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "5 счетов / мес.",
+          "pdf": "PDF-счета",
+          "paymentPages": "Публичные страницы оплаты",
+          "payments": "Крипто, банк и наличные",
+          "dashboard": "Панель",
+          "branding": "Свой брендинг",
+          "qr": "QR-код",
+          "excel": "Экспорт в Excel",
+          "reports": "Отчёты",
+          "multiCurrency": "Мультивалютные счета",
+          "footer": "Подпись Powered by VegaPal"
         }
       },
       "pro": {
         "name": "Pro",
-        "description": "For freelancers and small businesses scaling up.",
-        "cta": "Pay with USDT",
+        "description": "Для фрилансеров и малого бизнеса в росте.",
+        "cta": "Оплатить USDT",
         "features": {
-          "invoices": "90 invoices / month",
-          "users": "1 user",
-          "everythingFree": "Everything in Free",
-          "prioritySupport": "Priority support",
-          "earlyAccess": "Early access to new features",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "90 счетов / мес.",
+          "users": "1 пользователь",
+          "everythingFree": "Всё из Free",
+          "prioritySupport": "Приоритетная поддержка",
+          "earlyAccess": "Ранний доступ к новым функциям",
+          "footer": "Подпись Powered by VegaPal"
         }
       },
       "business": {
         "name": "Business",
-        "description": "For teams that need more volume and control.",
-        "cta": "Pay with USDT",
+        "description": "Для команд с большим объёмом и контролем.",
+        "cta": "Оплатить USDT",
         "features": {
-          "invoices": "Unlimited invoices",
-          "users": "2 users",
-          "everythingPro": "Everything in Pro",
-          "teamManagement": "Team management",
-          "multipleWallets": "Multiple wallets",
-          "analytics": "Advanced analytics",
-          "api": "API access coming soon",
-          "prioritySupport": "Priority support",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "Безлимитные счета",
+          "users": "2 пользователя",
+          "everythingPro": "Всё из Pro",
+          "teamManagement": "Управление командой",
+          "multipleWallets": "Несколько кошельков",
+          "analytics": "Расширенная аналитика",
+          "api": "API скоро",
+          "prioritySupport": "Приоритетная поддержка",
+          "footer": "Подпись Powered by VegaPal"
         }
       }
     }
   },
   "subscriptionModal": {
-    "title": "Pay with USDT — {{plan}}",
-    "description": "Send the monthly plan amount in USDT. Your plan will be activated manually after we confirm your payment.",
-    "amountLabel": "Amount",
-    "paymentMethods": "Payment methods",
+    "title": "Оплата USDT — {{plan}}",
+    "description": "Отправьте сумму месячного тарифа в USDT. Тариф активируется вручную после подтверждения оплаты.",
+    "amountLabel": "Сумма",
+    "paymentMethods": "Способы оплаты",
     "networkTron": "TRON TRC20",
     "networkBep20": "BNB Smart Chain BEP20",
-    "instructions": "After payment, please send your transaction ID (TXID) or payment screenshot to our Telegram or email so we can activate your plan.",
+    "instructions": "После оплаты отправьте TXID или скриншот в Telegram или на email для активации тарифа.",
     "telegram": "Telegram",
-    "networkWarning": "Please make sure you select the correct network before sending USDT. Payments sent on the wrong network may be lost."
+    "networkWarning": "Перед отправкой USDT выберите правильную сеть. Платежи в неверной сети могут быть потеряны."
   },
   "cta": {
-    "title": "Ready to send your first USDT invoice?",
-    "subtitle": "Join freelancers and businesses getting paid faster with VegaPal.",
-    "button": "Get started free"
+    "title": "Готовы отправить первый счёт в USDT?",
+    "subtitle": "Присоединяйтесь к фрилансерам и бизнесу, которые быстрее получают оплату с VegaPal.",
+    "button": "Начать бесплатно"
   },
   "contact": {
-    "eyebrow": "Support",
-    "title": "Contact us",
-    "subtitle": "Need help with invoices or payments? Our support team is available 24/7.",
+    "eyebrow": "Поддержка",
+    "title": "Связаться с нами",
+    "subtitle": "Нужна помощь со счетами или оплатой? Поддержка доступна 24/7.",
     "email": {
-      "title": "Email support"
+      "title": "Поддержка по email"
     },
     "telegram": {
-      "title": "Telegram support",
-      "description": "Chat with us on Telegram"
+      "title": "Поддержка в Telegram",
+      "description": "Напишите нам в Telegram"
     },
     "liveSupport": {
-      "title": "24/7 live support",
-      "description": "Get help anytime, anywhere."
+      "title": "Поддержка 24/7",
+      "description": "Помощь в любое время и в любом месте."
     }
   }
 }

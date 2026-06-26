@@ -1,53 +1,53 @@
 {
   "meta": {
-    "title": "VegaPal — Secure USDT Invoices & Crypto Payments",
-    "description": "Create professional USDT invoices and accept crypto payments. Built for freelancers and businesses who want secure, trusted deals.",
-    "ogTitle": "VegaPal — Secure USDT Invoices",
-    "ogDescription": "Professional crypto invoicing for freelancers and businesses."
+    "title": "VegaPal — 安全 USDT 发票与加密货币收款",
+    "description": "创建专业 USDT 发票并接收加密货币付款。为追求安全可信交易的自由职业者与企业打造。",
+    "ogTitle": "VegaPal — 安全 USDT 发票",
+    "ogDescription": "面向自由职业者与企业的专业加密货币开票平台。"
   },
   "hero": {
-    "badge": "Secure invoices. Faster payments.",
-    "headlineLine1": "Create your invoice",
-    "headlineLine2Prefix": "in",
+    "badge": "安全发票，更快收款。",
+    "headlineLine1": "创建发票",
+    "headlineLine2Prefix": "仅需",
     "headlineLine2Highlight": "30",
-    "headlineLine2Suffix": "Seconds.",
-    "headlineLine3": "Get paid anywhere.",
-    "description": "Create a secure invoice in seconds, share one payment link, and let your client pay by USDT, bank transfer, or cash — with a professional paid confirmation.",
-    "createFirstInvoice": "Create your first invoice",
-    "viewDemoInvoice": "View demo invoice",
+    "headlineLine2Suffix": "秒。",
+    "headlineLine3": "随时随地收款。",
+    "description": "几秒钟创建安全发票，分享一个付款链接，让客户通过 USDT、银行转账或现金付款 — 并提供专业的付款确认。",
+    "createFirstInvoice": "创建您的第一张发票",
+    "viewDemoInvoice": "查看演示发票",
     "features": {
-      "pdfInvoices": "Professional PDF invoices",
-      "paymentMethods": "Crypto, Bank & Cash Payments",
-      "verifiedPages": "Verified payment pages"
+      "pdfInvoices": "专业 PDF 发票",
+      "paymentMethods": "加密货币、银行与现金收款",
+      "verifiedPages": "可验证的付款页面"
     },
     "demo": {
-      "billedTo": "Billed to",
+      "billedTo": "账单收件人",
       "clientName": "Acme Trading LLC",
       "clientEmail": "finance@acmetrading.com",
-      "paid": "Paid",
-      "title": "Exchange USDT → AED",
-      "cryptoPayment": "Crypto payment",
+      "paid": "已付款",
+      "title": "USDT 兑换 AED",
+      "cryptoPayment": "加密货币付款",
       "networkTron": "TRON TRC20"
     }
   },
   "converter": {
-    "title": "Live Currency Converter",
-    "subtitle": "Check live exchange rates before creating your invoice.",
-    "from": "FROM",
-    "to": "TO",
-    "enterAmount": "Enter amount",
-    "swapCurrencies": "Swap currencies",
-    "fiatUnavailable": "Live rates are temporarily unavailable.",
-    "cryptoUnavailable": "Crypto live rates are temporarily unavailable.",
+    "title": "实时汇率换算",
+    "subtitle": "创建发票前先查看实时汇率。",
+    "from": "从",
+    "to": "至",
+    "enterAmount": "输入金额",
+    "swapCurrencies": "交换货币",
+    "fiatUnavailable": "实时汇率暂时不可用。",
+    "cryptoUnavailable": "加密货币实时汇率暂时不可用。",
     "rateLine": "1 {{from}} = {{amount}} {{to}}",
     "currencies": {
-      "USD": "US Dollar",
-      "AED": "UAE Dirham",
-      "EUR": "Euro",
-      "SAR": "Saudi Riyal",
-      "CNY": "Chinese Yuan",
-      "RUB": "Russian Ruble",
-      "INR": "Indian Rupee",
+      "USD": "美元",
+      "AED": "阿联酋迪拉姆",
+      "EUR": "欧元",
+      "SAR": "沙特里亚尔",
+      "CNY": "人民币",
+      "RUB": "俄罗斯卢布",
+      "INR": "印度卢比",
       "USDT": "Tether",
       "USDC": "USD Coin",
       "BTC": "Bitcoin",
@@ -55,129 +55,129 @@
     }
   },
   "features": {
-    "eyebrow": "Why VegaPal",
-    "title": "The fastest way to invoice in crypto.",
-    "subtitle": "Stripe-grade UX. Wise-grade reliability. PayPal-grade reach — built natively for stablecoins.",
+    "eyebrow": "为什么选择 VegaPal",
+    "title": "加密货币开票的最快方式。",
+    "subtitle": "Stripe 级体验、Wise 级可靠性、PayPal 级覆盖 — 专为稳定币原生打造。",
     "items": {
       "fastPayments": {
-        "title": "Fast crypto payments",
-        "desc": "Get paid in minutes using USDT with a simple payment link."
+        "title": "快速加密货币收款",
+        "desc": "通过简单付款链接，几分钟内用 USDT 收款。"
       },
       "directWallet": {
-        "title": "Direct to your wallet",
-        "desc": "Payments go straight to your wallet. VegaPal never holds your money."
+        "title": "直达您的钱包",
+        "desc": "付款直接进入您的钱包，VegaPal 从不托管您的资金。"
       },
       "multiplePayments": {
-        "title": "Accept multiple payments",
-        "desc": "Accept Crypto, Bank Transfer, or Cash from one invoice."
+        "title": "支持多种付款方式",
+        "desc": "一张发票即可接受加密货币、银行转账或现金。"
       },
       "professionalInvoices": {
-        "title": "Professional invoices",
-        "desc": "Create clean, modern invoices with QR codes and secure payment links."
+        "title": "专业发票",
+        "desc": "创建简洁现代的发票，含二维码与安全付款链接。"
       },
       "dashboard": {
-        "title": "Real-time dashboard",
-        "desc": "Track Paid, Pending, and Overdue invoices in one place."
+        "title": "实时控制台",
+        "desc": "在一处跟踪已付款、待付款和已逾期发票。"
       },
       "trusted": {
-        "title": "Trusted by clients",
-        "desc": "Professional invoices that make it easy for clients to pay with confidence."
+        "title": "赢得客户信任",
+        "desc": "专业发票让客户放心付款。"
       }
     }
   },
   "howItWorks": {
-    "eyebrow": "How it works",
-    "title": "From invoice to paid in 3 steps.",
+    "eyebrow": "使用流程",
+    "title": "三步完成开票到收款。",
     "steps": {
-      "create": "Create Invoice",
-      "share": "Share PDF Invoice",
-      "getPaid": "Get Paid"
+      "create": "创建发票",
+      "share": "分享 PDF 发票",
+      "getPaid": "收到付款"
     }
   },
   "pricing": {
-    "eyebrow": "Pricing",
-    "title": "Simple, transparent, fair.",
-    "subtitle": "Every plan includes VegaPal on your PDF invoices and payment pages — always.",
+    "eyebrow": "价格",
+    "title": "简单、透明、公平。",
+    "subtitle": "所有套餐均在 PDF 发票和付款页面展示 VegaPal — 始终如此。",
     "plans": {
       "free": {
         "name": "Free",
-        "description": "Start invoicing with everything you need.",
-        "cta": "Start Free",
+        "description": "包含开票所需的一切，立即开始。",
+        "cta": "免费开始",
         "features": {
-          "invoices": "5 invoices / month",
-          "pdf": "PDF invoices",
-          "paymentPages": "Public payment pages",
-          "payments": "Crypto, Bank & Cash payments",
-          "dashboard": "Dashboard",
-          "branding": "Custom branding",
-          "qr": "QR Code",
-          "excel": "Excel export",
-          "reports": "Reports",
-          "multiCurrency": "Multi-currency invoices",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "每月 5 张发票",
+          "pdf": "PDF 发票",
+          "paymentPages": "公开付款页面",
+          "payments": "加密货币、银行与现金收款",
+          "dashboard": "控制台",
+          "branding": "自定义品牌",
+          "qr": "二维码",
+          "excel": "Excel 导出",
+          "reports": "报表",
+          "multiCurrency": "多币种发票",
+          "footer": "Powered by VegaPal 页脚"
         }
       },
       "pro": {
         "name": "Pro",
-        "description": "For freelancers and small businesses scaling up.",
-        "cta": "Pay with USDT",
+        "description": "适合正在成长的自由职业者与小企业。",
+        "cta": "使用 USDT 付款",
         "features": {
-          "invoices": "90 invoices / month",
-          "users": "1 user",
-          "everythingFree": "Everything in Free",
-          "prioritySupport": "Priority support",
-          "earlyAccess": "Early access to new features",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "每月 90 张发票",
+          "users": "1 位用户",
+          "everythingFree": "包含 Free 全部功能",
+          "prioritySupport": "优先支持",
+          "earlyAccess": "新功能抢先体验",
+          "footer": "Powered by VegaPal 页脚"
         }
       },
       "business": {
         "name": "Business",
-        "description": "For teams that need more volume and control.",
-        "cta": "Pay with USDT",
+        "description": "适合需要更高用量与管控的团队。",
+        "cta": "使用 USDT 付款",
         "features": {
-          "invoices": "Unlimited invoices",
-          "users": "2 users",
-          "everythingPro": "Everything in Pro",
-          "teamManagement": "Team management",
-          "multipleWallets": "Multiple wallets",
-          "analytics": "Advanced analytics",
-          "api": "API access coming soon",
-          "prioritySupport": "Priority support",
-          "footer": "Powered by VegaPal footer"
+          "invoices": "无限发票",
+          "users": "2 位用户",
+          "everythingPro": "包含 Pro 全部功能",
+          "teamManagement": "团队管理",
+          "multipleWallets": "多个钱包",
+          "analytics": "高级分析",
+          "api": "API 即将推出",
+          "prioritySupport": "优先支持",
+          "footer": "Powered by VegaPal 页脚"
         }
       }
     }
   },
   "subscriptionModal": {
-    "title": "Pay with USDT — {{plan}}",
-    "description": "Send the monthly plan amount in USDT. Your plan will be activated manually after we confirm your payment.",
-    "amountLabel": "Amount",
-    "paymentMethods": "Payment methods",
+    "title": "使用 USDT 付款 — {{plan}}",
+    "description": "请按月套餐金额发送 USDT。我们确认付款后将手动激活您的套餐。",
+    "amountLabel": "金额",
+    "paymentMethods": "付款方式",
     "networkTron": "TRON TRC20",
     "networkBep20": "BNB Smart Chain BEP20",
-    "instructions": "After payment, please send your transaction ID (TXID) or payment screenshot to our Telegram or email so we can activate your plan.",
+    "instructions": "付款后，请将交易 ID（TXID）或付款截图发送至我们的 Telegram 或邮箱，以便激活套餐。",
     "telegram": "Telegram",
-    "networkWarning": "Please make sure you select the correct network before sending USDT. Payments sent on the wrong network may be lost."
+    "networkWarning": "发送 USDT 前请务必选择正确的网络，错误网络可能导致资金丢失。"
   },
   "cta": {
-    "title": "Ready to send your first USDT invoice?",
-    "subtitle": "Join freelancers and businesses getting paid faster with VegaPal.",
-    "button": "Get started free"
+    "title": "准备好发送您的第一张 USDT 发票了吗？",
+    "subtitle": "加入使用 VegaPal 更快收款的自由职业者与企业。",
+    "button": "免费开始"
   },
   "contact": {
-    "eyebrow": "Support",
-    "title": "Contact us",
-    "subtitle": "Need help with invoices or payments? Our support team is available 24/7.",
+    "eyebrow": "支持",
+    "title": "联系我们",
+    "subtitle": "发票或付款需要帮助？我们的支持团队 7×24 小时在线。",
     "email": {
-      "title": "Email support"
+      "title": "邮件支持"
     },
     "telegram": {
-      "title": "Telegram support",
-      "description": "Chat with us on Telegram"
+      "title": "Telegram 支持",
+      "description": "在 Telegram 上与我们聊天"
     },
     "liveSupport": {
-      "title": "24/7 live support",
-      "description": "Get help anytime, anywhere."
+      "title": "7×24 在线支持",
+      "description": "随时随地获得帮助。"
     }
   }
 }

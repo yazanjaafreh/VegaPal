@@ -1,47 +1,47 @@
 {
   "meta": {
-    "title": "Settings — VegaPal"
+    "title": "设置 — VegaPal"
   },
-  "title": "Settings",
-  "subtitle": "Manage your branding, payouts, and notifications.",
+  "title": "设置",
+  "subtitle": "管理品牌、收款和通知。",
   "sections": {
     "branding": {
-      "title": "Branding",
-      "desc": "Logo, brand color, and business name shown on invoices and PDFs."
+      "title": "品牌",
+      "desc": "发票和 PDF 上显示的标志、品牌色和企业名称。"
     },
     "companyInfo": {
-      "title": "Company info",
-      "desc": "Information shown to your clients on invoices."
+      "title": "企业信息",
+      "desc": "在发票上向客户展示的信息。"
     },
     "payments": {
-      "title": "Payments",
-      "desc": "Wallet where invoice payments will be received."
+      "title": "收款",
+      "desc": "接收发票付款的钱包。"
     },
     "notifications": {
-      "title": "Notifications",
-      "desc": "How VegaPal keeps you in the loop."
+      "title": "通知",
+      "desc": "VegaPal 如何向您推送更新。"
     }
   },
   "fields": {
-    "logo": "Logo",
-    "noLogo": "No logo",
-    "businessName": "Business name",
-    "businessPlaceholder": "Your Business",
-    "brandColor": "Brand color",
-    "fullName": "Full name",
-    "accountEmail": "Account email",
-    "contactEmail": "Contact email",
-    "website": "Website",
+    "logo": "标志",
+    "noLogo": "无标志",
+    "businessName": "企业名称",
+    "businessPlaceholder": "您的企业",
+    "brandColor": "品牌色",
+    "fullName": "全名",
+    "accountEmail": "账户邮箱",
+    "contactEmail": "联系邮箱",
+    "website": "网站",
     "websitePlaceholder": "https://yourbusiness.com",
-    "companyAddress": "Company address",
-    "companyAddressPlaceholder": "Office address",
-    "network": "Network",
-    "walletAddress": "Wallet address",
-    "walletPlaceholder": "Enter your wallet address",
-    "emailNotifications": "Email notifications",
-    "emailNotificationsDesc": "Receive account & security emails.",
-    "invoiceUpdates": "Invoice updates",
-    "invoiceUpdatesDesc": "Be notified when an invoice is paid or overdue."
+    "companyAddress": "公司地址",
+    "companyAddressPlaceholder": "办公地址",
+    "network": "网络",
+    "walletAddress": "钱包地址",
+    "walletPlaceholder": "请输入钱包地址",
+    "emailNotifications": "邮件通知",
+    "emailNotificationsDesc": "接收账户与安全相关邮件。",
+    "invoiceUpdates": "发票更新",
+    "invoiceUpdatesDesc": "发票已付款或逾期时通知您。"
   },
   "networks": {
     "trc20": "USDT — TRC20 (TRON)",
@@ -49,7 +49,7 @@
     "bep20": "USDT — BEP20 (BNB Chain)"
   },
   "signOut": {
-    "title": "Sign out",
-    "description": "End your session on this device."
+    "title": "退出登录",
+    "description": "在此设备上结束当前会话。"
   }
 }

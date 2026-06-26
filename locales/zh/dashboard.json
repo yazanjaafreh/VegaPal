@@ -1,21 +1,21 @@
 {
   "meta": {
-    "title": "Dashboard — VegaPal"
+    "title": "控制台 — VegaPal"
   },
-  "overview": "Overview",
-  "welcomeBack": "Welcome back",
-  "subtitle": "An overview of your invoicing activity.",
+  "overview": "概览",
+  "welcomeBack": "欢迎回来",
+  "subtitle": "您的发票活动概览。",
   "stats": {
-    "totalInvoices": "Total invoices",
-    "paidInvoices": "Paid invoices",
-    "pendingInvoices": "Pending invoices",
-    "overdue": "Overdue",
-    "totalVolume": "Total volume"
+    "totalInvoices": "发票总数",
+    "paidInvoices": "已付款发票",
+    "pendingInvoices": "待付款发票",
+    "overdue": "已逾期",
+    "totalVolume": "总金额"
   },
-  "recentInvoices": "Recent invoices",
-  "recentActivity": "Recent activity",
+  "recentInvoices": "最近发票",
+  "recentActivity": "最近活动",
   "empty": {
-    "title": "No invoices yet",
-    "description": "Create your first invoice to get started."
+    "title": "暂无发票",
+    "description": "创建您的第一张发票即可开始。"
   }
 }

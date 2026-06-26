@@ -1,21 +1,21 @@
 {
   "meta": {
-    "title": "Dashboard — VegaPal"
+    "title": "Панель — VegaPal"
   },
-  "overview": "Overview",
-  "welcomeBack": "Welcome back",
-  "subtitle": "An overview of your invoicing activity.",
+  "overview": "Обзор",
+  "welcomeBack": "С возвращением",
+  "subtitle": "Обзор вашей счётной активности.",
   "stats": {
-    "totalInvoices": "Total invoices",
-    "paidInvoices": "Paid invoices",
-    "pendingInvoices": "Pending invoices",
-    "overdue": "Overdue",
-    "totalVolume": "Total volume"
+    "totalInvoices": "Всего счетов",
+    "paidInvoices": "Оплаченные",
+    "pendingInvoices": "Ожидают оплаты",
+    "overdue": "Просроченные",
+    "totalVolume": "Общий объём"
   },
-  "recentInvoices": "Recent invoices",
-  "recentActivity": "Recent activity",
+  "recentInvoices": "Недавние счета",
+  "recentActivity": "Недавняя активность",
   "empty": {
-    "title": "No invoices yet",
-    "description": "Create your first invoice to get started."
+    "title": "Счетов пока нет",
+    "description": "Создайте первый счёт, чтобы начать."
   }
 }
