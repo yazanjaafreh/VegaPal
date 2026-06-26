@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import QRCode from "qrcode";
+import { qrCodeToDataUrl } from "@/lib/qrcode-lazy";
 import { Button } from "@/components/ui/button";
 import { Building2, Banknote, Check, Copy, Wallet } from "lucide-react";
 import type { Invoice } from "@/lib/vegapal-store";
@@ -29,7 +29,7 @@ export function PaymentMethodCards({ inv }: { inv: Invoice }) {
       setQr("");
       return;
     }
-    QRCode.toDataURL(crypto.walletAddress, {
+    qrCodeToDataUrl(crypto.walletAddress, {
       margin: 1,
       width: 280,
       color: { dark: "#0B1220", light: "#ffffff" },

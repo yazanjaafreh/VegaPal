@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/vegapal-store";
 import { AuthLayout } from "./login";
+import { registerSchema, firstZodError } from "@/lib/validation/schemas";
+import { checkClientRateLimit } from "@/lib/client-rate-limit";
 
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create account — VegaPal" }] }),
@@ -27,14 +29,39 @@ function RegisterPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (password !== confirmPassword) {
-      setError(t("register.passwordsDoNotMatch"));
+
+    const parsed = registerSchema.safeParse({
+      name,
+      business,
+      email,
+      password,
+      confirmPassword,
+    });
+    if (!parsed.success) {
+      setError(firstZodError(parsed.error));
       return;
     }
+
+    const rate = checkClientRateLimit("register", 5, 15 * 60_000);
+    if (!rate.allowed) {
+      setError(`Too many attempts. Try again in ${rate.retryAfterSec} seconds.`);
+      return;
+    }
+
     setLoading(true);
     try {
-      await auth.signUp(email.trim().toLowerCase(), password, name.trim(), business.trim() || undefined);
-      try { await auth.signIn(email.trim().toLowerCase(), password); } catch { /* ignore */ }
+      const data = parsed.data;
+      await auth.signUp(
+        data.email.toLowerCase(),
+        data.password,
+        data.name,
+        data.business || undefined,
+      );
+      try {
+        await auth.signIn(data.email.toLowerCase(), data.password);
+      } catch {
+        /* ignore */
+      }
       navigate({ to: "/dashboard" });
     } catch (err) {
       setError((err as Error).message);

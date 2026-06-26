@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/vegapal-store";
 import { AuthLayout } from "./login";
+import { forgotPasswordSchema, firstZodError } from "@/lib/validation/schemas";
+import { checkClientRateLimit } from "@/lib/client-rate-limit";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Reset password — VegaPal" }] }),
@@ -24,9 +26,22 @@ function ForgotPassword() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const parsed = forgotPasswordSchema.safeParse({ email });
+    if (!parsed.success) {
+      setError(firstZodError(parsed.error));
+      return;
+    }
+
+    const rate = checkClientRateLimit("forgot-password", 5, 15 * 60_000);
+    if (!rate.allowed) {
+      setError(`Too many attempts. Try again in ${rate.retryAfterSec} seconds.`);
+      return;
+    }
+
     setLoading(true);
     try {
-      await auth.resetPassword(email.trim().toLowerCase());
+      await auth.resetPassword(parsed.data.email.toLowerCase());
       setSent(true);
     } catch (err) {
       setError((err as Error).message);

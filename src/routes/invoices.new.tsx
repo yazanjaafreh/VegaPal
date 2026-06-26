@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "@/lib/i18n";
+import { invoiceCreateSchema, firstZodError } from "@/lib/validation/schemas";
+import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,6 +192,7 @@ function CreateInvoice() {
   const [hydrated, setHydrated] = useState(false);
   const [profilePaymentInitialized, setProfilePaymentInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (editId || !user || profilePaymentInitialized) return;
@@ -290,25 +293,56 @@ function CreateInvoice() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanItems = items.filter(
-      (i) => i.description.trim() && (Number(i.quantity) || 0) > 0,
-    );
-    if (cleanItems.length === 0) return;
+    setFormError("");
+
+    const cleanItems = items
+      .filter((i) => i.description.trim() && (Number(i.quantity) || 0) > 0)
+      .map((i) => ({
+        description: i.description.trim(),
+        quantity: Number(i.quantity) || 0,
+        unitPrice: Number(i.unitPrice) || 0,
+      }));
+
+    const parsed = invoiceCreateSchema.safeParse({
+      title,
+      clientName,
+      clientEmail,
+      clientCompany,
+      description,
+      termsAndConditions,
+      discount: dnum,
+      tax: tnum,
+      items: cleanItems,
+      cryptoWallet: crypto.walletAddress,
+    });
+    if (!parsed.success) {
+      setFormError(firstZodError(parsed.error));
+      return;
+    }
+
+    if (!editId) {
+      const rate = checkClientRateLimit("create-invoice", 20, 60 * 60_000);
+      if (!rate.allowed) {
+        setFormError(`Too many invoices created. Try again in ${rate.retryAfterSec} seconds.`);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const payload = {
-        clientName: clientName.trim(),
-        clientEmail: clientEmail.trim(),
-        clientCompany: clientCompany.trim() || undefined,
-        title: title.trim(),
-        description: description.trim(),
-        termsAndConditions: termsAndConditions.trim(),
+        clientName: parsed.data.clientName,
+        clientEmail: parsed.data.clientEmail,
+        clientCompany: parsed.data.clientCompany,
+        title: parsed.data.title,
+        description: parsed.data.description ?? "",
+        termsAndConditions: parsed.data.termsAndConditions ?? "",
         issueDate,
         dueDate,
         status,
         items: cleanItems,
-        discount: dnum,
-        tax: tnum,
+        discount: parsed.data.discount,
+        tax: parsed.data.tax,
         invoiceCurrency,
         poNumber: poNumber.trim() || undefined,
         referenceNumber: referenceNumber.trim() || undefined,
@@ -327,7 +361,7 @@ function CreateInvoice() {
         navigate({ to: "/invoices/$id", params: { id: inv.id } });
       }
     } catch (err) {
-      alert((err as Error).message);
+      setFormError((err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -980,6 +1014,7 @@ function CreateInvoice() {
           </Section>
 
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+            {formError && <p className="text-sm text-destructive sm:mr-auto sm:self-center">{formError}</p>}
             <Button type="button" variant="outline" onClick={() => navigate({ to: "/invoices" })}>
               {tc("buttons.cancel")}
             </Button>

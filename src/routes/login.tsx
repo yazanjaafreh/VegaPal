@@ -8,6 +8,8 @@ import { Logo } from "@/components/Logo";
 import { auth } from "@/lib/vegapal-store";
 import { ShieldCheck } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { loginSchema, firstZodError } from "@/lib/validation/schemas";
+import { checkClientRateLimit } from "@/lib/client-rate-limit";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — VegaPal" }] }),
@@ -26,9 +28,22 @@ function LoginPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const parsed = loginSchema.safeParse({ email, password });
+    if (!parsed.success) {
+      setError(firstZodError(parsed.error));
+      return;
+    }
+
+    const rate = checkClientRateLimit("login", 10, 15 * 60_000);
+    if (!rate.allowed) {
+      setError(`Too many attempts. Try again in ${rate.retryAfterSec} seconds.`);
+      return;
+    }
+
     setLoading(true);
     try {
-      await auth.signIn(email.trim().toLowerCase(), password);
+      await auth.signIn(parsed.data.email.toLowerCase(), parsed.data.password);
       navigate({ to: "/dashboard" });
     } catch (err) {
       setError((err as Error).message);

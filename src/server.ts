@@ -2,6 +2,7 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { applySecurityHeadersTo } from "./lib/security-headers";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -39,10 +40,7 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 async function applySecurityHeaders(response: Response): Promise<Response> {
   const headers = new Headers(response.headers);
-  headers.set("X-Content-Type-Options", "nosniff");
-  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  headers.set("X-Frame-Options", "SAMEORIGIN");
-  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  applySecurityHeadersTo(headers);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
@@ -59,15 +57,13 @@ export default {
       return await applySecurityHeaders(normalized);
     } catch (error) {
       console.error(error);
+      const errorHeaders = new Headers({
+        "content-type": "text/html; charset=utf-8",
+      });
+      applySecurityHeadersTo(errorHeaders);
       return new Response(renderErrorPage(), {
         status: 500,
-        headers: {
-          "content-type": "text/html; charset=utf-8",
-          "X-Content-Type-Options": "nosniff",
-          "Referrer-Policy": "strict-origin-when-cross-origin",
-          "X-Frame-Options": "SAMEORIGIN",
-          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-        },
+        headers: errorHeaders,
       });
     }
   },

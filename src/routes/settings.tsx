@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Check, LogOut, Upload, Trash2 } from "lucide-react";
+import { settingsSchema, firstZodError } from "@/lib/validation/schemas";
 
 export const Route = createFileRoute("/settings")({
   head: () => ({ meta: [{ title: "Settings — VegaPal" }] }),
@@ -35,6 +36,7 @@ function Settings() {
   const [invoiceUpdates, setInvoiceUpdates] = useState(true);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -67,17 +69,34 @@ function Settings() {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError("");
+
+    const parsed = settingsSchema.safeParse({
+      name,
+      business,
+      companyAddress,
+      website,
+      contactEmail,
+      wallet,
+      brandColor,
+    });
+    if (!parsed.success) {
+      setFormError(firstZodError(parsed.error));
+      return;
+    }
+
     setSaving(true);
     try {
+      const data = parsed.data;
       await auth.updateProfile({
-        name: name.trim(),
-        business: business.trim() || undefined,
-        companyAddress: companyAddress.trim() || undefined,
-        website: website.trim() || undefined,
-        contactEmail: contactEmail.trim() || undefined,
+        name: data.name,
+        business: data.business || undefined,
+        companyAddress: data.companyAddress || undefined,
+        website: data.website || undefined,
+        contactEmail: data.contactEmail || undefined,
         logoUrl: logoUrl || undefined,
-        brandColor,
-        wallet: wallet.trim(),
+        brandColor: data.brandColor,
+        wallet: data.wallet,
         network,
         emailNotifications,
         invoiceUpdates,
@@ -85,7 +104,7 @@ function Settings() {
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     } catch (err) {
-      alert((err as Error).message);
+      setFormError((err as Error).message);
     } finally {
       setSaving(false);
     }
@@ -222,6 +241,7 @@ function Settings() {
         </div>
 
         <div className="flex items-center justify-end gap-3 sticky bottom-4">
+          {formError && <p className="text-sm text-destructive mr-auto">{formError}</p>}
           {saved && (
             <span className="text-sm text-primary inline-flex items-center gap-1">
               <Check className="h-4 w-4" /> {tc("buttons.saved")}

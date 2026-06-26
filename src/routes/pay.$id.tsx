@@ -169,15 +169,15 @@ function PublicInvoice() {
               </div>
             )}
 
-            <div className="mt-8 rounded-2xl border border-border bg-card p-6 lg:p-8">
-              <div className="flex items-start justify-between gap-4">
+            <div className="mt-8 rounded-2xl border border-border bg-card p-4 sm:p-6 lg:p-8 min-w-0 overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground uppercase tracking-wider">
                     Total due
                   </p>
-                  <p className="mt-1 text-5xl font-bold tracking-tight tabular-nums">
+                  <p className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight tabular-nums break-all">
                     {formatInvoiceAmount(inv.total, currency)}
-                    <span className="text-xl text-muted-foreground font-medium ml-2">
+                    <span className="text-base sm:text-xl text-muted-foreground font-medium ml-1 sm:ml-2">
                       {currency}
                     </span>
                   </p>

@@ -14,6 +14,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { THEME_INIT_SCRIPT } from "../lib/theme";
 import i18n from "@/lib/i18n";
+import { DEFAULT_LANGUAGE } from "@/lib/i18n/languages";
 
 function NotFoundComponent() {
   const { t } = useTranslation("common");
@@ -88,11 +89,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "VegaPal — Secure USDT Invoices & Crypto Payments" },
       { name: "twitter:description", content: "VegaPal helps freelancers and businesses create professional USDT invoices and accept crypto payments securely." },
+      { property: "og:url", content: "https://vegapal.com/" },
+      { name: "robots", content: "index, follow" },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5bca70e8-c221-4739-abe1-d5adcc1be3b7/id-preview-6aef7401--fe66886f-3dfd-4ac9-867a-b0a2c3483bbd.lovable.app-1782281956253.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/5bca70e8-c221-4739-abe1-d5adcc1be3b7/id-preview-6aef7401--fe66886f-3dfd-4ac9-867a-b0a2c3483bbd.lovable.app-1782281956253.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "canonical", href: "https://vegapal.com/" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" },
@@ -105,8 +109,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const lang = typeof document !== "undefined" ? i18n.language : DEFAULT_LANGUAGE;
+
   return (
-    <html lang="en">
+    <html lang={lang}>
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import QRCode from "qrcode";
+import { qrCodeToDataUrl } from "@/lib/qrcode-lazy";
 import type { Invoice } from "./vegapal-store";
 import {
   formatInvoiceAmountWithCurrency,
@@ -402,7 +402,7 @@ export async function generateInvoicePDF(inv: Invoice) {
 
       if (crypto.walletAddress) {
         try {
-          const qr = await QRCode.toDataURL(crypto.walletAddress, { margin: 0, width: 200 });
+          const qr = await qrCodeToDataUrl(crypto.walletAddress, { margin: 0, width: 200 });
           doc.addImage(
             qr,
             "PNG",

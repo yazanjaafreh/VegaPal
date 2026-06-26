@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ChevronDown } from "lucide-react";
 import {
@@ -22,8 +23,18 @@ export function LanguageSwitcher({ variant = "default", className, compact }: La
   const current =
     SUPPORTED_LANGUAGES.find((lang) => lang.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
 
-  const changeLanguage = (code: SupportedLanguage) => {
-    void i18n.changeLanguage(code);
+  const [switching, setSwitching] = useState(false);
+
+  const changeLanguage = async (code: SupportedLanguage) => {
+    if (code === i18n.language || switching) return;
+    setSwitching(true);
+    try {
+      const { ensureLanguageLoaded } = await import("@/lib/i18n/load-locale");
+      await ensureLanguageLoaded(code);
+      await i18n.changeLanguage(code);
+    } finally {
+      setSwitching(false);
+    }
   };
 
   return (

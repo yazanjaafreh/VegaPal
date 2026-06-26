@@ -2,18 +2,14 @@
 // tsConfigPaths, and nitro — do NOT add those plugins manually or builds will break.
 // Outside Lovable, nitro is off by default; force it for self-host deploys (e.g. Vercel).
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { SECURITY_HEADERS } from "./src/lib/security-headers";
 
 export default defineConfig({
   nitro: {
     preset: "vercel",
     routeRules: {
       "/**": {
-        headers: {
-          "X-Content-Type-Options": "nosniff",
-          "Referrer-Policy": "strict-origin-when-cross-origin",
-          "X-Frame-Options": "SAMEORIGIN",
-          "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-        },
+        headers: SECURITY_HEADERS,
       },
     },
   },
