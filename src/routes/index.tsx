@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/Logo";
+import { TelegramIcon } from "@/components/icons/TelegramIcon";
 import { cn } from "@/lib/utils";
 import { LANDING_JSON_LD } from "@/lib/seo/landing-json-ld";
 import {
