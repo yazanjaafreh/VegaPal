@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { applySecurityHeadersTo } from "./lib/security-headers";
+import { handleTurnstileVerifyRequest } from "./lib/turnstile/verify.server";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -51,6 +52,12 @@ async function applySecurityHeaders(response: Response): Promise<Response> {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      if (url.pathname === "/api/turnstile/verify") {
+        const response = await handleTurnstileVerifyRequest(request);
+        return await applySecurityHeaders(response);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);

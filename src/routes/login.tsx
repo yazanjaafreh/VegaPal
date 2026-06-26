@@ -10,6 +10,8 @@ import { ShieldCheck } from "lucide-react";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { loginSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { useTurnstile } from "@/hooks/use-turnstile";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Sign in — VegaPal" }] }),
@@ -24,6 +26,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const turnstile = useTurnstile();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +46,11 @@ function LoginPage() {
 
     setLoading(true);
     try {
+      await turnstile.verifyBeforeAuth();
       await auth.signIn(parsed.data.email.toLowerCase(), parsed.data.password);
       navigate({ to: "/dashboard" });
     } catch (err) {
+      turnstile.reset();
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -83,7 +88,20 @@ function LoginPage() {
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+        {turnstile.enabled && (
+          <TurnstileWidget
+            onToken={turnstile.setToken}
+            resetRef={turnstile.resetRef}
+            onExpire={() => turnstile.setToken("")}
+          />
+        )}
+        <Button
+          type="submit"
+          variant="hero"
+          size="lg"
+          className="w-full"
+          disabled={loading || (turnstile.enabled && !turnstile.token)}
+        >
           {loading ? t("login.signingIn") : t("login.signIn")}
         </Button>
         <p className="text-sm text-muted-foreground text-center">

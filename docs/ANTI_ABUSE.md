@@ -13,12 +13,14 @@ In [Supabase Dashboard → Authentication → Rate Limits](https://supabase.com/
 - Enable built-in email signup / sign-in / password recovery limits.
 - Set sensible per-IP thresholds for production traffic.
 
-## Recommended: Cloudflare Turnstile (free)
+## Cloudflare Turnstile (implemented)
 
-1. Create a Turnstile site at [dash.cloudflare.com](https://dash.cloudflare.com).
-2. Add env vars: `VITE_TURNSTILE_SITE_KEY` (public), `TURNSTILE_SECRET_KEY` (server only — never in frontend).
-3. Wire widget on **Register** and **Forgot password** before calling `auth.signUp` / `auth.resetPassword`.
-4. Verify token in a Supabase Edge Function or Vercel serverless route before forwarding to Supabase.
+Set in Vercel / local env:
+
+- `VITE_TURNSTILE_SITE_KEY` — public site key (widget on register, login, forgot-password)
+- `TURNSTILE_SECRET_KEY` — server only; verified at `POST /api/turnstile/verify` before Supabase auth
+
+If keys are omitted locally, auth works without captcha (dev convenience). In production, set both keys.
 
 ## Recommended: Vercel
 

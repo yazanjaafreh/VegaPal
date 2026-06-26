@@ -8,6 +8,8 @@ import { auth } from "@/lib/vegapal-store";
 import { AuthLayout } from "./login";
 import { registerSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { useTurnstile } from "@/hooks/use-turnstile";
 
 export const Route = createFileRoute("/register")({
   head: () => ({ meta: [{ title: "Create account — VegaPal" }] }),
@@ -25,6 +27,7 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const turnstile = useTurnstile();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +53,7 @@ function RegisterPage() {
 
     setLoading(true);
     try {
+      await turnstile.verifyBeforeAuth();
       const data = parsed.data;
       await auth.signUp(
         data.email.toLowerCase(),
@@ -64,6 +68,7 @@ function RegisterPage() {
       }
       navigate({ to: "/dashboard" });
     } catch (err) {
+      turnstile.reset();
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -131,7 +136,20 @@ function RegisterPage() {
           />
         </div>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+        {turnstile.enabled && (
+          <TurnstileWidget
+            onToken={turnstile.setToken}
+            resetRef={turnstile.resetRef}
+            onExpire={() => turnstile.setToken("")}
+          />
+        )}
+        <Button
+          type="submit"
+          variant="hero"
+          size="lg"
+          className="w-full"
+          disabled={loading || (turnstile.enabled && !turnstile.token)}
+        >
           {loading ? t("register.creatingAccount") : t("register.createAccount")}
         </Button>
         <p className="text-xs text-muted-foreground text-center">{t("register.termsNotice")}</p>

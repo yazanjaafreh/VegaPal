@@ -8,6 +8,8 @@ import { auth } from "@/lib/vegapal-store";
 import { AuthLayout } from "./login";
 import { forgotPasswordSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { useTurnstile } from "@/hooks/use-turnstile";
 
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Reset password — VegaPal" }] }),
@@ -22,6 +24,7 @@ function ForgotPassword() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const turnstile = useTurnstile();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,9 +44,11 @@ function ForgotPassword() {
 
     setLoading(true);
     try {
+      await turnstile.verifyBeforeAuth();
       await auth.resetPassword(parsed.data.email.toLowerCase());
       setSent(true);
     } catch (err) {
+      turnstile.reset();
       setError((err as Error).message);
     } finally {
       setLoading(false);
@@ -83,7 +88,20 @@ function ForgotPassword() {
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading}>
+          {turnstile.enabled && (
+            <TurnstileWidget
+              onToken={turnstile.setToken}
+              resetRef={turnstile.resetRef}
+              onExpire={() => turnstile.setToken("")}
+            />
+          )}
+          <Button
+            type="submit"
+            variant="hero"
+            size="lg"
+            className="w-full"
+            disabled={loading || (turnstile.enabled && !turnstile.token)}
+          >
             {loading ? t("forgotPassword.sending") : t("forgotPassword.sendResetLink")}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
