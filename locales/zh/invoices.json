@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "list": "Invoices — VegaPal",
+    "create": "Create invoice — VegaPal",
+    "detail": "Invoice — VegaPal"
+  },
+  "list": {
+    "title": "Invoices",
+    "subtitle": "Manage every invoice you've issued.",
+    "searchPlaceholder": "Search invoices...",
+    "loading": "Loading invoices…",
+    "filters": {
+      "all": "All",
+      "pending": "Pending",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "title": "No invoices found",
+      "noInvoices": "Create your first USDT invoice to get started.",
+      "tryDifferent": "Try a different filter or search."
+    }
+  },
+  "create": {
+    "backToInvoices": "Back to invoices",
+    "editTitle": "Edit invoice",
+    "createTitle": "Create invoice",
+    "subtitle": "Fill in the details below. Your client will receive a secure payment link.",
+    "loading": "Loading invoice…",
+    "sections": {
+      "invoiceDetails": "Invoice details",
+      "sellerClient": "Seller / client information",
+      "lineItems": "Line items",
+      "totals": "Totals",
+      "paymentMethod": "Payment method",
+      "notesTerms": "Notes & terms"
+    },
+    "fields": {
+      "invoiceCurrency": "Invoice currency",
+      "fiatCurrencies": "Fiat currencies",
+      "cryptoCurrencies": "Crypto currencies",
+      "invoiceTitle": "Invoice title",
+      "invoiceTitlePlaceholder": "Exchange USDT → AED",
+      "issueDate": "Issue date",
+      "poNumber": "PO Number",
+      "referenceNumber": "Reference Number",
+      "projectCode": "Project Code",
+      "optionalPlaceholder": "Optional",
+      "sellerInfo": "Seller information",
+      "sellerFromProfile": "Seller (from your profile)",
+      "clientInfo": "Client information",
+      "editInSettings": "Edit in Settings →",
+      "editCompanyInfo": "Edit company info",
+      "clientName": "Client name",
+      "clientNamePlaceholder": "Client name",
+      "clientEmail": "Client email",
+      "clientEmailPlaceholder": "client@email.com",
+      "companyOptional": "Company (optional)",
+      "companyPlaceholder": "Company name (optional)",
+      "itemDescriptionPlaceholder": "Exchange USDT → AED",
+      "removeItem": "Remove",
+      "discountLabel": "Discount ({{currency}})",
+      "taxLabel": "Tax ({{currency}})",
+      "paymentInstructions": "Payment instructions",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional information for your client (optional)",
+      "termsPlaceholder": "100% Advance Payment Required.",
+      "showOnInvoice": "Show on invoice"
+    },
+    "paymentMethods": {
+      "cash": "Cash",
+      "cashDesc": "In-person or manual payment",
+      "bankTransfer": "Bank Transfer",
+      "bankDesc": "Wire or local bank account",
+      "crypto": "Crypto",
+      "cryptoDesc": "Wallet address on-chain",
+      "multiple": "Multiple methods",
+      "multipleDesc": "Offer more than one way to pay",
+      "enableMethods": "Enable payment methods",
+      "shownOnInvoice": "Shown on invoice",
+      "tapToEnable": "Tap to enable",
+      "cryptoPayment": "Crypto payment",
+      "cryptoCurrency": "Crypto currency",
+      "walletPlaceholder": "Enter wallet address",
+      "bankTransferTitle": "Bank transfer",
+      "bankInstructionsPlaceholder": "Please send us the bank transfer receipt after payment.",
+      "cashPayment": "Cash payment",
+      "cashInstructionsPlaceholder": "Cash payment time and location.",
+      "cashLocation": "Payment location or notes",
+      "cashLocationPlaceholder": "Office address or meeting location"
+    },
+    "preview": {
+      "livePreview": "Live preview",
+      "invoiceTitleFallback": "Invoice title",
+      "sellerFallback": "Seller",
+      "clientFallback": "Client",
+      "itemFallback": "Item {{index}}"
+    }
+  },
+  "detail": {
+    "backToInvoices": "Back to invoices",
+    "cancel": "Cancel",
+    "invoiceCurrencyLabel": "Invoice currency:",
+    "updateStatus": "Update status",
+    "markAsPaid": "Mark as paid",
+    "markAsPending": "Mark as pending",
+    "markAsDraft": "Mark as draft",
+    "markAsCancelled": "Mark as cancelled",
+    "shareTitle": "Share with your client",
+    "shareDescription": "Send this secure link to receive payment."
+  },
+  "paymentCards": {
+    "cryptoPayment": "Crypto payment"
+  }
+}

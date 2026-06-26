@@ -1,0 +1,183 @@
+{
+  "meta": {
+    "title": "VegaPal — Secure USDT Invoices & Crypto Payments",
+    "description": "Create professional USDT invoices and accept crypto payments. Built for freelancers and businesses who want secure, trusted deals.",
+    "ogTitle": "VegaPal — Secure USDT Invoices",
+    "ogDescription": "Professional crypto invoicing for freelancers and businesses."
+  },
+  "hero": {
+    "badge": "Secure invoices. Faster payments.",
+    "headlineLine1": "Create your invoice",
+    "headlineLine2Prefix": "in",
+    "headlineLine2Highlight": "30",
+    "headlineLine2Suffix": "Seconds.",
+    "headlineLine3": "Get paid anywhere.",
+    "description": "Create a secure invoice in seconds, share one payment link, and let your client pay by USDT, bank transfer, or cash — with a professional paid confirmation.",
+    "createFirstInvoice": "Create your first invoice",
+    "viewDemoInvoice": "View demo invoice",
+    "features": {
+      "pdfInvoices": "Professional PDF invoices",
+      "paymentMethods": "Crypto, Bank & Cash Payments",
+      "verifiedPages": "Verified payment pages"
+    },
+    "demo": {
+      "billedTo": "Billed to",
+      "clientName": "Acme Trading LLC",
+      "clientEmail": "finance@acmetrading.com",
+      "paid": "Paid",
+      "title": "Exchange USDT → AED",
+      "cryptoPayment": "Crypto payment",
+      "networkTron": "TRON TRC20"
+    }
+  },
+  "converter": {
+    "title": "Live Currency Converter",
+    "subtitle": "Check live exchange rates before creating your invoice.",
+    "from": "FROM",
+    "to": "TO",
+    "enterAmount": "Enter amount",
+    "swapCurrencies": "Swap currencies",
+    "fiatUnavailable": "Live rates are temporarily unavailable.",
+    "cryptoUnavailable": "Crypto live rates are temporarily unavailable.",
+    "rateLine": "1 {{from}} = {{amount}} {{to}}",
+    "currencies": {
+      "USD": "US Dollar",
+      "AED": "UAE Dirham",
+      "EUR": "Euro",
+      "SAR": "Saudi Riyal",
+      "CNY": "Chinese Yuan",
+      "RUB": "Russian Ruble",
+      "INR": "Indian Rupee",
+      "USDT": "Tether",
+      "USDC": "USD Coin",
+      "BTC": "Bitcoin",
+      "ETH": "Ethereum"
+    }
+  },
+  "features": {
+    "eyebrow": "Why VegaPal",
+    "title": "The fastest way to invoice in crypto.",
+    "subtitle": "Stripe-grade UX. Wise-grade reliability. PayPal-grade reach — built natively for stablecoins.",
+    "items": {
+      "fastPayments": {
+        "title": "Fast crypto payments",
+        "desc": "Get paid in minutes using USDT with a simple payment link."
+      },
+      "directWallet": {
+        "title": "Direct to your wallet",
+        "desc": "Payments go straight to your wallet. VegaPal never holds your money."
+      },
+      "multiplePayments": {
+        "title": "Accept multiple payments",
+        "desc": "Accept Crypto, Bank Transfer, or Cash from one invoice."
+      },
+      "professionalInvoices": {
+        "title": "Professional invoices",
+        "desc": "Create clean, modern invoices with QR codes and secure payment links."
+      },
+      "dashboard": {
+        "title": "Real-time dashboard",
+        "desc": "Track Paid, Pending, and Overdue invoices in one place."
+      },
+      "trusted": {
+        "title": "Trusted by clients",
+        "desc": "Professional invoices that make it easy for clients to pay with confidence."
+      }
+    }
+  },
+  "howItWorks": {
+    "eyebrow": "How it works",
+    "title": "From invoice to paid in 3 steps.",
+    "steps": {
+      "create": "Create Invoice",
+      "share": "Share PDF Invoice",
+      "getPaid": "Get Paid"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Pricing",
+    "title": "Simple, transparent, fair.",
+    "subtitle": "Every plan includes VegaPal on your PDF invoices and payment pages — always.",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Start invoicing with everything you need.",
+        "cta": "Start Free",
+        "features": {
+          "invoices": "5 invoices / month",
+          "pdf": "PDF invoices",
+          "paymentPages": "Public payment pages",
+          "payments": "Crypto, Bank & Cash payments",
+          "dashboard": "Dashboard",
+          "branding": "Custom branding",
+          "qr": "QR Code",
+          "excel": "Excel export",
+          "reports": "Reports",
+          "multiCurrency": "Multi-currency invoices",
+          "footer": "Powered by VegaPal footer"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For freelancers and small businesses scaling up.",
+        "cta": "Pay with USDT",
+        "features": {
+          "invoices": "90 invoices / month",
+          "users": "1 user",
+          "everythingFree": "Everything in Free",
+          "prioritySupport": "Priority support",
+          "earlyAccess": "Early access to new features",
+          "footer": "Powered by VegaPal footer"
+        }
+      },
+      "business": {
+        "name": "Business",
+        "description": "For teams that need more volume and control.",
+        "cta": "Pay with USDT",
+        "features": {
+          "invoices": "Unlimited invoices",
+          "users": "2 users",
+          "everythingPro": "Everything in Pro",
+          "teamManagement": "Team management",
+          "multipleWallets": "Multiple wallets",
+          "analytics": "Advanced analytics",
+          "api": "API access coming soon",
+          "prioritySupport": "Priority support",
+          "footer": "Powered by VegaPal footer"
+        }
+      }
+    }
+  },
+  "subscriptionModal": {
+    "title": "Pay with USDT — {{plan}}",
+    "description": "Send the monthly plan amount in USDT. Your plan will be activated manually after we confirm your payment.",
+    "amountLabel": "Amount",
+    "paymentMethods": "Payment methods",
+    "networkTron": "TRON TRC20",
+    "networkBep20": "BNB Smart Chain BEP20",
+    "instructions": "After payment, please send your transaction ID (TXID) or payment screenshot to our Telegram or email so we can activate your plan.",
+    "telegram": "Telegram",
+    "networkWarning": "Please make sure you select the correct network before sending USDT. Payments sent on the wrong network may be lost."
+  },
+  "cta": {
+    "title": "Ready to send your first USDT invoice?",
+    "subtitle": "Join freelancers and businesses getting paid faster with VegaPal.",
+    "button": "Get started free"
+  },
+  "contact": {
+    "eyebrow": "Support",
+    "title": "Contact us",
+    "subtitle": "Need help with invoices or payments? Our support team is available 24/7.",
+    "email": {
+      "title": "Email support"
+    },
+    "telegram": {
+      "title": "Telegram support",
+      "description": "Chat with us on Telegram"
+    },
+    "liveSupport": {
+      "title": "24/7 live support",
+      "description": "Get help anytime, anywhere."
+    }
+  }
+}

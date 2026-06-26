@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "title": "Settings — VegaPal"
+  },
+  "title": "Settings",
+  "subtitle": "Manage your branding, payouts, and notifications.",
+  "sections": {
+    "branding": {
+      "title": "Branding",
+      "desc": "Logo, brand color, and business name shown on invoices and PDFs."
+    },
+    "companyInfo": {
+      "title": "Company info",
+      "desc": "Information shown to your clients on invoices."
+    },
+    "payments": {
+      "title": "Payments",
+      "desc": "Wallet where invoice payments will be received."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "desc": "How VegaPal keeps you in the loop."
+    }
+  },
+  "fields": {
+    "logo": "Logo",
+    "noLogo": "No logo",
+    "businessName": "Business name",
+    "businessPlaceholder": "Your Business",
+    "brandColor": "Brand color",
+    "fullName": "Full name",
+    "accountEmail": "Account email",
+    "contactEmail": "Contact email",
+    "website": "Website",
+    "websitePlaceholder": "https://yourbusiness.com",
+    "companyAddress": "Company address",
+    "companyAddressPlaceholder": "Office address",
+    "network": "Network",
+    "walletAddress": "Wallet address",
+    "walletPlaceholder": "Enter your wallet address",
+    "emailNotifications": "Email notifications",
+    "emailNotificationsDesc": "Receive account & security emails.",
+    "invoiceUpdates": "Invoice updates",
+    "invoiceUpdatesDesc": "Be notified when an invoice is paid or overdue."
+  },
+  "networks": {
+    "trc20": "USDT — TRC20 (TRON)",
+    "erc20": "USDT — ERC20 (Ethereum)",
+    "bep20": "USDT — BEP20 (BNB Chain)"
+  },
+  "signOut": {
+    "title": "Sign out",
+    "description": "End your session on this device."
+  }
+}

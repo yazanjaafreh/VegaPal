@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next";
 import {
   DEFAULT_LANGUAGE,
   getStoredLanguage,
+  isSupportedLanguage,
   persistLanguage,
   type SupportedLanguage,
 } from "./languages";
@@ -20,6 +21,20 @@ import thAuth from "../../../locales/th/auth.json";
 import thDashboard from "../../../locales/th/dashboard.json";
 import thInvoices from "../../../locales/th/invoices.json";
 import thSettings from "../../../locales/th/settings.json";
+
+import zhCommon from "../../../locales/zh/common.json";
+import zhLanding from "../../../locales/zh/landing.json";
+import zhAuth from "../../../locales/zh/auth.json";
+import zhDashboard from "../../../locales/zh/dashboard.json";
+import zhInvoices from "../../../locales/zh/invoices.json";
+import zhSettings from "../../../locales/zh/settings.json";
+
+import ruCommon from "../../../locales/ru/common.json";
+import ruLanding from "../../../locales/ru/landing.json";
+import ruAuth from "../../../locales/ru/auth.json";
+import ruDashboard from "../../../locales/ru/dashboard.json";
+import ruInvoices from "../../../locales/ru/invoices.json";
+import ruSettings from "../../../locales/ru/settings.json";
 
 export const I18N_NAMESPACES = [
   "common",
@@ -49,6 +64,22 @@ const resources = {
     invoices: thInvoices,
     settings: thSettings,
   },
+  zh: {
+    common: zhCommon,
+    landing: zhLanding,
+    auth: zhAuth,
+    dashboard: zhDashboard,
+    invoices: zhInvoices,
+    settings: zhSettings,
+  },
+  ru: {
+    common: ruCommon,
+    landing: ruLanding,
+    auth: ruAuth,
+    dashboard: ruDashboard,
+    invoices: ruInvoices,
+    settings: ruSettings,
+  },
 } as const;
 
 const initialLanguage: SupportedLanguage = DEFAULT_LANGUAGE;
@@ -77,7 +108,7 @@ i18n.on("languageChanged", (lng) => {
   if (typeof document !== "undefined") {
     document.documentElement.lang = lng;
   }
-  if (lng === "en" || lng === "th") {
+  if (isSupportedLanguage(lng)) {
     persistLanguage(lng);
   }
 });
