@@ -220,6 +220,7 @@ export const Route = createFileRoute("/")({
         content:
           "Create professional USDT invoices and accept crypto payments. Built for freelancers and businesses.",
       },
+      { name: "robots", content: "index, follow" },
     ],
     links: [{ rel: "canonical", href: "https://vegapal.com/" }],
     scripts: [

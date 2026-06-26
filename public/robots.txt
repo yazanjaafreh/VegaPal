@@ -3,9 +3,6 @@ Allow: /
 Disallow: /dashboard
 Disallow: /invoices
 Disallow: /settings
-Disallow: /login
-Disallow: /register
-Disallow: /forgot-password
-Disallow: /reset-password
+Disallow: /pay
 
 Sitemap: https://vegapal.com/sitemap.xml

@@ -83,7 +83,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
     }> = [
       { rel: "stylesheet", href: appCss },
-      { rel: "canonical", href: "https://vegapal.com/" },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
