@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import type { LearnFaqItem, LearnRelatedArticle, LearnTocItem } from "@/lib/learn/types";
+import type { LearnFaqItem, LearnRelatedArticle, LearnRoutePath, LearnTocItem } from "@/lib/learn/types";
 
 export type Sprint1ArticleConfig = {
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   title: string;
   description: string;
   breadcrumbTitle: string;
@@ -20,7 +20,7 @@ export const SPRINT1_PATHS = [
   "/learn/invoice-vs-bill",
   "/learn/invoice-generator",
   "/learn/invoice-software",
-] as const;
+] as const satisfies readonly LearnRoutePath[];
 
 export function sprint1RelatedArticles(current: (typeof SPRINT1_PATHS)[number]): LearnRelatedArticle[] {
   const all: LearnRelatedArticle[] = [
@@ -75,7 +75,7 @@ export function Paragraphs({ items }: { items: string[] }) {
   );
 }
 
-export function LearnInlineLink({ to, children }: { to: `/learn${string}`; children: ReactNode }) {
+export function LearnInlineLink({ to, children }: { to: LearnRoutePath; children: ReactNode }) {
   return (
     <Link to={to} className="text-primary hover:underline font-medium">
       {children}

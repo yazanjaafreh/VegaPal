@@ -1,3 +1,8 @@
+import type { FileRoutesByTo } from "@/routeTree.gen";
+
+/** Registered TanStack Router paths under /learn */
+export type LearnRoutePath = Extract<keyof FileRoutesByTo, `/learn${string}`>;
+
 export type LearnFaqItem = {
   question: string;
   answer: string;
@@ -9,21 +14,21 @@ export type LearnTocItem = {
 };
 
 export type LearnRelatedArticle = {
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   title: string;
 };
 
 export type LearnArticleNavLink = {
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   title: string;
 };
 
 export type LearnArticleMeta = {
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   title: string;
   description: string;
   category: string;
-  categoryPath: `/learn/${string}`;
+  categoryPath: LearnRoutePath;
   readingMinutes: number;
   publishedAt: string;
   updatedAt: string;

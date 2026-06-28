@@ -82,6 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       href: string;
       as?: string;
       type?: string;
+      sizes?: string;
       crossOrigin?: "anonymous" | "use-credentials" | "" | undefined;
     }> = [
       { rel: "stylesheet", href: appCss },

@@ -12,10 +12,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { LearnRoutePath } from "@/lib/learn/types";
+
 export type LearnTopic = {
   id: string;
   title: string;
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   icon: LucideIcon;
 };
 

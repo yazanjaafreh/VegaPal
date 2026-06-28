@@ -8,6 +8,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import type { LearnRoutePath } from "@/lib/learn/types";
+
 export const LEARN_BASE_URL = "https://vega-pal.com";
 
 export type LearnCategoryId =
@@ -20,7 +22,7 @@ export type LearnCategoryId =
 
 export type LearnCategory = {
   id: LearnCategoryId;
-  path: `/learn/${LearnCategoryId}`;
+  path: LearnRoutePath;
   title: string;
   description: string;
   icon: LucideIcon;

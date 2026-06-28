@@ -3,6 +3,7 @@ Allow: /
 Disallow: /dashboard
 Disallow: /invoices
 Disallow: /settings
+Disallow: /admin
 Disallow: /pay
 
-Sitemap: https://vegapal.com/sitemap.xml
+Sitemap: https://vega-pal.com/sitemap.xml

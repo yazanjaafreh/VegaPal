@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
+import type { LearnRoutePath } from "@/lib/learn/types";
+
 export type LearnBreadcrumbItem = {
   label: string;
-  href?: string | `/learn${string}`;
+  href?: "/" | LearnRoutePath | (string & {});
 };
 
 type LearnBreadcrumbProps = {
@@ -28,7 +30,7 @@ export function LearnBreadcrumb({ items }: LearnBreadcrumbProps) {
                   {item.label}
                 </Link>
               ) : item.href.startsWith("/learn") ? (
-                <Link to={item.href as `/learn${string}`} className="hover:text-primary hover:underline">
+                <Link to={item.href as LearnRoutePath} className="hover:text-primary hover:underline">
                   {item.label}
                 </Link>
               ) : (

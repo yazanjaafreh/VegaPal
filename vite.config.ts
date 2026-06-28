@@ -7,6 +7,8 @@ import { SECURITY_HEADERS } from "./src/lib/security-headers";
 export default defineConfig({
   nitro: {
     preset: "vercel",
+    // routeRules is valid for Nitro/Vercel; lovable config types omit it
+    // @ts-expect-error Nitro routeRules — security headers on all routes
     routeRules: {
       "/**": {
         headers: SECURITY_HEADERS,

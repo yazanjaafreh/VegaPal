@@ -1,3 +1,4 @@
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { UserPlan } from "@/lib/admin/plans";
 import { requireAdminFromRequest } from "@/lib/admin/admin-auth.server";
 
@@ -196,7 +197,7 @@ async function getUserDetail(userId: string) {
 async function patchUser(userId: string, body: { plan?: UserPlan; isDisabled?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+  const updates: TablesUpdate<"profiles"> = { updated_at: new Date().toISOString() };
   if (body.plan !== undefined) updates.plan = body.plan;
   if (body.isDisabled !== undefined) updates.is_disabled = body.isDisabled;
 

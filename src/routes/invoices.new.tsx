@@ -26,6 +26,7 @@ import {
   FIAT_CURRENCY_OPTIONS,
   INVOICE_CURRENCIES,
   PAYMENT_NETWORKS,
+  type InvoiceCurrency,
   buildDefaultPaymentMethods,
   type BankPaymentConfig,
   type CashPaymentConfig,
@@ -216,7 +217,11 @@ function CreateInvoice() {
       return;
     }
     if (existing && !hydrated) {
-      setInvoiceCurrency(existing.invoiceCurrency);
+      setInvoiceCurrency(
+        (INVOICE_CURRENCIES as readonly string[]).includes(existing.invoiceCurrency)
+          ? (existing.invoiceCurrency as InvoiceCurrency)
+          : DEFAULT_INVOICE_CURRENCY,
+      );
       setPoNumber(existing.poNumber ?? "");
       setReferenceNumber(existing.referenceNumber ?? "");
       setProjectCode(existing.projectCode ?? "");
@@ -303,11 +308,16 @@ function CreateInvoice() {
 
     const cleanItems = items
       .filter((i) => i.description.trim() && (Number(i.quantity) || 0) > 0)
-      .map((i) => ({
-        description: i.description.trim(),
-        quantity: Number(i.quantity) || 0,
-        unitPrice: Number(i.unitPrice) || 0,
-      }));
+      .map((i) => {
+        const quantity = Number(i.quantity) || 0;
+        const unitPrice = Number(i.unitPrice) || 0;
+        return {
+          description: i.description.trim(),
+          quantity,
+          unitPrice,
+          total: quantity * unitPrice,
+        };
+      });
 
     const parsed = invoiceCreateSchema.safeParse({
       title,
@@ -404,7 +414,10 @@ function CreateInvoice() {
           <Section title={t("create.sections.invoiceDetails")}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Field label={t("create.fields.invoiceCurrency")}>
-                <Select value={invoiceCurrency} onValueChange={setInvoiceCurrency}>
+                <Select
+                  value={invoiceCurrency}
+                  onValueChange={(v) => setInvoiceCurrency(v as InvoiceCurrency)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>

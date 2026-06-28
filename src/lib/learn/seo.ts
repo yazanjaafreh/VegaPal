@@ -1,15 +1,15 @@
 import { LEARN_BASE_URL } from "./categories";
-import type { LearnFaqItem } from "./types";
+import type { LearnFaqItem, LearnRoutePath } from "./types";
 
 type LearnHeadConfig = {
   title: string;
   description: string;
-  path: `/learn${string}`;
+  path: LearnRoutePath;
   breadcrumbTitle: string;
   categoryTitle?: string;
-  categoryPath?: `/learn${string}`;
+  categoryPath?: LearnRoutePath;
   dateModified?: string;
-  faq?: LearnFaqItem[];
+  faq?: readonly LearnFaqItem[];
 };
 
 export function createLearnHead({

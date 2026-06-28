@@ -1,6 +1,8 @@
+import type { LearnRoutePath } from "@/lib/learn/types";
+
 export type LearnPopularSearch = {
   label: string;
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
 };
 
 export const LEARN_POPULAR_SEARCHES: LearnPopularSearch[] = [

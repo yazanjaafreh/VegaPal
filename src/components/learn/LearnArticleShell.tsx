@@ -5,12 +5,14 @@ import { LearnBreadcrumb } from "@/components/learn/LearnBreadcrumb";
 import { LearnSupport } from "@/components/learn/LearnSupport";
 import type { LearnCategoryId } from "@/lib/learn/categories";
 
+import type { LearnRoutePath } from "@/lib/learn/types";
+
 type LearnArticleShellProps = {
   title: string;
   intro?: ReactNode;
   currentId?: LearnCategoryId;
   breadcrumbCategory?: string;
-  breadcrumbCategoryPath?: `/learn/${string}`;
+  breadcrumbCategoryPath?: LearnRoutePath;
   breadcrumbArticle?: string;
   children: ReactNode;
 };

@@ -1,4 +1,4 @@
-import type { LearnArticleMeta } from "@/lib/learn/types";
+import type { LearnArticleMeta, LearnRoutePath } from "@/lib/learn/types";
 
 export const SPRINT1_ARTICLE_META: LearnArticleMeta[] = [
   {
@@ -148,7 +148,7 @@ export const LATEST_ARTICLES = [...SPRINT1_ARTICLE_META].sort(
   (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
 );
 
-export function learnArticleByPath(path: `/learn/${string}`): LearnArticleMeta | undefined {
+export function learnArticleByPath(path: LearnRoutePath): LearnArticleMeta | undefined {
   return LEARN_ARTICLE_REGISTRY.find((a) => a.path === path);
 }
 
@@ -169,9 +169,9 @@ export function searchLearnArticles(query: string): LearnArticleMeta[] {
   }).slice(0, 8);
 }
 
-export function sprint1NavFor(path: `/learn/${string}`): {
-  prev?: { path: `/learn/${string}`; title: string };
-  next?: { path: `/learn/${string}`; title: string };
+export function sprint1NavFor(path: LearnRoutePath): {
+  prev?: { path: LearnRoutePath; title: string };
+  next?: { path: LearnRoutePath; title: string };
 } {
   const idx = SPRINT1_ARTICLE_META.findIndex((a) => a.path === path);
   if (idx === -1) return {};

@@ -3,9 +3,10 @@ import { LearnArticleMetaBar } from "@/components/learn/LearnArticleMetaBar";
 import { LearnArticleShell } from "@/components/learn/LearnArticleShell";
 import { LearnInternalLinks } from "@/components/learn/LearnInternalLinks";
 import { learnArticleByPath } from "@/lib/learn/registry";
+import type { LearnRoutePath } from "@/lib/learn/types";
 
 type LearnCategoryArticleProps = {
-  path: `/learn/${string}`;
+  path: LearnRoutePath;
   title: string;
   children: ReactNode;
 };
