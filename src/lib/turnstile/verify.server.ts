@@ -1,3 +1,5 @@
+import { serverTurnstilePolicy, shouldBypassTurnstile } from "@/lib/turnstile/policy";
+
 const TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 export type TurnstileVerifyResult = {
@@ -8,8 +10,14 @@ export type TurnstileVerifyResult = {
 
 export async function verifyTurnstileToken(
   token: string,
-  remoteIp?: string,
+  options?: { remoteIp?: string; host?: string | null },
 ): Promise<TurnstileVerifyResult> {
+  const host = options?.host ?? null;
+
+  if (shouldBypassTurnstile(serverTurnstilePolicy(host))) {
+    return { success: true, skipped: true };
+  }
+
   const secret = process.env.TURNSTILE_SECRET_KEY;
 
   if (!secret) {
@@ -23,8 +31,8 @@ export async function verifyTurnstileToken(
   const form = new URLSearchParams();
   form.set("secret", secret);
   form.set("response", token.trim());
-  if (remoteIp) {
-    form.set("remoteip", remoteIp);
+  if (options?.remoteIp) {
+    form.set("remoteip", options.remoteIp);
   }
 
   const response = await fetch(TURNSTILE_VERIFY_URL, {
@@ -53,7 +61,8 @@ export async function handleTurnstileVerifyRequest(request: Request): Promise<Re
   try {
     const body = (await request.json()) as { token?: string };
     const remoteIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-    const result = await verifyTurnstileToken(body.token ?? "", remoteIp);
+    const host = request.headers.get("host");
+    const result = await verifyTurnstileToken(body.token ?? "", { remoteIp, host });
 
     if (!result.success) {
       return Response.json(

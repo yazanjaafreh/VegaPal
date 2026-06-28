@@ -1,5 +1,10 @@
+import { clientTurnstilePolicy, shouldBypassTurnstile } from "@/lib/turnstile/policy";
+
 export function isTurnstileEnabled() {
-  return Boolean(import.meta.env.VITE_TURNSTILE_SITE_KEY);
+  if (!import.meta.env.VITE_TURNSTILE_SITE_KEY) {
+    return false;
+  }
+  return !shouldBypassTurnstile(clientTurnstilePolicy());
 }
 
 export async function verifyTurnstileOnServer(token: string): Promise<void> {
