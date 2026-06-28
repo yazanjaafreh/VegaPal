@@ -1,87 +1,42 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { Logo } from "@/components/Logo";
-import {
-  BookOpen,
-  FileText,
-  Wallet,
-  ShieldCheck,
-  Building2,
-  CircleHelp,
-  type LucideIcon,
-} from "lucide-react";
+import { LearnRelatedLinks } from "@/components/learn/LearnRelatedLinks";
+import { LearnSupport } from "@/components/learn/LearnSupport";
+import { LEARN_BASE_URL, LEARN_CATEGORIES } from "@/lib/learn/categories";
 
-const LEARN_CATEGORIES: Array<{
-  id: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  {
-    id: "getting-started",
-    title: "Getting Started",
-    description:
-      "Set up your VegaPal account, understand the dashboard, and send your first invoice in minutes.",
-    icon: BookOpen,
-  },
-  {
-    id: "invoice",
-    title: "Invoice",
-    description:
-      "Create professional invoices, customize line items, currencies, and PDF exports for your clients.",
-    icon: FileText,
-  },
-  {
-    id: "payments",
-    title: "Payments",
-    description:
-      "Accept USDT and other payment methods with shareable payment links and wallet-based checkout flows.",
-    icon: Wallet,
-  },
-  {
-    id: "security",
-    title: "Security",
-    description:
-      "Learn how VegaPal protects your data, secures payment pages, and helps you run trusted business deals.",
-    icon: ShieldCheck,
-  },
-  {
-    id: "business",
-    title: "Business",
-    description:
-      "Best practices for freelancers and teams managing recurring clients, subscriptions, and crypto billing.",
-    icon: Building2,
-  },
-  {
-    id: "faq",
-    title: "FAQ",
-    description:
-      "Answers to common questions about USDT payments, invoices, wallets, networks, and account management.",
-    icon: CircleHelp,
-  },
-];
+const TITLE = "VegaPal Learn | Invoice, USDT Payments & Crypto Billing Guides";
+const DESCRIPTION =
+  "Learn how invoices, USDT payments, payment links, wallet payments, and secure business payments work with VegaPal.";
 
 export const Route = createFileRoute("/learn")({
-  head: () => ({
-    meta: [
-      { title: "VegaPal Learn | Invoice, USDT Payments & Crypto Billing Guides" },
-      {
-        name: "description",
-        content:
-          "Learn how invoices, USDT payments, payment links, wallet payments, and secure business payments work with VegaPal.",
-      },
-      { name: "robots", content: "index, follow" },
-      { property: "og:title", content: "VegaPal Learn | Invoice, USDT Payments & Crypto Billing Guides" },
-      {
-        property: "og:description",
-        content:
-          "Learn how invoices, USDT payments, payment links, wallet payments, and secure business payments work with VegaPal.",
-      },
-      { property: "og:url", content: "https://vega-pal.com/learn" },
-      { property: "og:type", content: "website" },
-    ],
-    links: [{ rel: "canonical", href: "https://vega-pal.com/learn" }],
-  }),
+  head: () => {
+    const url = `${LEARN_BASE_URL}/learn`;
+    const collectionLd = {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Learn VegaPal",
+      description: DESCRIPTION,
+      url,
+    };
+
+    return {
+      meta: [
+        { title: TITLE },
+        { name: "description", content: DESCRIPTION },
+        { name: "robots", content: "index, follow" },
+        { property: "og:title", content: TITLE },
+        { property: "og:description", content: DESCRIPTION },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "website" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: TITLE },
+        { name: "twitter:description", content: DESCRIPTION },
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify(collectionLd) }],
+    };
+  },
   component: LearnPage,
 });
 
@@ -92,42 +47,55 @@ function LearnPage() {
         <div className="absolute inset-0 bg-mesh opacity-60" />
         <LandingHeader />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-28 sm:pt-36 pb-16 sm:pb-20 lg:pt-40">
-          <p className="text-sm font-semibold text-primary uppercase tracking-wider">Learn</p>
-          <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-navy-foreground max-w-3xl">
-            Guides for invoices, USDT payments &amp; crypto billing
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-navy-foreground max-w-4xl">
+            Learn VegaPal
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-navy-foreground/70 max-w-2xl leading-relaxed">
-            Explore how VegaPal helps you create invoices, share payment links, accept wallet payments, and run secure
-            business deals.
+          <p className="mt-4 text-base sm:text-lg text-navy-foreground/80 max-w-3xl leading-relaxed">
+            Professional guides for invoices, billing, USDT payments, crypto payments, bank transfers and secure
+            business invoicing.
+          </p>
+          <p className="mt-4 text-base sm:text-lg text-navy-foreground/70 max-w-3xl leading-relaxed">
+            Learn everything about online invoicing, professional billing, secure payments, payment links, crypto
+            invoices, bank transfer invoices and business payments. Whether you are a freelancer, startup or enterprise,
+            VegaPal helps you create invoices in seconds and receive payments securely.
           </p>
         </div>
       </section>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-16">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-16 space-y-12">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {LEARN_CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
               <article
                 key={category.id}
-                id={category.id}
                 className="rounded-2xl border border-border bg-card p-6 shadow-soft transition-shadow hover:shadow-elevated"
               >
-                <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                  <Icon className="h-5 w-5" aria-hidden />
-                </div>
-                <h2 className="text-lg font-semibold text-foreground">{category.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{category.description}</p>
+                <Link to={category.path} className="block group">
+                  <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
+                    <Icon className="h-5 w-5" aria-hidden />
+                  </div>
+                  <h2 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {category.title}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{category.description}</p>
+                  <span className="mt-4 inline-block text-sm font-medium text-primary">Read guide →</span>
+                </Link>
               </article>
             );
           })}
         </div>
+
+        <LearnSupport />
+        <LearnRelatedLinks />
       </main>
 
       <footer className="border-t border-border py-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           <Logo size="default" />
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} VegaPal. Secure Payments &amp; Trusted Deals.</p>
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} VegaPal. Secure Payments &amp; Trusted Deals.
+          </p>
         </div>
       </footer>
     </div>

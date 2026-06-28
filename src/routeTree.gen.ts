@@ -19,6 +19,12 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
+import { Route as LearnSecurityRouteImport } from './routes/learn.security'
+import { Route as LearnPaymentsRouteImport } from './routes/learn.payments'
+import { Route as LearnInvoiceRouteImport } from './routes/learn.invoice'
+import { Route as LearnGettingStartedRouteImport } from './routes/learn.getting-started'
+import { Route as LearnFaqRouteImport } from './routes/learn.faq'
+import { Route as LearnBusinessRouteImport } from './routes/learn.business'
 import { Route as InvoicesNewRouteImport } from './routes/invoices.new'
 import { Route as InvoicesIdRouteImport } from './routes/invoices.$id'
 
@@ -72,6 +78,36 @@ const PayIdRoute = PayIdRouteImport.update({
   path: '/pay/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnSecurityRoute = LearnSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnPaymentsRoute = LearnPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnInvoiceRoute = LearnInvoiceRouteImport.update({
+  id: '/invoice',
+  path: '/invoice',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnGettingStartedRoute = LearnGettingStartedRouteImport.update({
+  id: '/getting-started',
+  path: '/getting-started',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnFaqRoute = LearnFaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnBusinessRoute = LearnBusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => LearnRoute,
+} as any)
 const InvoicesNewRoute = InvoicesNewRouteImport.update({
   id: '/invoices/new',
   path: '/invoices/new',
@@ -87,13 +123,19 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/learn': typeof LearnRoute
+  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
+  '/learn/business': typeof LearnBusinessRoute
+  '/learn/faq': typeof LearnFaqRoute
+  '/learn/getting-started': typeof LearnGettingStartedRoute
+  '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/payments': typeof LearnPaymentsRoute
+  '/learn/security': typeof LearnSecurityRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -101,13 +143,19 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/learn': typeof LearnRoute
+  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
+  '/learn/business': typeof LearnBusinessRoute
+  '/learn/faq': typeof LearnFaqRoute
+  '/learn/getting-started': typeof LearnGettingStartedRoute
+  '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/payments': typeof LearnPaymentsRoute
+  '/learn/security': typeof LearnSecurityRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices': typeof InvoicesIndexRoute
 }
@@ -116,13 +164,19 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/learn': typeof LearnRoute
+  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/invoices/$id': typeof InvoicesIdRoute
   '/invoices/new': typeof InvoicesNewRoute
+  '/learn/business': typeof LearnBusinessRoute
+  '/learn/faq': typeof LearnFaqRoute
+  '/learn/getting-started': typeof LearnGettingStartedRoute
+  '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/payments': typeof LearnPaymentsRoute
+  '/learn/security': typeof LearnSecurityRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -139,6 +193,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/invoices/$id'
     | '/invoices/new'
+    | '/learn/business'
+    | '/learn/faq'
+    | '/learn/getting-started'
+    | '/learn/invoice'
+    | '/learn/payments'
+    | '/learn/security'
     | '/pay/$id'
     | '/invoices/'
   fileRoutesByTo: FileRoutesByTo
@@ -153,6 +213,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/invoices/$id'
     | '/invoices/new'
+    | '/learn/business'
+    | '/learn/faq'
+    | '/learn/getting-started'
+    | '/learn/invoice'
+    | '/learn/payments'
+    | '/learn/security'
     | '/pay/$id'
     | '/invoices'
   id:
@@ -167,6 +233,12 @@ export interface FileRouteTypes {
     | '/settings'
     | '/invoices/$id'
     | '/invoices/new'
+    | '/learn/business'
+    | '/learn/faq'
+    | '/learn/getting-started'
+    | '/learn/invoice'
+    | '/learn/payments'
+    | '/learn/security'
     | '/pay/$id'
     | '/invoices/'
   fileRoutesById: FileRoutesById
@@ -175,7 +247,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  LearnRoute: typeof LearnRoute
+  LearnRoute: typeof LearnRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -258,6 +330,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/security': {
+      id: '/learn/security'
+      path: '/security'
+      fullPath: '/learn/security'
+      preLoaderRoute: typeof LearnSecurityRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/payments': {
+      id: '/learn/payments'
+      path: '/payments'
+      fullPath: '/learn/payments'
+      preLoaderRoute: typeof LearnPaymentsRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/invoice': {
+      id: '/learn/invoice'
+      path: '/invoice'
+      fullPath: '/learn/invoice'
+      preLoaderRoute: typeof LearnInvoiceRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/getting-started': {
+      id: '/learn/getting-started'
+      path: '/getting-started'
+      fullPath: '/learn/getting-started'
+      preLoaderRoute: typeof LearnGettingStartedRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/faq': {
+      id: '/learn/faq'
+      path: '/faq'
+      fullPath: '/learn/faq'
+      preLoaderRoute: typeof LearnFaqRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/business': {
+      id: '/learn/business'
+      path: '/business'
+      fullPath: '/learn/business'
+      preLoaderRoute: typeof LearnBusinessRouteImport
+      parentRoute: typeof LearnRoute
+    }
     '/invoices/new': {
       id: '/invoices/new'
       path: '/invoices/new'
@@ -275,11 +389,31 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface LearnRouteChildren {
+  LearnBusinessRoute: typeof LearnBusinessRoute
+  LearnFaqRoute: typeof LearnFaqRoute
+  LearnGettingStartedRoute: typeof LearnGettingStartedRoute
+  LearnInvoiceRoute: typeof LearnInvoiceRoute
+  LearnPaymentsRoute: typeof LearnPaymentsRoute
+  LearnSecurityRoute: typeof LearnSecurityRoute
+}
+
+const LearnRouteChildren: LearnRouteChildren = {
+  LearnBusinessRoute: LearnBusinessRoute,
+  LearnFaqRoute: LearnFaqRoute,
+  LearnGettingStartedRoute: LearnGettingStartedRoute,
+  LearnInvoiceRoute: LearnInvoiceRoute,
+  LearnPaymentsRoute: LearnPaymentsRoute,
+  LearnSecurityRoute: LearnSecurityRoute,
+}
+
+const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  LearnRoute: LearnRoute,
+  LearnRoute: LearnRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   ResetPasswordRoute: ResetPasswordRoute,
