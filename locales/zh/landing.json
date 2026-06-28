@@ -155,7 +155,7 @@
     "paymentMethods": "付款方式",
     "networkTron": "TRON TRC20",
     "networkBep20": "BNB Smart Chain BEP20",
-    "instructions": "付款后，请将交易 ID（TXID）或付款截图发送至我们的 Telegram 或邮箱，以便激活套餐。",
+    "instructions": "付款后，请将交易 ID（TXID）或付款截图发送至 info@vega-pal.com 或 Telegram @vegapal，以便激活套餐。",
     "telegram": "Telegram",
     "networkWarning": "发送 USDT 前请务必选择正确的网络，错误网络可能导致资金丢失。"
   },
@@ -167,7 +167,7 @@
   "contact": {
     "eyebrow": "支持",
     "title": "联系我们",
-    "subtitle": "发票或付款需要帮助？我们的支持团队 7×24 小时在线。",
+    "subtitle": "发票或付款需要帮助？我们的支持团队 7 天 24 小时在线。",
     "email": {
       "title": "邮件支持"
     },

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LandingHeader } from "@/components/landing/LandingHeader";
-import { Logo } from "@/components/Logo";
+import { PublicSiteFooter } from "@/components/landing/PublicSiteFooter";
 import { LearnAiPlaceholder } from "@/components/learn/LearnAiPlaceholder";
 import { LearnBrowseTopics } from "@/components/learn/LearnBrowseTopics";
 import { LearnFaqPreview } from "@/components/learn/LearnFaqPreview";
@@ -81,14 +81,7 @@ function LearnHubPage() {
         <LearnAiPlaceholder />
       </main>
 
-      <footer className="border-t border-border py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <Logo size="default" />
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} VegaPal. Secure Payments &amp; Trusted Deals.
-          </p>
-        </div>
-      </footer>
+      <PublicSiteFooter />
     </div>
   );
 }

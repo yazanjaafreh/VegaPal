@@ -4,7 +4,16 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { PublicSiteFooter } from "@/components/landing/PublicSiteFooter";
 import { TelegramIcon } from "@/components/icons/TelegramIcon";
+import {
+  VEGAPAL_SUPPORT_AVAILABILITY,
+  VEGAPAL_SUPPORT_EMAIL,
+  VEGAPAL_SUPPORT_EMAIL_HREF,
+  VEGAPAL_SUPPORT_TELEGRAM_HANDLE,
+  VEGAPAL_SUPPORT_TELEGRAM_HREF,
+  VEGAPAL_SUPPORT_TRUST,
+} from "@/lib/support-contact";
 import { cn } from "@/lib/utils";
 import { LANDING_JSON_LD } from "@/lib/seo/landing-json-ld";
 import {
@@ -433,22 +442,25 @@ function Landing() {
             <p className="mt-4 text-lg text-navy-foreground/70">
               {t("contact.subtitle")}
             </p>
+            <p className="mt-3 text-sm text-navy-foreground/60 max-w-2xl mx-auto leading-relaxed">
+              {VEGAPAL_SUPPORT_TRUST}
+            </p>
           </div>
 
           <div className="mt-14 grid md:grid-cols-3 gap-6">
             <a
-              href="mailto:support@vegapal.com"
+              href={VEGAPAL_SUPPORT_EMAIL_HREF}
               className="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)]"
             >
               <div className="h-11 w-11 rounded-xl bg-primary/15 text-primary flex items-center justify-center mb-5">
                 <Mail className="h-5 w-5" />
               </div>
               <h3 className="font-semibold text-lg text-navy-foreground">{t("contact.email.title")}</h3>
-              <p className="mt-2 text-sm text-primary group-hover:underline">support@vegapal.com</p>
+              <p className="mt-2 text-sm text-primary group-hover:underline">{VEGAPAL_SUPPORT_EMAIL}</p>
             </a>
 
             <a
-              href="https://t.me/vegapal"
+              href={VEGAPAL_SUPPORT_TELEGRAM_HREF}
               target="_blank"
               rel="noopener noreferrer"
               className="group rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 transition-all duration-300 hover:bg-white/10 hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.45)]"
@@ -457,9 +469,7 @@ function Landing() {
                 <TelegramIcon className="h-5 w-5" />
               </div>
               <h3 className="font-semibold text-lg text-navy-foreground">{t("contact.telegram.title")}</h3>
-              <p className="mt-2 text-sm text-navy-foreground/70 group-hover:text-navy-foreground transition-colors">
-                {t("contact.telegram.description")}
-              </p>
+              <p className="mt-2 text-sm text-primary group-hover:underline">{VEGAPAL_SUPPORT_TELEGRAM_HANDLE}</p>
             </a>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6">
@@ -467,23 +477,13 @@ function Landing() {
                 <Headphones className="h-5 w-5" />
               </div>
               <h3 className="font-semibold text-lg text-navy-foreground">{t("contact.liveSupport.title")}</h3>
-              <p className="mt-2 text-sm text-navy-foreground/70">
-                {t("contact.liveSupport.description")}
-              </p>
+              <p className="mt-2 text-sm text-navy-foreground/70">{VEGAPAL_SUPPORT_AVAILABILITY}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-border py-10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <Logo />
-          <p className="text-sm text-muted-foreground">
-            {tc("footer.copyright", { year: new Date().getFullYear() })}
-          </p>
-        </div>
-      </footer>
+      <PublicSiteFooter copyright={tc("footer.copyright", { year: new Date().getFullYear() })} />
     </div>
   );
 }

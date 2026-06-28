@@ -122,7 +122,7 @@ export const LEARN_FAQ_ITEMS = [
   {
     question: "How can I contact support?",
     answer:
-      "Contact support by email at support@vegapal.com, on Telegram at t.me/vegapal, or through the contact form on the VegaPal website. Support is available 24 hours a day, 7 days a week.",
+      "Contact support by email at info@vega-pal.com, on Telegram at @vegapal (https://t.me/vegapal), or through the contact form on the VegaPal website. Support is available 24 hours a day, 7 days a week.",
   },
   {
     question: "What is a payment link?",

@@ -155,7 +155,7 @@
     "paymentMethods": "Payment methods",
     "networkTron": "TRON TRC20",
     "networkBep20": "BNB Smart Chain BEP20",
-    "instructions": "After payment, please send your transaction ID (TXID) or payment screenshot to our Telegram or email so we can activate your plan.",
+    "instructions": "After payment, please send your transaction ID (TXID) or payment screenshot to info@vega-pal.com or @vegapal on Telegram so we can activate your plan.",
     "telegram": "Telegram",
     "networkWarning": "Please make sure you select the correct network before sending USDT. Payments sent on the wrong network may be lost."
   },
@@ -167,17 +167,17 @@
   "contact": {
     "eyebrow": "Support",
     "title": "Contact us",
-    "subtitle": "Need help with invoices or payments? Our support team is available 24/7.",
+    "subtitle": "Need help with invoices or payments? Our support team is available 24 hours a day, 7 days a week.",
     "email": {
-      "title": "Email support"
+      "title": "Email Support"
     },
     "telegram": {
-      "title": "Telegram support",
-      "description": "Chat with us on Telegram"
+      "title": "Telegram Support",
+      "description": "@vegapal"
     },
     "liveSupport": {
-      "title": "24/7 live support",
-      "description": "Get help anytime, anywhere."
+      "title": "24/7 support",
+      "description": "Our support team is available 24 hours a day, 7 days a week."
     }
   }
 }

@@ -155,7 +155,7 @@
     "paymentMethods": "Способы оплаты",
     "networkTron": "TRON TRC20",
     "networkBep20": "BNB Smart Chain BEP20",
-    "instructions": "После оплаты отправьте TXID или скриншот в Telegram или на email для активации тарифа.",
+    "instructions": "После оплаты отправьте TXID или скриншот на info@vega-pal.com или в Telegram @vegapal для активации тарифа.",
     "telegram": "Telegram",
     "networkWarning": "Перед отправкой USDT выберите правильную сеть. Платежи в неверной сети могут быть потеряны."
   },
@@ -167,7 +167,7 @@
   "contact": {
     "eyebrow": "Поддержка",
     "title": "Связаться с нами",
-    "subtitle": "Нужна помощь со счетами или оплатой? Поддержка доступна 24/7.",
+    "subtitle": "Нужна помощь со счетами или оплатой? Поддержка доступна 24 часа в сутки, 7 дней в неделю.",
     "email": {
       "title": "Поддержка по email"
     },

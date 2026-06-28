@@ -12,6 +12,11 @@ import { useState } from "react";
 import type { TFunction } from "i18next";
 import { PaymentQr } from "@/components/landing/PaymentQr";
 import { TelegramIcon } from "@/components/icons/TelegramIcon";
+import {
+  VEGAPAL_SUPPORT_EMAIL,
+  VEGAPAL_SUPPORT_EMAIL_HREF,
+  VEGAPAL_SUPPORT_TELEGRAM_HREF,
+} from "@/lib/support-contact";
 
 const SUBSCRIPTION_WALLETS = [
   {
@@ -124,15 +129,15 @@ export function SubscriptionPaymentModal({
 
         <div className="flex flex-col sm:flex-row gap-2">
           <Button asChild variant="outline" className="flex-1">
-            <a href="https://t.me/vegapal" target="_blank" rel="noopener noreferrer">
+            <a href={VEGAPAL_SUPPORT_TELEGRAM_HREF} target="_blank" rel="noopener noreferrer">
               <TelegramIcon className="h-4 w-4" />
               {t("subscriptionModal.telegram")}
             </a>
           </Button>
           <Button asChild variant="outline" className="flex-1">
-            <a href="mailto:support@vegapal.com">
+            <a href={VEGAPAL_SUPPORT_EMAIL_HREF}>
               <Mail className="h-4 w-4" />
-              support@vegapal.com
+              {VEGAPAL_SUPPORT_EMAIL}
             </a>
           </Button>
         </div>
