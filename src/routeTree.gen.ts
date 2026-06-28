@@ -17,6 +17,7 @@ import { Route as LearnRouteImport } from './routes/learn'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
 import { Route as LearnWhatIsAnInvoiceRouteImport } from './routes/learn.what-is-an-invoice'
@@ -72,6 +73,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => LearnRoute,
 } as any)
 const InvoicesIndexRoute = InvoicesIndexRouteImport.update({
   id: '/invoices/',
@@ -173,12 +179,12 @@ export interface FileRoutesByFullPath {
   '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
+  '/learn/': typeof LearnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -198,6 +204,7 @@ export interface FileRoutesByTo {
   '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices': typeof InvoicesIndexRoute
+  '/learn': typeof LearnIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -224,6 +231,7 @@ export interface FileRoutesById {
   '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
+  '/learn/': typeof LearnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -251,12 +259,12 @@ export interface FileRouteTypes {
     | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices/'
+    | '/learn/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/forgot-password'
-    | '/learn'
     | '/login'
     | '/register'
     | '/reset-password'
@@ -276,6 +284,7 @@ export interface FileRouteTypes {
     | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices'
+    | '/learn'
   id:
     | '__root__'
     | '/'
@@ -301,6 +310,7 @@ export interface FileRouteTypes {
     | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices/'
+    | '/learn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -375,6 +385,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/learn/': {
+      id: '/learn/'
+      path: '/'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof LearnRoute
     }
     '/invoices/': {
       id: '/invoices/'
@@ -496,6 +513,7 @@ interface LearnRouteChildren {
   LearnSecurityRoute: typeof LearnSecurityRoute
   LearnWhatIsABillRoute: typeof LearnWhatIsABillRoute
   LearnWhatIsAnInvoiceRoute: typeof LearnWhatIsAnInvoiceRoute
+  LearnIndexRoute: typeof LearnIndexRoute
 }
 
 const LearnRouteChildren: LearnRouteChildren = {
@@ -510,6 +528,7 @@ const LearnRouteChildren: LearnRouteChildren = {
   LearnSecurityRoute: LearnSecurityRoute,
   LearnWhatIsABillRoute: LearnWhatIsABillRoute,
   LearnWhatIsAnInvoiceRoute: LearnWhatIsAnInvoiceRoute,
+  LearnIndexRoute: LearnIndexRoute,
 }
 
 const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
