@@ -58,6 +58,12 @@ export default {
         return await applySecurityHeaders(response);
       }
 
+      if (url.pathname.startsWith("/api/admin")) {
+        const { handleAdminApiRequest } = await import("@/lib/admin/admin-api.server");
+        const response = await handleAdminApiRequest(request);
+        return await applySecurityHeaders(response);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const normalized = await normalizeCatastrophicSsrResponse(response);

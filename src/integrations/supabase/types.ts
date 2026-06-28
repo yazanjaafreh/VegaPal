@@ -171,9 +171,12 @@ export type Database = {
           email_notifications: boolean
           id: string
           invoice_updates: boolean
+          is_disabled: boolean
           logo_url: string | null
           name: string
           network: string
+          plan: "free" | "pro" | "business"
+          role: "user" | "admin"
           updated_at: string
           wallet: string
           website: string | null
@@ -188,9 +191,12 @@ export type Database = {
           email_notifications?: boolean
           id: string
           invoice_updates?: boolean
+          is_disabled?: boolean
           logo_url?: string | null
           name?: string
           network?: string
+          plan?: "free" | "pro" | "business"
+          role?: "user" | "admin"
           updated_at?: string
           wallet?: string
           website?: string | null
@@ -205,9 +211,12 @@ export type Database = {
           email_notifications?: boolean
           id?: string
           invoice_updates?: boolean
+          is_disabled?: boolean
           logo_url?: string | null
           name?: string
           network?: string
+          plan?: "free" | "pro" | "business"
+          role?: "user" | "admin"
           updated_at?: string
           wallet?: string
           website?: string | null
@@ -222,7 +231,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_plan: "free" | "pro" | "business"
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
