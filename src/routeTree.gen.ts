@@ -19,8 +19,13 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as InvoicesIndexRouteImport } from './routes/invoices.index'
 import { Route as PayIdRouteImport } from './routes/pay.$id'
+import { Route as LearnWhatIsAnInvoiceRouteImport } from './routes/learn.what-is-an-invoice'
+import { Route as LearnWhatIsABillRouteImport } from './routes/learn.what-is-a-bill'
 import { Route as LearnSecurityRouteImport } from './routes/learn.security'
 import { Route as LearnPaymentsRouteImport } from './routes/learn.payments'
+import { Route as LearnInvoiceVsBillRouteImport } from './routes/learn.invoice-vs-bill'
+import { Route as LearnInvoiceSoftwareRouteImport } from './routes/learn.invoice-software'
+import { Route as LearnInvoiceGeneratorRouteImport } from './routes/learn.invoice-generator'
 import { Route as LearnInvoiceRouteImport } from './routes/learn.invoice'
 import { Route as LearnGettingStartedRouteImport } from './routes/learn.getting-started'
 import { Route as LearnFaqRouteImport } from './routes/learn.faq'
@@ -78,6 +83,16 @@ const PayIdRoute = PayIdRouteImport.update({
   path: '/pay/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnWhatIsAnInvoiceRoute = LearnWhatIsAnInvoiceRouteImport.update({
+  id: '/what-is-an-invoice',
+  path: '/what-is-an-invoice',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnWhatIsABillRoute = LearnWhatIsABillRouteImport.update({
+  id: '/what-is-a-bill',
+  path: '/what-is-a-bill',
+  getParentRoute: () => LearnRoute,
+} as any)
 const LearnSecurityRoute = LearnSecurityRouteImport.update({
   id: '/security',
   path: '/security',
@@ -86,6 +101,21 @@ const LearnSecurityRoute = LearnSecurityRouteImport.update({
 const LearnPaymentsRoute = LearnPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnInvoiceVsBillRoute = LearnInvoiceVsBillRouteImport.update({
+  id: '/invoice-vs-bill',
+  path: '/invoice-vs-bill',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnInvoiceSoftwareRoute = LearnInvoiceSoftwareRouteImport.update({
+  id: '/invoice-software',
+  path: '/invoice-software',
+  getParentRoute: () => LearnRoute,
+} as any)
+const LearnInvoiceGeneratorRoute = LearnInvoiceGeneratorRouteImport.update({
+  id: '/invoice-generator',
+  path: '/invoice-generator',
   getParentRoute: () => LearnRoute,
 } as any)
 const LearnInvoiceRoute = LearnInvoiceRouteImport.update({
@@ -134,8 +164,13 @@ export interface FileRoutesByFullPath {
   '/learn/faq': typeof LearnFaqRoute
   '/learn/getting-started': typeof LearnGettingStartedRoute
   '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/invoice-generator': typeof LearnInvoiceGeneratorRoute
+  '/learn/invoice-software': typeof LearnInvoiceSoftwareRoute
+  '/learn/invoice-vs-bill': typeof LearnInvoiceVsBillRoute
   '/learn/payments': typeof LearnPaymentsRoute
   '/learn/security': typeof LearnSecurityRoute
+  '/learn/what-is-a-bill': typeof LearnWhatIsABillRoute
+  '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -154,8 +189,13 @@ export interface FileRoutesByTo {
   '/learn/faq': typeof LearnFaqRoute
   '/learn/getting-started': typeof LearnGettingStartedRoute
   '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/invoice-generator': typeof LearnInvoiceGeneratorRoute
+  '/learn/invoice-software': typeof LearnInvoiceSoftwareRoute
+  '/learn/invoice-vs-bill': typeof LearnInvoiceVsBillRoute
   '/learn/payments': typeof LearnPaymentsRoute
   '/learn/security': typeof LearnSecurityRoute
+  '/learn/what-is-a-bill': typeof LearnWhatIsABillRoute
+  '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices': typeof InvoicesIndexRoute
 }
@@ -175,8 +215,13 @@ export interface FileRoutesById {
   '/learn/faq': typeof LearnFaqRoute
   '/learn/getting-started': typeof LearnGettingStartedRoute
   '/learn/invoice': typeof LearnInvoiceRoute
+  '/learn/invoice-generator': typeof LearnInvoiceGeneratorRoute
+  '/learn/invoice-software': typeof LearnInvoiceSoftwareRoute
+  '/learn/invoice-vs-bill': typeof LearnInvoiceVsBillRoute
   '/learn/payments': typeof LearnPaymentsRoute
   '/learn/security': typeof LearnSecurityRoute
+  '/learn/what-is-a-bill': typeof LearnWhatIsABillRoute
+  '/learn/what-is-an-invoice': typeof LearnWhatIsAnInvoiceRoute
   '/pay/$id': typeof PayIdRoute
   '/invoices/': typeof InvoicesIndexRoute
 }
@@ -197,8 +242,13 @@ export interface FileRouteTypes {
     | '/learn/faq'
     | '/learn/getting-started'
     | '/learn/invoice'
+    | '/learn/invoice-generator'
+    | '/learn/invoice-software'
+    | '/learn/invoice-vs-bill'
     | '/learn/payments'
     | '/learn/security'
+    | '/learn/what-is-a-bill'
+    | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices/'
   fileRoutesByTo: FileRoutesByTo
@@ -217,8 +267,13 @@ export interface FileRouteTypes {
     | '/learn/faq'
     | '/learn/getting-started'
     | '/learn/invoice'
+    | '/learn/invoice-generator'
+    | '/learn/invoice-software'
+    | '/learn/invoice-vs-bill'
     | '/learn/payments'
     | '/learn/security'
+    | '/learn/what-is-a-bill'
+    | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices'
   id:
@@ -237,8 +292,13 @@ export interface FileRouteTypes {
     | '/learn/faq'
     | '/learn/getting-started'
     | '/learn/invoice'
+    | '/learn/invoice-generator'
+    | '/learn/invoice-software'
+    | '/learn/invoice-vs-bill'
     | '/learn/payments'
     | '/learn/security'
+    | '/learn/what-is-a-bill'
+    | '/learn/what-is-an-invoice'
     | '/pay/$id'
     | '/invoices/'
   fileRoutesById: FileRoutesById
@@ -330,6 +390,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PayIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/what-is-an-invoice': {
+      id: '/learn/what-is-an-invoice'
+      path: '/what-is-an-invoice'
+      fullPath: '/learn/what-is-an-invoice'
+      preLoaderRoute: typeof LearnWhatIsAnInvoiceRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/what-is-a-bill': {
+      id: '/learn/what-is-a-bill'
+      path: '/what-is-a-bill'
+      fullPath: '/learn/what-is-a-bill'
+      preLoaderRoute: typeof LearnWhatIsABillRouteImport
+      parentRoute: typeof LearnRoute
+    }
     '/learn/security': {
       id: '/learn/security'
       path: '/security'
@@ -342,6 +416,27 @@ declare module '@tanstack/react-router' {
       path: '/payments'
       fullPath: '/learn/payments'
       preLoaderRoute: typeof LearnPaymentsRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/invoice-vs-bill': {
+      id: '/learn/invoice-vs-bill'
+      path: '/invoice-vs-bill'
+      fullPath: '/learn/invoice-vs-bill'
+      preLoaderRoute: typeof LearnInvoiceVsBillRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/invoice-software': {
+      id: '/learn/invoice-software'
+      path: '/invoice-software'
+      fullPath: '/learn/invoice-software'
+      preLoaderRoute: typeof LearnInvoiceSoftwareRouteImport
+      parentRoute: typeof LearnRoute
+    }
+    '/learn/invoice-generator': {
+      id: '/learn/invoice-generator'
+      path: '/invoice-generator'
+      fullPath: '/learn/invoice-generator'
+      preLoaderRoute: typeof LearnInvoiceGeneratorRouteImport
       parentRoute: typeof LearnRoute
     }
     '/learn/invoice': {
@@ -394,8 +489,13 @@ interface LearnRouteChildren {
   LearnFaqRoute: typeof LearnFaqRoute
   LearnGettingStartedRoute: typeof LearnGettingStartedRoute
   LearnInvoiceRoute: typeof LearnInvoiceRoute
+  LearnInvoiceGeneratorRoute: typeof LearnInvoiceGeneratorRoute
+  LearnInvoiceSoftwareRoute: typeof LearnInvoiceSoftwareRoute
+  LearnInvoiceVsBillRoute: typeof LearnInvoiceVsBillRoute
   LearnPaymentsRoute: typeof LearnPaymentsRoute
   LearnSecurityRoute: typeof LearnSecurityRoute
+  LearnWhatIsABillRoute: typeof LearnWhatIsABillRoute
+  LearnWhatIsAnInvoiceRoute: typeof LearnWhatIsAnInvoiceRoute
 }
 
 const LearnRouteChildren: LearnRouteChildren = {
@@ -403,8 +503,13 @@ const LearnRouteChildren: LearnRouteChildren = {
   LearnFaqRoute: LearnFaqRoute,
   LearnGettingStartedRoute: LearnGettingStartedRoute,
   LearnInvoiceRoute: LearnInvoiceRoute,
+  LearnInvoiceGeneratorRoute: LearnInvoiceGeneratorRoute,
+  LearnInvoiceSoftwareRoute: LearnInvoiceSoftwareRoute,
+  LearnInvoiceVsBillRoute: LearnInvoiceVsBillRoute,
   LearnPaymentsRoute: LearnPaymentsRoute,
   LearnSecurityRoute: LearnSecurityRoute,
+  LearnWhatIsABillRoute: LearnWhatIsABillRoute,
+  LearnWhatIsAnInvoiceRoute: LearnWhatIsAnInvoiceRoute,
 }
 
 const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)

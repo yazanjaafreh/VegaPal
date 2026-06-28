@@ -1,13 +1,15 @@
 import { LEARN_BASE_URL } from "./categories";
+import type { LearnFaqItem } from "./types";
 
 type LearnHeadConfig = {
   title: string;
   description: string;
   path: `/learn${string}`;
   breadcrumbTitle: string;
+  faq?: LearnFaqItem[];
 };
 
-export function createLearnHead({ title, description, path, breadcrumbTitle }: LearnHeadConfig) {
+export function createLearnHead({ title, description, path, breadcrumbTitle, faq }: LearnHeadConfig) {
   const url = `${LEARN_BASE_URL}${path}`;
 
   const breadcrumbLd = {
@@ -43,6 +45,26 @@ export function createLearnHead({ title, description, path, breadcrumbTitle }: L
     },
   };
 
+  const scripts = [
+    { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },
+    { type: "application/ld+json", children: JSON.stringify(articleLd) },
+  ];
+
+  if (faq?.length) {
+    scripts.push({
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      }),
+    });
+  }
+
   return {
     meta: [
       { title },
@@ -57,9 +79,6 @@ export function createLearnHead({ title, description, path, breadcrumbTitle }: L
       { name: "twitter:description", content: description },
     ],
     links: [{ rel: "canonical", href: url }],
-    scripts: [
-      { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },
-      { type: "application/ld+json", children: JSON.stringify(articleLd) },
-    ],
+    scripts,
   };
 }
