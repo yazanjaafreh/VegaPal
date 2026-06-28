@@ -1,11 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { LandingHeader } from "@/components/landing/LandingHeader";
 import { Logo } from "@/components/Logo";
-import { LearnPopularGuides } from "@/components/learn/LearnPopularGuides";
-import { LearnRelatedLinks } from "@/components/learn/LearnRelatedLinks";
+import { LearnAiPlaceholder } from "@/components/learn/LearnAiPlaceholder";
+import { LearnBrowseTopics } from "@/components/learn/LearnBrowseTopics";
+import { LearnFaqPreview } from "@/components/learn/LearnFaqPreview";
+import { LearnFeaturedGuides } from "@/components/learn/LearnFeaturedGuides";
+import { LearnKnowledgeSearch } from "@/components/learn/LearnKnowledgeSearch";
+import { LearnLatestArticles } from "@/components/learn/LearnLatestArticles";
+import { LearnPopularSearches } from "@/components/learn/LearnPopularSearches";
 import { LearnSupport } from "@/components/learn/LearnSupport";
-import { LEARN_BASE_URL, LEARN_CATEGORIES } from "@/lib/learn/categories";
-import { POPULAR_INVOICE_GUIDES } from "@/lib/learn/popular-guides";
+import { LEARN_BASE_URL } from "@/lib/learn/categories";
+import { FEATURED_GUIDES, LATEST_ARTICLES } from "@/lib/learn/registry";
 
 const TITLE = "VegaPal Learn | Invoice, USDT Payments & Crypto Billing Guides";
 const DESCRIPTION =
@@ -45,10 +50,10 @@ export const Route = createFileRoute("/learn/")({
 function LearnHubPage() {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <section className="relative bg-hero overflow-hidden">
+      <section className="relative bg-hero overflow-hidden pb-16 sm:pb-20">
         <div className="absolute inset-0 bg-mesh opacity-60" />
         <LandingHeader />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-28 sm:pt-36 pb-16 sm:pb-20 lg:pt-40">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-40">
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-navy-foreground max-w-4xl">
             Learn VegaPal
           </h1>
@@ -57,49 +62,23 @@ function LearnHubPage() {
             business invoicing.
           </p>
           <p className="mt-4 text-base sm:text-lg text-navy-foreground/70 max-w-3xl leading-relaxed">
-            Learn everything about online invoicing, professional billing, secure payments, payment links, crypto
-            invoices, bank transfer invoices and business payments. Whether you are a freelancer, startup or enterprise,
-            VegaPal helps you create invoices in seconds and receive payments securely.
+            Whether you are a freelancer, startup or enterprise, VegaPal helps you create invoices in seconds and
+            receive payments securely.
           </p>
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+          <LearnKnowledgeSearch />
         </div>
       </section>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-16 space-y-14">
-        <LearnPopularGuides guides={POPULAR_INVOICE_GUIDES} />
-
-        <section aria-labelledby="learn-categories">
-          <h2 id="learn-categories" className="text-2xl font-bold tracking-tight text-foreground">
-            Browse by topic
-          </h2>
-          <p className="mt-2 text-sm text-muted-foreground max-w-3xl">
-            Product guides for getting started, invoicing, payments, security, and business workflows on VegaPal.
-          </p>
-          <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {LEARN_CATEGORIES.map((category) => {
-              const Icon = category.icon;
-              return (
-                <article
-                  key={category.id}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-soft transition-shadow hover:shadow-elevated"
-                >
-                  <Link to={category.path} className="block group">
-                    <div className="h-11 w-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-5">
-                      <Icon className="h-5 w-5" aria-hidden />
-                    </div>
-                    <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                      {category.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{category.description}</p>
-                    <span className="mt-4 inline-block text-sm font-medium text-primary">Read guide →</span>
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 pt-16 sm:pt-20 pb-14 sm:pb-16 space-y-14">
+        <LearnFeaturedGuides guides={FEATURED_GUIDES} />
+        <LearnLatestArticles articles={LATEST_ARTICLES} />
+        <LearnBrowseTopics />
+        <LearnPopularSearches />
+        <LearnFaqPreview />
         <LearnSupport />
-        <LearnRelatedLinks />
+        <LearnAiPlaceholder />
       </main>
 
       <footer className="border-t border-border py-10">

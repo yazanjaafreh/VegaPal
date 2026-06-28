@@ -4,8 +4,8 @@ import { TelegramIcon } from "@/components/icons/TelegramIcon";
 export function LearnSupport() {
   return (
     <section className="rounded-2xl border border-border bg-muted/30 p-6 sm:p-8" aria-labelledby="learn-support-heading">
-      <h2 id="learn-support-heading" className="text-xl font-bold tracking-tight text-foreground">
-        Need help?
+      <h2 id="learn-support-heading" className="text-2xl font-bold tracking-tight text-foreground">
+        Need Help?
       </h2>
       <p className="mt-2 text-muted-foreground">
         Our support team is available 24 hours a day, 7 days a week.

@@ -1,21 +1,21 @@
 import { Link } from "@tanstack/react-router";
 import { FileText } from "lucide-react";
-import type { LearnGuideCard } from "@/lib/learn/popular-guides";
+import type { LearnArticleMeta } from "@/lib/learn/types";
 
-type LearnPopularGuidesProps = {
-  guides: LearnGuideCard[];
+type LearnFeaturedGuidesProps = {
+  guides: LearnArticleMeta[];
 };
 
-export function LearnPopularGuides({ guides }: LearnPopularGuidesProps) {
+export function LearnFeaturedGuides({ guides }: LearnFeaturedGuidesProps) {
   return (
-    <section aria-labelledby="popular-invoice-guides">
-      <h2 id="popular-invoice-guides" className="text-2xl font-bold tracking-tight text-foreground">
-        Popular invoice guides
+    <section aria-labelledby="featured-guides">
+      <h2 id="featured-guides" className="text-2xl font-bold tracking-tight text-foreground">
+        Featured Guides
       </h2>
       <p className="mt-2 text-sm text-muted-foreground max-w-3xl">
-        In-depth articles on invoices, bills, generators, and software—written for freelancers and small businesses.
+        Essential reading on invoices, bills, generators, and software for freelancers and small businesses.
       </p>
-      <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {guides.map((guide) => (
           <article
             key={guide.path}
@@ -28,7 +28,7 @@ export function LearnPopularGuides({ guides }: LearnPopularGuidesProps) {
               <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                 {guide.title}
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{guide.description}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{guide.description}</p>
               <span className="mt-4 inline-block text-sm font-medium text-primary">Read guide →</span>
             </Link>
           </article>

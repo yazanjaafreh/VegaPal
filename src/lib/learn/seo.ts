@@ -6,32 +6,58 @@ type LearnHeadConfig = {
   description: string;
   path: `/learn${string}`;
   breadcrumbTitle: string;
+  categoryTitle?: string;
+  categoryPath?: `/learn${string}`;
+  dateModified?: string;
   faq?: LearnFaqItem[];
 };
 
-export function createLearnHead({ title, description, path, breadcrumbTitle, faq }: LearnHeadConfig) {
+export function createLearnHead({
+  title,
+  description,
+  path,
+  breadcrumbTitle,
+  categoryTitle,
+  categoryPath,
+  dateModified,
+  faq,
+}: LearnHeadConfig) {
   const url = `${LEARN_BASE_URL}${path}`;
+
+  const breadcrumbItems: { "@type": string; position: number; name: string; item?: string }[] = [
+    { "@type": "ListItem", position: 1, name: "Home", item: `${LEARN_BASE_URL}/` },
+    { "@type": "ListItem", position: 2, name: "Learn", item: `${LEARN_BASE_URL}/learn` },
+  ];
+
+  if (categoryTitle && categoryPath) {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 3,
+      name: categoryTitle,
+      item: `${LEARN_BASE_URL}${categoryPath}`,
+    });
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 4,
+      name: breadcrumbTitle,
+      item: url,
+    });
+  } else {
+    breadcrumbItems.push({
+      "@type": "ListItem",
+      position: 3,
+      name: breadcrumbTitle,
+      item: url,
+    });
+  }
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Learn VegaPal",
-        item: `${LEARN_BASE_URL}/learn`,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: breadcrumbTitle,
-        item: url,
-      },
-    ],
+    itemListElement: breadcrumbItems,
   };
 
-  const articleLd = {
+  const articleLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: title,
@@ -44,6 +70,10 @@ export function createLearnHead({ title, description, path, breadcrumbTitle, faq
       url: `${LEARN_BASE_URL}/`,
     },
   };
+
+  if (dateModified) {
+    articleLd.dateModified = dateModified;
+  }
 
   const scripts = [
     { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },

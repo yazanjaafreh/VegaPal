@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LEARN_CATEGORIES, type LearnCategoryId } from "@/lib/learn/categories";
-import { POPULAR_INVOICE_GUIDES } from "@/lib/learn/popular-guides";
+import { FEATURED_GUIDES } from "@/lib/learn/registry";
 
 const SITE_LINKS = [
   { label: "Features", href: "/#features" },
@@ -37,9 +37,9 @@ export function LearnRelatedLinks({ currentId }: { currentId?: LearnCategoryId }
           </ul>
         </div>
         <div>
-          <h3 className="font-medium text-foreground mb-2">Popular invoice guides</h3>
+          <h3 className="font-medium text-foreground mb-2">Featured guides</h3>
           <ul className="space-y-2">
-            {POPULAR_INVOICE_GUIDES.map((guide) => (
+            {FEATURED_GUIDES.map((guide) => (
               <li key={guide.path}>
                 <Link to={guide.path} className="text-primary hover:underline">
                   {guide.title}

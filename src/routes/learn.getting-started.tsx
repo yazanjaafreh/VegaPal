@@ -1,11 +1,13 @@
+import { LearnCategoryArticle } from "@/components/learn/LearnCategoryArticle";
 import { createLearnHead } from "@/lib/learn/seo";
-import { LearnArticleShell } from "@/components/learn/LearnArticleShell";
+import { learnArticleByPath } from "@/lib/learn/registry";
 import { GettingStartedContent } from "@/lib/learn/articles/getting-started";
 import { createFileRoute } from "@tanstack/react-router";
 
 const TITLE = "Getting Started with VegaPal";
 const DESCRIPTION =
   "Create your VegaPal account in under one minute, build your first invoice in around 30 seconds, and manage billing from one secure dashboard.";
+const meta = learnArticleByPath("/learn/getting-started")!;
 
 export const Route = createFileRoute("/learn/getting-started")({
   head: () =>
@@ -14,14 +16,17 @@ export const Route = createFileRoute("/learn/getting-started")({
       description: DESCRIPTION,
       path: "/learn/getting-started",
       breadcrumbTitle: "Getting Started",
+      categoryTitle: meta.category,
+      categoryPath: meta.categoryPath,
+      dateModified: meta.updatedAt,
     }),
   component: GettingStartedPage,
 });
 
 function GettingStartedPage() {
   return (
-    <LearnArticleShell title={TITLE} currentId="getting-started">
+    <LearnCategoryArticle path="/learn/getting-started" title={TITLE}>
       <GettingStartedContent />
-    </LearnArticleShell>
+    </LearnCategoryArticle>
   );
 }
