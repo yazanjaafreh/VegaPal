@@ -32,9 +32,28 @@ function json(data: unknown, status = 200) {
   });
 }
 
-function startOfUtcDay() {
+function startOfUtcMonth() {
   const d = new Date();
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString();
+}
+
+function startOfNextUtcMonth() {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
+}
+
+async function countInvoicesThisMonth(
+  supabaseAdmin: Awaited<ReturnType<typeof import("@/integrations/supabase/client.server")>>["supabaseAdmin"],
+  userId: string,
+) {
+  const { count, error } = await supabaseAdmin
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", startOfUtcMonth())
+    .lt("created_at", startOfNextUtcMonth());
+  if (error) throw error;
+  return count ?? 0;
 }
 
 async function loadAuthUsersMap() {
@@ -61,7 +80,9 @@ async function loadAuthUsersMap() {
 
 async function getStats() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const todayStart = startOfUtcDay();
+  const todayStart = new Date(
+    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()),
+  ).toISOString();
 
   const [{ data: profiles, error: profilesError }, { data: invoices, error: invoicesError }] =
     await Promise.all([
@@ -175,10 +196,12 @@ async function getUserDetail(userId: string) {
     plan: profile.plan as UserPlan,
     role: profile.role,
     isDisabled: profile.is_disabled,
+    joinedAt: profile.created_at,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
     lastSignInAt: auth?.last_sign_in_at ?? null,
     invoiceCount: invoiceRows.length,
+    invoiceCountThisMonth: await countInvoicesThisMonth(supabaseAdmin, userId),
     paidInvoiceCount: invoiceRows.filter((i) => i.status === "paid").length,
     pendingInvoiceCount: invoiceRows.filter((i) => i.status === "pending").length,
     recentInvoices: (invoices as InvoiceRow[]).map((inv) => ({
@@ -197,6 +220,10 @@ async function getUserDetail(userId: string) {
 async function patchUser(userId: string, body: { plan?: UserPlan; isDisabled?: boolean }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+  if (body.plan === undefined && body.isDisabled === undefined) {
+    throw new Error("No updates provided");
+  }
+
   const updates: TablesUpdate<"profiles"> = { updated_at: new Date().toISOString() };
   if (body.plan !== undefined) updates.plan = body.plan;
   if (body.isDisabled !== undefined) updates.is_disabled = body.isDisabled;
@@ -208,7 +235,12 @@ async function patchUser(userId: string, body: { plan?: UserPlan; isDisabled?: b
     .select("id, plan, is_disabled")
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    const message = error.message?.includes("Cannot change")
+      ? "Profile updates are restricted."
+      : error.message;
+    throw new Error(message || "Failed to update user");
+  }
   if (!data) return null;
 
   return {
@@ -260,12 +292,23 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
 
       if (request.method === "PATCH") {
         const body = (await request.json()) as { plan?: UserPlan; isDisabled?: boolean };
-        if (body.plan && !["free", "pro", "business"].includes(body.plan)) {
-          return json({ error: "Invalid plan" }, 400);
+        if (body.plan !== undefined && !["free", "pro", "business"].includes(body.plan)) {
+          return json({ error: "Invalid plan. Choose Free, Pro, or Business." }, 400);
         }
-        const updated = await patchUser(userId, body);
-        if (!updated) return json({ error: "User not found" }, 404);
-        return json(updated);
+        if (body.isDisabled !== undefined && typeof body.isDisabled !== "boolean") {
+          return json({ error: "Invalid account status." }, 400);
+        }
+        if (body.plan === undefined && body.isDisabled === undefined) {
+          return json({ error: "No updates provided." }, 400);
+        }
+        try {
+          const updated = await patchUser(userId, body);
+          if (!updated) return json({ error: "User not found" }, 404);
+          return json(updated);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Failed to update user";
+          return json({ error: message }, 400);
+        }
       }
 
       return json({ error: "Method not allowed" }, 405);

@@ -32,8 +32,10 @@ export type AdminUserDetail = AdminUserRow & {
   companyAddress: string | null;
   website: string | null;
   contactEmail: string | null;
+  joinedAt: string;
   createdAt: string;
   updatedAt: string;
+  invoiceCountThisMonth: number;
   recentInvoices: {
     id: string;
     number: string;

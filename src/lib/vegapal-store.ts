@@ -9,6 +9,12 @@ import {
   getPasswordResetRedirectUrl,
   logAuthRedirect,
 } from "@/lib/auth/redirect-url";
+import type { UserPlan } from "@/lib/admin/plans";
+import { FREE_PLAN_MONTHLY_INVOICE_LIMIT } from "@/lib/admin/plans";
+import {
+  FREE_PLAN_LIMIT_MESSAGE,
+  type InvoicePlanUsage,
+} from "@/lib/plan/invoice-limit";
 import {
   DEFAULT_DISPLAY_OPTIONS,
   DEFAULT_INVOICE_CURRENCY,
@@ -84,7 +90,11 @@ export interface User {
   network?: string;
   emailNotifications?: boolean;
   invoiceUpdates?: boolean;
+  plan: UserPlan;
+  isDisabled?: boolean;
 }
+
+export type { InvoicePlanUsage };
 
 const DEFAULT_WALLET = "TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE";
 const DEFAULT_NETWORK = "TRC20";
@@ -122,6 +132,8 @@ type ProfileRow = {
   network: string;
   email_notifications: boolean;
   invoice_updates: boolean;
+  plan?: UserPlan;
+  is_disabled?: boolean;
 };
 function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
   return {
@@ -138,7 +150,77 @@ function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
     network: p.network,
     emailNotifications: p.email_notifications,
     invoiceUpdates: p.invoice_updates,
+    plan: p.plan ?? "free",
+    isDisabled: p.is_disabled ?? false,
   };
+}
+
+function startOfUtcMonthIso(): string {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString();
+}
+
+function startOfNextUtcMonthIso(): string {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
+}
+
+export async function getInvoicePlanUsage(): Promise<InvoicePlanUsage | null> {
+  const { data: u } = await supabase.auth.getUser();
+  if (!u.user) return null;
+
+  const { data, error } = await supabase.rpc("get_invoice_plan_usage");
+  if (!error && data && Array.isArray(data) && data.length > 0) {
+    const row = data[0] as {
+      plan: UserPlan;
+      invoices_this_month: number;
+      monthly_limit: number | null;
+    };
+    return {
+      plan: row.plan,
+      invoicesThisMonth: row.invoices_this_month,
+      monthlyLimit: row.monthly_limit,
+    };
+  }
+
+  const profile = await loadProfile(u.user);
+  const plan = profile?.plan ?? "free";
+  if (plan !== "free") {
+    return { plan, invoicesThisMonth: 0, monthlyLimit: null };
+  }
+
+  const { count, error: countError } = await supabase
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", u.user.id)
+    .gte("created_at", startOfUtcMonthIso())
+    .lt("created_at", startOfNextUtcMonthIso());
+
+  if (countError) return { plan, invoicesThisMonth: 0, monthlyLimit: FREE_PLAN_MONTHLY_INVOICE_LIMIT };
+
+  return {
+    plan,
+    invoicesThisMonth: count ?? 0,
+    monthlyLimit: FREE_PLAN_MONTHLY_INVOICE_LIMIT,
+  };
+}
+
+async function assertCanCreateInvoice(userId: string, plan: UserPlan): Promise<void> {
+  if (plan !== "free") return;
+
+  const { count, error } = await supabase
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", startOfUtcMonthIso())
+    .lt("created_at", startOfNextUtcMonthIso());
+
+  if (error) throw error;
+  if ((count ?? 0) >= FREE_PLAN_MONTHLY_INVOICE_LIMIT) {
+    const limitError = new Error(FREE_PLAN_LIMIT_MESSAGE) as Error & { code?: string };
+    limitError.code = "free_plan_invoice_limit";
+    throw limitError;
+  }
 }
 
 type InvoiceRow = {
@@ -302,6 +384,16 @@ export function useSession() {
     cachedPendingEmailConfirmation = false;
     setPendingEmailConfirmation(false);
     const p = await loadProfile(supaUser);
+    if (p?.isDisabled) {
+      await supabase.auth.signOut();
+      cachedProfile = null;
+      cachedAuthEmail = null;
+      setUser(null);
+      setAuthEmail(null);
+      setLoading(false);
+      notifySession();
+      return;
+    }
     cachedProfile = p;
     setUser(p);
     setLoading(false);
@@ -378,6 +470,17 @@ export const auth = {
       const unconfirmed = new Error("Email not confirmed") as Error & { code?: string };
       unconfirmed.code = "email_not_confirmed";
       throw unconfirmed;
+    }
+    const profile = data.user ? await loadProfile(data.user) : null;
+    if (profile?.isDisabled) {
+      await supabase.auth.signOut();
+      cachedProfile = null;
+      cachedPendingEmailConfirmation = false;
+      cachedAuthEmail = null;
+      notifySession();
+      const disabled = new Error("This account has been disabled.") as Error & { code?: string };
+      disabled.code = "account_disabled";
+      throw disabled;
     }
     return data;
   },
@@ -521,6 +624,12 @@ export const invoices = {
     // Load profile for seller snapshot
     const profile = await loadProfile(u.user);
     if (!profile) throw new Error("Profile not ready");
+    if (profile.isDisabled) {
+      const disabled = new Error("This account has been disabled.") as Error & { code?: string };
+      disabled.code = "account_disabled";
+      throw disabled;
+    }
+    await assertCanCreateInvoice(u.user.id, profile.plan);
 
     const items = input.items.map((i) => ({
       ...i,

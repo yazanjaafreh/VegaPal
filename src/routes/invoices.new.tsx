@@ -4,6 +4,10 @@ import { useTranslation } from "react-i18next";
 import { invoiceCreateSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { formatAppError } from "@/lib/auth/errors";
+import {
+  FREE_PLAN_LIMIT_MESSAGE,
+  isAtFreePlanInvoiceLimit,
+} from "@/lib/plan/invoice-limit";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -45,8 +49,10 @@ import {
   useInvoice,
   invoices,
   notifyInvoices,
+  getInvoicePlanUsage,
   type InvoiceItem,
   type InvoiceStatus,
+  type InvoicePlanUsage,
 } from "@/lib/vegapal-store";
 import { ArrowLeft, Banknote, Building2, Coins, Layers, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -206,8 +212,16 @@ function CreateInvoice() {
   const [profilePaymentInitialized, setProfilePaymentInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [planUsage, setPlanUsage] = useState<InvoicePlanUsage | null>(null);
   const formErrorRef = useRef<HTMLDivElement>(null);
   const submitGuard = useSubmitGuard();
+
+  useEffect(() => {
+    if (editId) return;
+    void getInvoicePlanUsage().then(setPlanUsage);
+  }, [editId]);
+
+  const atInvoiceLimit = !editId && planUsage !== null && isAtFreePlanInvoiceLimit(planUsage);
 
   useEffect(() => {
     if (formError && formErrorRef.current) {
@@ -359,6 +373,11 @@ function CreateInvoice() {
         submitGuard.end();
         return;
       }
+      if (atInvoiceLimit) {
+        setFormError(FREE_PLAN_LIMIT_MESSAGE);
+        submitGuard.end();
+        return;
+      }
     }
 
     setSaving(true);
@@ -429,6 +448,24 @@ function CreateInvoice() {
         {editId ? t("create.editTitle") : t("create.createTitle")}
       </h1>
       <p className="text-muted-foreground mt-1">{t("create.subtitle")}</p>
+
+      {!editId && planUsage ? (
+        <div className="mt-4 rounded-xl border border-border bg-muted/20 px-4 py-3">
+          <p className="text-sm text-muted-foreground">
+            {planUsage.monthlyLimit === null
+              ? "Unlimited invoices"
+              : `${planUsage.invoicesThisMonth}/${planUsage.monthlyLimit} invoices used this month`}
+          </p>
+          {atInvoiceLimit ? (
+            <div className="mt-3 space-y-3">
+              <p className="text-sm leading-relaxed">{FREE_PLAN_LIMIT_MESSAGE}</p>
+              <Button asChild size="sm" variant="hero">
+                <Link to="/pricing">Upgrade plan</Link>
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
 
       <form
         onSubmit={submit}
@@ -1068,7 +1105,7 @@ function CreateInvoice() {
             >
               {tc("buttons.cancel")}
             </Button>
-            <LoadingButton type="submit" variant="hero" loading={saving} disabled={saving}>
+            <LoadingButton type="submit" variant="hero" loading={saving} disabled={saving || atInvoiceLimit}>
               {saving
                 ? tc("buttons.saving")
                 : editId

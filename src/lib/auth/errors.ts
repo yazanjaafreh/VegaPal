@@ -51,6 +51,9 @@ const SUPABASE_AUTH_MESSAGES: Record<string, string> = {
   session_missing: "Your reset link has expired. Please request a new password reset link.",
   flow_state_expired: "This link has expired. Please request a new one.",
   otp_expired: "This link has expired. Please request a new one.",
+  account_disabled: "This account has been disabled. Contact support if you need help.",
+  free_plan_invoice_limit:
+    "You have reached the Free plan limit of 5 invoices this month. Upgrade to Pro to create unlimited invoices.",
   request_timeout: "The request timed out. Check your connection and try again.",
 };
 
@@ -97,6 +100,9 @@ function mapSupabaseAuthMessage(message: string): string {
   }
   if (lower.includes("code verifier")) {
     return "This reset link must be opened in the same browser where you requested it. Please request a new password reset link.";
+  }
+  if (lower.includes("free_plan_invoice_limit") || lower.includes("free plan limit of 5")) {
+    return SUPABASE_AUTH_MESSAGES.free_plan_invoice_limit;
   }
   if (lower.includes("no password recovery token")) {
     return "Open the password reset link from your email, or request a new one.";

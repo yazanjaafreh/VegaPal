@@ -3,6 +3,7 @@ import { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/AppShell";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { InvoicePlanUsageIndicator } from "@/components/plan/InvoicePlanUsageIndicator";
 import { useInvoices, type Invoice, type InvoiceStatus } from "@/lib/vegapal-store";
 import { formatInvoiceAmountWithCurrency } from "@/lib/invoice-display";
 import { Button } from "@/components/ui/button";
@@ -187,6 +188,7 @@ function Dashboard() {
           </p>
           <h1 className="text-3xl font-bold tracking-tight mt-1">{t("welcomeBack")}</h1>
           <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
+          <InvoicePlanUsageIndicator className="mt-3" />
         </div>
         <Button asChild variant="hero">
           <Link to="/invoices/new">

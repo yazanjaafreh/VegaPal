@@ -15,6 +15,8 @@ import { Switch } from "@/components/ui/switch";
 import { Check, LogOut, Upload, Trash2 } from "lucide-react";
 import { settingsSchema, firstZodError } from "@/lib/validation/schemas";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { InvoicePlanUsageIndicator } from "@/components/plan/InvoicePlanUsageIndicator";
+import { PlanBadge } from "@/components/admin/AdminBadges";
 
 export const Route = createFileRoute("/settings")({
   beforeLoad: () => ensureNamespacesLoaded(["settings"]),
@@ -130,6 +132,10 @@ function Settings() {
     <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto min-w-0">
       <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
       <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <PlanBadge plan={user.plan} />
+        <InvoicePlanUsageIndicator />
+      </div>
 
       <form onSubmit={save} className="mt-8 space-y-6">
         <Section title={t("sections.branding.title")} desc={t("sections.branding.desc")}>

@@ -2,13 +2,29 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { FormError } from "@/components/ui/form-error";
+import { FormSuccess } from "@/components/ui/form-success";
 import { StatusBadge } from "@/components/StatusBadge";
+import { AccountStatusBadge, PlanBadge } from "@/components/admin/AdminBadges";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   fetchAdminUser,
   updateAdminUser,
   type AdminUserDetail,
 } from "@/lib/admin/admin-client";
 import { PLAN_LIMITS, USER_PLANS, type UserPlan } from "@/lib/admin/plans";
+import { formatAppError } from "@/lib/auth/errors";
 
 export const Route = createFileRoute("/admin/users/$userId")({
   component: AdminUserDetailPage,
@@ -17,15 +33,19 @@ export const Route = createFileRoute("/admin/users/$userId")({
 function AdminUserDetailPage() {
   const { userId } = Route.useParams();
   const [user, setUser] = useState<AdminUserDetail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [savingPlan, setSavingPlan] = useState<UserPlan | null>(null);
+  const [savingStatus, setSavingStatus] = useState(false);
 
   const load = useCallback(() => {
-    setError(null);
+    setLoading(true);
+    setError("");
     fetchAdminUser(userId)
       .then(setUser)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load user"));
+      .catch((err) => setError(formatAppError(err)))
+      .finally(() => setLoading(false));
   }, [userId]);
 
   useEffect(() => {
@@ -33,46 +53,49 @@ function AdminUserDetailPage() {
   }, [load]);
 
   async function changePlan(plan: UserPlan) {
-    setSaving(true);
-    setMessage(null);
+    if (user?.plan === plan) return;
+    setSavingPlan(plan);
+    setSuccess("");
+    setError("");
     try {
       await updateAdminUser(userId, { plan });
-      setMessage(`Plan updated to ${PLAN_LIMITS[plan].label}.`);
+      setSuccess(`Plan updated to ${PLAN_LIMITS[plan].label}.`);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update plan");
+      setError(formatAppError(err));
     } finally {
-      setSaving(false);
+      setSavingPlan(null);
     }
   }
 
   async function setDisabled(isDisabled: boolean) {
-    setSaving(true);
-    setMessage(null);
+    setSavingStatus(true);
+    setSuccess("");
+    setError("");
     try {
       await updateAdminUser(userId, { isDisabled });
-      setMessage(isDisabled ? "User disabled." : "User re-enabled.");
+      setSuccess(isDisabled ? "User disabled." : "User re-enabled.");
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
+      setError(formatAppError(err));
     } finally {
-      setSaving(false);
+      setSavingStatus(false);
     }
   }
 
-  if (error && !user) {
+  if (loading && !user) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading user…</div>;
+  }
+
+  if (!user) {
     return (
-      <div className="p-6 max-w-3xl mx-auto">
-        <p className="text-destructive text-sm">{error}</p>
+      <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+        <FormError message={error || "User not found."} />
         <Button asChild variant="outline" className="mt-4">
           <Link to="/admin/users">Back to users</Link>
         </Button>
       </div>
     );
-  }
-
-  if (!user) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading user…</div>;
   }
 
   const planInfo = PLAN_LIMITS[user.plan];
@@ -86,35 +109,43 @@ function AdminUserDetailPage() {
             Back to users
           </Link>
         </Button>
-        <p className="text-xs font-medium text-primary uppercase tracking-wider">User detail</p>
-        <h1 className="text-3xl font-bold tracking-tight mt-1">{user.name || user.email}</h1>
-        <p className="text-muted-foreground mt-1">{user.email}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs font-medium text-primary uppercase tracking-wider w-full sm:w-auto">
+            User detail
+          </p>
+          <PlanBadge plan={user.plan} />
+          <AccountStatusBadge status={user.status} />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-2 break-words">
+          {user.name || user.email}
+        </h1>
+        <p className="text-muted-foreground mt-1 break-all">{user.email}</p>
       </div>
 
-      {message ? <p className="text-sm text-success">{message}</p> : null}
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {success ? <FormSuccess message={success} /> : null}
+      <FormError message={error} />
 
       <div className="grid lg:grid-cols-2 gap-6">
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-4">
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-soft space-y-4">
           <h2 className="font-semibold">Profile</h2>
           <dl className="grid sm:grid-cols-2 gap-4 text-sm">
             <DetailItem label="Name" value={user.name || "—"} />
             <DetailItem label="Email" value={user.email || "—"} />
             <DetailItem label="Business" value={user.business || "—"} />
             <DetailItem label="Plan" value={planInfo.label} />
-            <DetailItem label="Created" value={formatDateTime(user.createdAt)} />
+            <DetailItem label="Joined" value={formatDateTime(user.joinedAt)} />
             <DetailItem
               label="Last sign in"
               value={user.lastSignInAt ? formatDateTime(user.lastSignInAt) : "—"}
             />
-            <DetailItem label="Invoices" value={String(user.invoiceCount)} />
+            <DetailItem label="Invoices this month" value={String(user.invoiceCountThisMonth)} />
+            <DetailItem label="Total invoices" value={String(user.invoiceCount)} />
             <DetailItem label="Paid" value={String(user.paidInvoiceCount)} />
             <DetailItem label="Pending" value={String(user.pendingInvoiceCount)} />
-            <DetailItem label="Status" value={user.status === "active" ? "Active" : "Disabled"} />
           </dl>
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-soft space-y-5">
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-soft space-y-5">
           <h2 className="font-semibold">Plan management</h2>
           <p className="text-sm text-muted-foreground">
             {planInfo.maxUsers} user{planInfo.maxUsers === 1 ? "" : "s"},{" "}
@@ -123,46 +154,71 @@ function AdminUserDetailPage() {
               : `${planInfo.maxInvoicesPerMonth} invoices per month`}
             .
           </p>
-          <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
-            {planInfo.features.map((feature) => (
-              <li key={feature}>{feature}</li>
-            ))}
-          </ul>
           <div className="flex flex-wrap gap-2">
             {USER_PLANS.map((plan) => (
-              <Button
+              <LoadingButton
                 key={plan}
                 size="sm"
                 variant={user.plan === plan ? "default" : "outline"}
-                disabled={saving || user.plan === plan}
+                disabled={user.plan === plan || savingPlan !== null || savingStatus}
+                loading={savingPlan === plan}
                 onClick={() => changePlan(plan)}
               >
-                {PLAN_LIMITS[plan].label}
-              </Button>
+                Set {PLAN_LIMITS[plan].label}
+              </LoadingButton>
             ))}
           </div>
 
           <div className="border-t border-border pt-5 space-y-3">
             <h3 className="font-medium text-sm">Account status</h3>
             {user.isDisabled ? (
-              <Button size="sm" variant="outline" disabled={saving} onClick={() => setDisabled(false)}>
-                Re-enable user
-              </Button>
+              <LoadingButton
+                size="sm"
+                variant="outline"
+                loading={savingStatus}
+                disabled={savingPlan !== null}
+                onClick={() => setDisabled(false)}
+              >
+                Enable user
+              </LoadingButton>
             ) : (
-              <Button size="sm" variant="destructive" disabled={saving} onClick={() => setDisabled(true)}>
-                Disable user
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <LoadingButton
+                    size="sm"
+                    variant="destructive"
+                    loading={savingStatus}
+                    disabled={savingPlan !== null}
+                  >
+                    Disable user
+                  </LoadingButton>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Disable this user?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {user.email} will be signed out and unable to sign in until re-enabled.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => setDisabled(true)}>
+                      Disable user
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </section>
       </div>
 
       <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
-        <div className="px-6 py-4 border-b border-border">
+        <div className="px-5 sm:px-6 py-4 border-b border-border">
           <h2 className="font-semibold">Recent invoices</h2>
         </div>
         {user.recentInvoices.length === 0 ? (
-          <p className="px-6 py-8 text-sm text-muted-foreground">No invoices yet.</p>
+          <p className="px-5 sm:px-6 py-8 text-sm text-muted-foreground">No invoices yet.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
@@ -183,7 +239,11 @@ function AdminUserDetailPage() {
                     <td className="px-4 py-3">{invoice.title}</td>
                     <td className="px-4 py-3 text-muted-foreground">{invoice.clientName}</td>
                     <td className="px-4 py-3">
-                      <StatusBadge status={invoice.status as "paid" | "pending" | "overdue" | "draft" | "cancelled"} />
+                      <StatusBadge
+                        status={
+                          invoice.status as "paid" | "pending" | "overdue" | "draft" | "cancelled"
+                        }
+                      />
                     </td>
                     <td className="px-4 py-3 tabular-nums">{invoice.total.toFixed(2)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{formatDateTime(invoice.createdAt)}</td>

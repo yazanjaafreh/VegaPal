@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { fetchAdminStats, type AdminStats } from "@/lib/admin/admin-client";
+import { formatAppError } from "@/lib/auth/errors";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboardPage,
@@ -25,7 +26,7 @@ function AdminDashboardPage() {
   useEffect(() => {
     fetchAdminStats()
       .then(setStats)
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load stats"));
+      .catch((err) => setError(formatAppError(err)));
   }, []);
 
   return (

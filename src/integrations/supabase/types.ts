@@ -228,7 +228,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_invoice_plan_usage: {
+        Args: Record<string, never>
+        Returns: {
+          plan: Database["public"]["Enums"]["user_plan"]
+          invoices_this_month: number
+          monthly_limit: number | null
+        }[]
+      }
     }
     Enums: {
       user_plan: "free" | "pro" | "business"
