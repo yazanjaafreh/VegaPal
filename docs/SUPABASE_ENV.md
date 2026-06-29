@@ -50,6 +50,8 @@ In **Authentication → URL Configuration** on the new project, set:
 
 - **Site URL:** `https://vega-pal.com` (not a `*.vercel.app` URL)
 
+Auth emails (`signUp`, `resend`, `resetPassword`) always use `https://vega-pal.com/...` redirect targets except on `localhost` dev.
+
 Add **Redirect URLs**:
 
 - `http://localhost:5173/**` (local Vite)

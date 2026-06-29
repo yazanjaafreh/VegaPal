@@ -1,60 +1,45 @@
-import {
-  isPreviewOrLocalHost,
-  isProductionTurnstileHost,
-  normalizeHostname,
-} from "@/lib/turnstile/policy";
+import { normalizeHostname } from "@/lib/turnstile/policy";
 
-/** Canonical production origin for auth email links — never a Vercel preview URL. */
-export const PRODUCTION_AUTH_ORIGIN = "https://vega-pal.com";
+/** Canonical VegaPal site URL — used for all auth email redirects outside localhost. */
+export const CANONICAL_SITE_URL = "https://vega-pal.com";
+
+function isLocalDevHost(hostname: string): boolean {
+  const host = normalizeHostname(hostname);
+  return host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+}
 
 /**
- * Origin used in Supabase `emailRedirectTo` / `redirectTo`.
+ * Origin for Supabase `emailRedirectTo` / `redirectTo`.
  *
- * Production (vega-pal.com): always https://vega-pal.com — even on www or alias hosts.
- * Preview (*.vercel.app): current preview origin only.
- * Local: current origin (localhost).
+ * - localhost → current origin (e.g. http://localhost:5173)
+ * - production, preview, or any other host → https://vega-pal.com (never *.vercel.app)
  */
-export function getAuthRedirectOrigin(): string | undefined {
-  if (typeof window === "undefined") return undefined;
-
-  const hostname = normalizeHostname(window.location.hostname);
-
-  if (isProductionTurnstileHost(hostname)) {
-    return PRODUCTION_AUTH_ORIGIN;
+export function getAuthRedirectOrigin(): string {
+  if (typeof window === "undefined") {
+    return CANONICAL_SITE_URL;
   }
 
-  if (isPreviewOrLocalHost(hostname)) {
+  if (isLocalDevHost(window.location.hostname)) {
     return window.location.origin;
   }
 
-  const configured = import.meta.env.VITE_SITE_URL as string | undefined;
-  if (configured?.trim()) {
-    try {
-      return new URL(configured.trim()).origin;
-    } catch {
-      /* ignore invalid VITE_SITE_URL */
-    }
-  }
-
-  return window.location.origin;
+  return CANONICAL_SITE_URL;
 }
 
-export function getEmailConfirmRedirectUrl(): string | undefined {
-  const origin = getAuthRedirectOrigin();
-  return origin ? `${origin}/dashboard` : undefined;
+export function getEmailConfirmRedirectUrl(): string {
+  return `${getAuthRedirectOrigin()}/dashboard`;
 }
 
-export function getPasswordResetRedirectUrl(): string | undefined {
-  const origin = getAuthRedirectOrigin();
-  return origin ? `${origin}/reset-password` : undefined;
+export function getPasswordResetRedirectUrl(): string {
+  return `${getAuthRedirectOrigin()}/reset-password`;
 }
 
 /** Dev-only: log the redirect URL chosen during signup/resend for debugging. */
 export function logAuthRedirect(
   context: "signUp" | "resend" | "resetPassword",
-  url: string | undefined,
+  url: string,
 ): void {
-  if (!import.meta.env.DEV || !url) return;
+  if (!import.meta.env.DEV) return;
   const hostname = typeof window !== "undefined" ? window.location.hostname : "ssr";
   console.debug(`[auth] ${context} emailRedirectTo=${url} (host=${hostname})`);
 }
