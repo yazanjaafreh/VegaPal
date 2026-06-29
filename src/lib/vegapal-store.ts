@@ -314,6 +314,10 @@ export function useSession() {
 
     let cancelled = false;
     void (async () => {
+      if (typeof window !== "undefined" && window.location.pathname === "/reset-password") {
+        if (!cancelled) await refresh();
+        return;
+      }
       await completeAuthFromUrl();
       if (!cancelled) await refresh();
     })();

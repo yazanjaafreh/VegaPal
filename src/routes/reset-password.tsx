@@ -33,6 +33,7 @@ function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [recoveryStep, setRecoveryStep] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageState, setPageState] = useState<PageState>("checking");
   const submitGuard = useSubmitGuard();
@@ -41,12 +42,22 @@ function ResetPassword() {
     let cancelled = false;
 
     void (async () => {
-      const ready = await establishPasswordRecoverySession();
+      const result = await establishPasswordRecoverySession();
       if (cancelled) return;
-      if (ready) {
+
+      console.info("[auth:recovery] establishPasswordRecoverySession result", {
+        ok: result.ok,
+        step: result.step,
+        error: result.error?.message ?? null,
+      });
+
+      if (result.ok) {
         setPageState("ready");
         return;
       }
+
+      setRecoveryStep(result.step);
+      setError(formatAuthError(result.error ?? t("resetPassword.invalidLink")));
       setPageState("invalid");
     })();
 
@@ -69,18 +80,30 @@ function ResetPassword() {
 
     setLoading(true);
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      console.info("[auth:recovery] getSession before updateUser", {
+        hasSession: !!sessionData.session,
+        error: sessionError?.message ?? null,
+      });
+
       if (!sessionData.session) {
         const recovered = await establishPasswordRecoverySession();
-        if (!recovered) {
+        console.info("[auth:recovery] re-establish before updateUser", recovered);
+        if (!recovered.ok) {
           setPageState("invalid");
-          setError(t("resetPassword.sessionExpired"));
+          setRecoveryStep(recovered.step);
+          setError(formatAuthError(recovered.error ?? t("resetPassword.sessionExpired")));
           return;
         }
       }
 
-      const { error: updateError } = await supabase.auth.updateUser({
+      const { data: updateData, error: updateError } = await supabase.auth.updateUser({
         password: parsed.data.password,
+      });
+      console.info("[auth:recovery] updateUser", {
+        hasUser: !!updateData.user,
+        error: updateError?.message ?? null,
+        code: updateError?.code ?? null,
       });
       if (updateError) throw updateError;
 
@@ -121,6 +144,9 @@ function ResetPassword() {
             {t("resetPassword.invalidLink")}
           </p>
           <FormError message={error} />
+          {recoveryStep ? (
+            <p className="text-xs text-muted-foreground">Recovery step: {recoveryStep}</p>
+          ) : null}
           <Button asChild variant="hero" size="lg" className="w-full">
             <Link to="/forgot-password">{t("resetPassword.requestNewLink")}</Link>
           </Button>
