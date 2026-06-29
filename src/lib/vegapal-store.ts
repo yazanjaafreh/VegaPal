@@ -3,6 +3,12 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { isEmailConfirmed } from "@/lib/auth/email-confirmation";
+import { completeAuthFromUrl } from "@/lib/auth/complete-auth-from-url";
+import {
+  getEmailConfirmRedirectUrl,
+  getPasswordResetRedirectUrl,
+  logAuthRedirect,
+} from "@/lib/auth/redirect-url";
 import {
   DEFAULT_DISPLAY_OPTIONS,
   DEFAULT_INVOICE_CURRENCY,
@@ -259,8 +265,15 @@ export function useSession() {
   const [loading, setLoading] = useState(cachedProfile === null && !cachedPendingEmailConfirmation);
 
   const refresh = useCallback(async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    let supaUser = sessionData.session?.user ?? null;
+
+    if (!supaUser) {
+      const { data } = await supabase.auth.getUser();
+      supaUser = data.user;
+    }
+
+    if (!supaUser) {
       cachedProfile = null;
       cachedPendingEmailConfirmation = false;
       cachedAuthEmail = null;
@@ -272,11 +285,11 @@ export function useSession() {
       return;
     }
 
-    const email = data.user.email ?? null;
+    const email = supaUser.email ?? null;
     cachedAuthEmail = email;
     setAuthEmail(email);
 
-    if (!isEmailConfirmed(data.user)) {
+    if (!isEmailConfirmed(supaUser)) {
       cachedProfile = null;
       cachedPendingEmailConfirmation = true;
       setUser(null);
@@ -288,7 +301,7 @@ export function useSession() {
 
     cachedPendingEmailConfirmation = false;
     setPendingEmailConfirmation(false);
-    const p = await loadProfile(data.user);
+    const p = await loadProfile(supaUser);
     cachedProfile = p;
     setUser(p);
     setLoading(false);
@@ -298,13 +311,26 @@ export function useSession() {
   useEffect(() => {
     const cb = () => setUser(cachedProfile);
     sessionListeners.add(cb);
-    refresh();
+
+    let cancelled = false;
+    void (async () => {
+      await completeAuthFromUrl();
+      if (!cancelled) await refresh();
+    })();
+
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+      if (
+        event === "INITIAL_SESSION" ||
+        event === "SIGNED_IN" ||
+        event === "SIGNED_OUT" ||
+        event === "USER_UPDATED" ||
+        event === "PASSWORD_RECOVERY"
+      ) {
         refresh();
       }
     });
     return () => {
+      cancelled = true;
       sessionListeners.delete(cb);
       sub.subscription.unsubscribe();
     };
@@ -316,8 +342,8 @@ export function useSession() {
 // ---------- Auth actions ----------
 export const auth = {
   async signUp(email: string, password: string, name: string, business?: string) {
-    const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
+    const redirectTo = getEmailConfirmRedirectUrl();
+    logAuthRedirect("signUp", redirectTo);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -359,14 +385,14 @@ export const auth = {
     notifySession();
   },
   async resetPassword(email: string) {
-    const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+    const redirectTo = getPasswordResetRedirectUrl();
+    logAuthRedirect("resetPassword", redirectTo);
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) throw error;
   },
   async resendConfirmationEmail(email: string) {
-    const redirectTo =
-      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
+    const redirectTo = getEmailConfirmRedirectUrl();
+    logAuthRedirect("resend", redirectTo);
     const { error } = await supabase.auth.resend({
       type: "signup",
       email,

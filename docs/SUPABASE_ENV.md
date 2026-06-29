@@ -46,7 +46,11 @@ After updating, trigger a new deployment (Settings → Deployments → Redeploy)
 
 ## Supabase Auth redirect URLs
 
-In **Authentication → URL Configuration** on the new project, add:
+In **Authentication → URL Configuration** on the new project, set:
+
+- **Site URL:** `https://vega-pal.com` (not a `*.vercel.app` URL)
+
+Add **Redirect URLs**:
 
 - `http://localhost:5173/**` (local Vite)
 - `https://vega-pal.com/**`

@@ -9,6 +9,7 @@ import { AuthLayout } from "./login";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { FormError } from "@/components/ui/form-error";
+import { completeAuthFromUrl } from "@/lib/auth/complete-auth-from-url";
 import { formatAuthError } from "@/lib/auth/errors";
 import { firstZodError, resetPasswordSchema } from "@/lib/validation/schemas";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
@@ -38,6 +39,7 @@ function ResetPassword() {
     let cancelled = false;
 
     const checkSession = async () => {
+      await completeAuthFromUrl();
       const { data } = await supabase.auth.getSession();
       if (cancelled) return;
       if (data.session) {
