@@ -3,6 +3,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { LayoutDashboard, Users, LogOut, ShieldAlert } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
+import { ConfirmEmailPending } from "@/components/auth/ConfirmEmailPending";
 import { auth, useSession } from "@/lib/vegapal-store";
 import { fetchAdminMe } from "@/lib/admin/admin-client";
 
@@ -10,12 +11,13 @@ type AdminGate = "loading" | "denied" | "allowed";
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const { user, loading } = useSession();
+  const { user, loading, pendingEmailConfirmation, authEmail } = useSession();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [gate, setGate] = useState<AdminGate>("loading");
 
   useEffect(() => {
     if (loading) return;
+    if (pendingEmailConfirmation) return;
     if (!user) {
       navigate({ to: "/login" });
       return;
@@ -35,7 +37,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [loading, user, navigate]);
+  }, [loading, user, pendingEmailConfirmation, navigate]);
 
   if (loading || gate === "loading") {
     return (
@@ -43,6 +45,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
         Loading admin…
       </div>
     );
+  }
+
+  if (pendingEmailConfirmation) {
+    return <ConfirmEmailPending email={authEmail} />;
   }
 
   if (gate === "denied") {

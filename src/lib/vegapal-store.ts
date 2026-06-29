@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User as SupaUser } from "@supabase/supabase-js";
+import { isEmailConfirmed } from "@/lib/auth/email-confirmation";
 import {
   DEFAULT_DISPLAY_OPTIONS,
   DEFAULT_INVOICE_CURRENCY,
@@ -201,6 +202,8 @@ function rowToInvoice(r: InvoiceRow, items: ItemRow[]): Invoice {
 
 // ---------- Session hook ----------
 let cachedProfile: User | null = null;
+let cachedPendingEmailConfirmation = false;
+let cachedAuthEmail: string | null = null;
 const sessionListeners = new Set<() => void>();
 function notifySession() { sessionListeners.forEach((cb) => cb()); }
 
@@ -216,11 +219,42 @@ async function loadProfile(supaUser: SupaUser): Promise<User | null> {
 
 export function useSession() {
   const [user, setUser] = useState<User | null>(cachedProfile);
-  const [loading, setLoading] = useState(cachedProfile === null);
+  const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState(cachedPendingEmailConfirmation);
+  const [authEmail, setAuthEmail] = useState<string | null>(cachedAuthEmail);
+  const [loading, setLoading] = useState(
+    cachedProfile === null && !cachedPendingEmailConfirmation,
+  );
 
   const refresh = useCallback(async () => {
     const { data } = await supabase.auth.getUser();
-    if (!data.user) { cachedProfile = null; setUser(null); setLoading(false); notifySession(); return; }
+    if (!data.user) {
+      cachedProfile = null;
+      cachedPendingEmailConfirmation = false;
+      cachedAuthEmail = null;
+      setUser(null);
+      setPendingEmailConfirmation(false);
+      setAuthEmail(null);
+      setLoading(false);
+      notifySession();
+      return;
+    }
+
+    const email = data.user.email ?? null;
+    cachedAuthEmail = email;
+    setAuthEmail(email);
+
+    if (!isEmailConfirmed(data.user)) {
+      cachedProfile = null;
+      cachedPendingEmailConfirmation = true;
+      setUser(null);
+      setPendingEmailConfirmation(true);
+      setLoading(false);
+      notifySession();
+      return;
+    }
+
+    cachedPendingEmailConfirmation = false;
+    setPendingEmailConfirmation(false);
     const p = await loadProfile(data.user);
     cachedProfile = p;
     setUser(p);
@@ -240,28 +274,51 @@ export function useSession() {
     return () => { sessionListeners.delete(cb); sub.subscription.unsubscribe(); };
   }, [refresh]);
 
-  return { user, loading, refresh };
+  return { user, loading, pendingEmailConfirmation, authEmail, refresh };
 }
 
 // ---------- Auth actions ----------
 export const auth = {
   async signUp(email: string, password: string, name: string, business?: string) {
-    const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
     const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { emailRedirectTo: redirectTo, data: { name, business: business ?? "" } },
     });
     if (error) throw error;
+    if (data.user?.identities?.length === 0) {
+      const dup = new Error("User already registered") as Error & { code?: string };
+      dup.code = "user_already_exists";
+      throw dup;
+    }
+    await supabase.auth.signOut();
+    cachedProfile = null;
+    cachedPendingEmailConfirmation = false;
+    cachedAuthEmail = null;
+    notifySession();
     return data;
   },
   async signIn(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    if (data.user && !isEmailConfirmed(data.user)) {
+      await supabase.auth.signOut();
+      cachedProfile = null;
+      cachedPendingEmailConfirmation = false;
+      cachedAuthEmail = null;
+      notifySession();
+      const unconfirmed = new Error("Email not confirmed") as Error & { code?: string };
+      unconfirmed.code = "email_not_confirmed";
+      throw unconfirmed;
+    }
     return data;
   },
   async signOut() {
     await supabase.auth.signOut();
     cachedProfile = null;
+    cachedPendingEmailConfirmation = false;
+    cachedAuthEmail = null;
     notifySession();
   },
   async resetPassword(email: string) {

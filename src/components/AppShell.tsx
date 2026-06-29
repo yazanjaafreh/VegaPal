@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { ConfirmEmailPending } from "@/components/auth/ConfirmEmailPending";
 import { auth, useSession } from "@/lib/vegapal-store";
 import { LayoutDashboard, FilePlus2, Settings, LogOut, FileText, Shield } from "lucide-react";
 import { Logo } from "./Logo";
@@ -10,15 +11,17 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const { user, loading } = useSession();
+  const { user, loading, pendingEmailConfirmation, authEmail } = useSession();
   const { t } = useTranslation("common");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    if (!loading && !user) navigate({ to: "/login" });
-  }, [loading, user, navigate]);
+    if (!loading && !user && !pendingEmailConfirmation) navigate({ to: "/login" });
+  }, [loading, user, pendingEmailConfirmation, navigate]);
 
-  if (loading || !user) return null;
+  if (loading) return null;
+  if (pendingEmailConfirmation) return <ConfirmEmailPending email={authEmail} />;
+  if (!user) return null;
 
   const nav = [
     { to: "/dashboard", label: t("nav.overview"), icon: LayoutDashboard, exact: true },

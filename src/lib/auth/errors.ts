@@ -38,7 +38,7 @@ export function toDisplayString(value: unknown): string {
 
 const SUPABASE_AUTH_MESSAGES: Record<string, string> = {
   invalid_credentials: "Incorrect email or password.",
-  email_not_confirmed: "Please confirm your email before signing in.",
+  email_not_confirmed: "Please confirm your email before continuing.",
   user_already_exists: "An account with this email already exists. Try signing in instead.",
   email_exists: "An account with this email already exists. Try signing in instead.",
   signup_disabled: "Registration is temporarily unavailable. Please try again later.",

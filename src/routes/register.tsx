@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,6 @@ export const Route = createFileRoute("/register")({
 });
 
 function RegisterPage() {
-  const navigate = useNavigate();
   const { t } = useTranslation("auth");
   const { t: tc } = useTranslation("common");
   const [name, setName] = useState("");
@@ -37,6 +36,8 @@ function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const turnstile = useTurnstile();
 
   const submit = async (e: React.FormEvent) => {
@@ -71,12 +72,8 @@ function RegisterPage() {
         data.name,
         data.business || undefined,
       );
-      try {
-        await auth.signIn(data.email.toLowerCase(), data.password);
-      } catch {
-        /* ignore */
-      }
-      navigate({ to: "/dashboard" });
+      setRegisteredEmail(data.email.toLowerCase());
+      setRegistered(true);
     } catch (err) {
       turnstile.reset();
       setError(formatAuthError(err));
@@ -87,6 +84,23 @@ function RegisterPage() {
 
   return (
     <AuthLayout title={t("register.title")} subtitle={t("register.subtitle")}>
+      {registered ? (
+        <div className="space-y-5">
+          <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
+            <p className="text-sm font-medium">{t("register.successTitle")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("register.successMessage")}</p>
+            {registeredEmail ? (
+              <p className="mt-2 text-sm break-all">
+                <span className="text-muted-foreground">{tc("labels.email")}: </span>
+                <strong>{registeredEmail}</strong>
+              </p>
+            ) : null}
+          </div>
+          <Button asChild variant="outline" size="lg" className="w-full">
+            <Link to="/login">{t("register.backToSignIn")}</Link>
+          </Button>
+        </div>
+      ) : (
       <form onSubmit={submit} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="name">{tc("labels.name")}</Label>
@@ -170,6 +184,7 @@ function RegisterPage() {
           </Link>
         </p>
       </form>
+      )}
     </AuthLayout>
   );
 }
