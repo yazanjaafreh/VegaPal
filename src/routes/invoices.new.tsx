@@ -1,10 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoiceCreateSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
+import { formatAppError } from "@/lib/auth/errors";
+import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { FormError } from "@/components/ui/form-error";
+import { Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -50,12 +55,13 @@ import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 export const Route = createFileRoute("/invoices/new")({
   beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
   head: () => ({
-    meta: [
-      { title: "Create invoice — VegaPal" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Create invoice — VegaPal" }, { name: "robots", content: "noindex" }],
   }),
-  component: () => <AppShell><CreateInvoice /></AppShell>,
+  component: () => (
+    <AppShell>
+      <CreateInvoice />
+    </AppShell>
+  ),
 });
 
 const INVOICE_STATUSES: InvoiceStatus[] = ["draft", "pending", "paid", "overdue", "cancelled"];
@@ -200,6 +206,14 @@ function CreateInvoice() {
   const [profilePaymentInitialized, setProfilePaymentInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const formErrorRef = useRef<HTMLDivElement>(null);
+  const submitGuard = useSubmitGuard();
+
+  useEffect(() => {
+    if (formError && formErrorRef.current) {
+      formErrorRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [formError]);
 
   useEffect(() => {
     if (editId || !user || profilePaymentInitialized) return;
@@ -304,6 +318,7 @@ function CreateInvoice() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!submitGuard.begin()) return;
     setFormError("");
 
     const cleanItems = items
@@ -333,13 +348,15 @@ function CreateInvoice() {
     });
     if (!parsed.success) {
       setFormError(firstZodError(parsed.error));
+      submitGuard.end();
       return;
     }
 
     if (!editId) {
       const rate = checkClientRateLimit("create-invoice", 20, 60 * 60_000);
       if (!rate.allowed) {
-        setFormError(`Too many invoices created. Try again in ${rate.retryAfterSec} seconds.`);
+        setFormError(tc("errors.rateLimitCreate", { seconds: rate.retryAfterSec }));
+        submitGuard.end();
         return;
       }
     }
@@ -377,15 +394,22 @@ function CreateInvoice() {
         navigate({ to: "/invoices/$id", params: { id: inv.id } });
       }
     } catch (err) {
-      setFormError((err as Error).message);
+      setFormError(formatAppError(err));
     } finally {
       setSaving(false);
+      submitGuard.end();
     }
   };
 
   if (editId && loadingExisting) {
     return (
-      <div className="p-10 text-center text-sm text-muted-foreground">{t("create.loading")}</div>
+      <div
+        className="flex items-center justify-center gap-2 p-16 text-sm text-muted-foreground"
+        role="status"
+      >
+        <Loader2 className="h-5 w-5 animate-spin text-primary" aria-hidden />
+        {t("create.loading")}
+      </div>
     );
   }
 
@@ -590,30 +614,30 @@ function CreateInvoice() {
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Field label={t("create.fields.clientName")}>
-                  <Input
-                    required
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    placeholder={t("create.fields.clientNamePlaceholder")}
-                  />
-                </Field>
-                <Field label={t("create.fields.clientEmail")}>
-                  <Input
-                    type="email"
-                    required
-                    value={clientEmail}
-                    onChange={(e) => setClientEmail(e.target.value)}
-                    placeholder={t("create.fields.clientEmailPlaceholder")}
-                  />
-                </Field>
-                <Field label={t("create.fields.companyOptional")} full>
-                  <Input
-                    value={clientCompany}
-                    onChange={(e) => setClientCompany(e.target.value)}
-                    placeholder={t("create.fields.companyPlaceholder")}
-                  />
-                </Field>
+                  <Field label={t("create.fields.clientName")}>
+                    <Input
+                      required
+                      value={clientName}
+                      onChange={(e) => setClientName(e.target.value)}
+                      placeholder={t("create.fields.clientNamePlaceholder")}
+                    />
+                  </Field>
+                  <Field label={t("create.fields.clientEmail")}>
+                    <Input
+                      type="email"
+                      required
+                      value={clientEmail}
+                      onChange={(e) => setClientEmail(e.target.value)}
+                      placeholder={t("create.fields.clientEmailPlaceholder")}
+                    />
+                  </Field>
+                  <Field label={t("create.fields.companyOptional")} full>
+                    <Input
+                      value={clientCompany}
+                      onChange={(e) => setClientCompany(e.target.value)}
+                      placeholder={t("create.fields.companyPlaceholder")}
+                    />
+                  </Field>
                 </div>
               </div>
             </div>
@@ -632,7 +656,9 @@ function CreateInvoice() {
                 <div key={idx} className="min-w-0 max-w-full">
                   <div className="md:hidden rounded-lg border border-border bg-muted/20 p-3 space-y-3 min-w-0 max-w-full">
                     <div className="space-y-1.5 min-w-0">
-                      <Label className="text-xs text-muted-foreground">{tc("labels.description")}</Label>
+                      <Label className="text-xs text-muted-foreground">
+                        {tc("labels.description")}
+                      </Label>
                       <Input
                         value={it.description}
                         onChange={(e) => updateItem(idx, { description: e.target.value })}
@@ -656,7 +682,9 @@ function CreateInvoice() {
                         />
                       </div>
                       <div className="min-w-0 space-y-1.5">
-                        <Label className="text-xs text-muted-foreground">{tc("labels.unitPrice")}</Label>
+                        <Label className="text-xs text-muted-foreground">
+                          {tc("labels.unitPrice")}
+                        </Label>
                         <Input
                           type="number"
                           min="0"
@@ -905,7 +933,9 @@ function CreateInvoice() {
 
               {bankVisible && (
                 <div className="rounded-lg border border-border p-4 space-y-4">
-                  <p className="text-sm font-medium">{t("create.paymentMethods.bankTransferTitle")}</p>
+                  <p className="text-sm font-medium">
+                    {t("create.paymentMethods.bankTransferTitle")}
+                  </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Field label={tc("labels.bankName")}>
                       <Input
@@ -922,9 +952,7 @@ function CreateInvoice() {
                     <Field label={tc("labels.accountNumber")}>
                       <Input
                         value={bank.accountNumber ?? ""}
-                        onChange={(e) =>
-                          setBank((b) => ({ ...b, accountNumber: e.target.value }))
-                        }
+                        onChange={(e) => setBank((b) => ({ ...b, accountNumber: e.target.value }))}
                       />
                     </Field>
                     <Field label={tc("labels.iban")}>
@@ -960,9 +988,7 @@ function CreateInvoice() {
                       <Textarea
                         rows={3}
                         value={bank.instructions ?? ""}
-                        onChange={(e) =>
-                          setBank((b) => ({ ...b, instructions: e.target.value }))
-                        }
+                        onChange={(e) => setBank((b) => ({ ...b, instructions: e.target.value }))}
                         placeholder={t("create.paymentMethods.bankInstructionsPlaceholder")}
                       />
                     </Field>
@@ -978,9 +1004,7 @@ function CreateInvoice() {
                       <Textarea
                         rows={3}
                         value={cash.instructions ?? ""}
-                        onChange={(e) =>
-                          setCash((c) => ({ ...c, instructions: e.target.value }))
-                        }
+                        onChange={(e) => setCash((c) => ({ ...c, instructions: e.target.value }))}
                         placeholder={t("create.paymentMethods.cashInstructionsPlaceholder")}
                       />
                     </Field>
@@ -1033,13 +1057,24 @@ function CreateInvoice() {
           </Section>
 
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-            {formError && <p className="text-sm text-destructive sm:mr-auto sm:self-center">{formError}</p>}
-            <Button type="button" variant="outline" onClick={() => navigate({ to: "/invoices" })}>
+            <div ref={formErrorRef} className="sm:mr-auto sm:self-center w-full sm:w-auto">
+              <FormError message={formError} />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate({ to: "/invoices" })}
+              disabled={saving}
+            >
               {tc("buttons.cancel")}
             </Button>
-            <Button type="submit" variant="hero" disabled={saving}>
-              {saving ? tc("buttons.saving") : editId ? tc("buttons.save") : tc("buttons.createInvoice")}
-            </Button>
+            <LoadingButton type="submit" variant="hero" loading={saving} disabled={saving}>
+              {saving
+                ? tc("buttons.saving")
+                : editId
+                  ? tc("buttons.save")
+                  : tc("buttons.createInvoice")}
+            </LoadingButton>
           </div>
         </div>
 
@@ -1054,20 +1089,24 @@ function CreateInvoice() {
 
             {displayOptions.showSellerInfo && (
               <div className="text-sm border-b border-border pb-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">{tc("labels.from")}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  {tc("labels.from")}
+                </p>
                 <p className="font-semibold">
                   {user?.business || user?.name || t("create.preview.sellerFallback")}
                 </p>
-                <p className="text-muted-foreground text-xs">
-                  {user?.contactEmail || user?.email}
-                </p>
+                <p className="text-muted-foreground text-xs">{user?.contactEmail || user?.email}</p>
               </div>
             )}
 
             <div className="flex justify-between items-start gap-3">
               <div className="min-w-0">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">{tc("labels.invoice")}</p>
-                <p className="font-semibold truncate">{title || t("create.preview.invoiceTitleFallback")}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  {tc("labels.invoice")}
+                </p>
+                <p className="font-semibold truncate">
+                  {title || t("create.preview.invoiceTitleFallback")}
+                </p>
                 {displayOptions.showPoNumber && poNumber && (
                   <p className="text-xs text-muted-foreground mt-1">
                     {tc("labels.po")}: {poNumber}
@@ -1094,7 +1133,9 @@ function CreateInvoice() {
 
             {displayOptions.showClientInfo && (
               <div className="text-sm">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">{tc("labels.billTo")}</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                  {tc("labels.billTo")}
+                </p>
                 <p className="font-semibold">
                   {clientCompany || clientName || t("create.preview.clientFallback")}
                 </p>
@@ -1119,7 +1160,10 @@ function CreateInvoice() {
             </div>
 
             <div className="border-t border-border pt-3 space-y-1 text-sm">
-              <PreviewLine label={tc("labels.subtotal")} value={fmtAmount(subtotal, invoiceCurrency)} />
+              <PreviewLine
+                label={tc("labels.subtotal")}
+                value={fmtAmount(subtotal, invoiceCurrency)}
+              />
               {displayOptions.showDiscount && dnum > 0 && (
                 <PreviewLine
                   label={tc("labels.discount")}

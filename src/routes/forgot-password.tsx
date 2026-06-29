@@ -1,18 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/vegapal-store";
 import { AuthLayout } from "./login";
 import { forgotPasswordSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
-import { AuthFormError } from "@/components/auth/AuthFormError";
+import { FormError } from "@/components/ui/form-error";
 import { formatAuthError } from "@/lib/auth/errors";
 import { useTurnstile } from "@/hooks/use-turnstile";
+import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { MailCheck } from "lucide-react";
 
 export const Route = createFileRoute("/forgot-password")({
   beforeLoad: () => ensureNamespacesLoaded(["auth"]),
@@ -35,20 +38,24 @@ function ForgotPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const turnstile = useTurnstile();
+  const submitGuard = useSubmitGuard();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!submitGuard.begin()) return;
     setError("");
 
     const parsed = forgotPasswordSchema.safeParse({ email });
     if (!parsed.success) {
       setError(firstZodError(parsed.error));
+      submitGuard.end();
       return;
     }
 
     const rate = checkClientRateLimit("forgot-password", 5, 15 * 60_000);
     if (!rate.allowed) {
-      setError(`Too many attempts. Try again in ${rate.retryAfterSec} seconds.`);
+      setError(tc("errors.rateLimit", { seconds: rate.retryAfterSec }));
+      submitGuard.end();
       return;
     }
 
@@ -62,15 +69,19 @@ function ForgotPassword() {
       setError(formatAuthError(err));
     } finally {
       setLoading(false);
+      submitGuard.end();
     }
   };
 
   return (
     <AuthLayout title={t("forgotPassword.title")} subtitle={t("forgotPassword.subtitle")}>
       {sent ? (
-        <div className="space-y-5">
-          <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-            <p className="text-sm">
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-primary/25 bg-primary/5 p-6 text-center">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <MailCheck className="h-6 w-6" aria-hidden />
+            </div>
+            <p className="mt-4 text-sm leading-relaxed">
               <Trans
                 i18nKey="forgotPassword.checkInbox"
                 ns="auth"
@@ -78,26 +89,33 @@ function ForgotPassword() {
                 components={{ strong: <strong /> }}
               />
             </p>
-            <p className="text-xs text-muted-foreground mt-2">{t("forgotPassword.followLink")}</p>
+            <p className="mt-2 text-xs text-muted-foreground">{t("forgotPassword.followLink")}</p>
           </div>
-          <Button onClick={() => navigate({ to: "/login" })} variant="hero" className="w-full">
+          <Button
+            onClick={() => navigate({ to: "/login" })}
+            variant="hero"
+            size="lg"
+            className="w-full"
+          >
             {t("forgotPassword.backToSignIn")}
           </Button>
         </div>
       ) : (
-        <form onSubmit={submit} className="space-y-5">
+        <form onSubmit={submit} className="space-y-5" noValidate>
           <div className="space-y-2">
             <Label htmlFor="email">{tc("labels.email")}</Label>
             <Input
               id="email"
               type="email"
               required
+              autoComplete="email"
+              disabled={loading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={t("register.emailPlaceholder")}
             />
           </div>
-          <AuthFormError message={error} />
+          <FormError message={error} />
           {turnstile.enabled && (
             <TurnstileWidget
               onToken={turnstile.setToken}
@@ -105,15 +123,16 @@ function ForgotPassword() {
               onExpire={() => turnstile.setToken("")}
             />
           )}
-          <Button
+          <LoadingButton
             type="submit"
             variant="hero"
             size="lg"
             className="w-full"
+            loading={loading}
             disabled={loading || (turnstile.enabled && !turnstile.token)}
           >
             {loading ? t("forgotPassword.sending") : t("forgotPassword.sendResetLink")}
-          </Button>
+          </LoadingButton>
           <p className="text-sm text-muted-foreground text-center">
             {t("forgotPassword.remembered")}{" "}
             <Link to="/login" className="text-primary font-medium hover:underline">

@@ -10,6 +10,8 @@ import {
   formatInvoiceListDate,
 } from "@/lib/invoice-export";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton } from "@/components/ui/list-skeleton";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowUpRight, Download, FileText, Plus, Search } from "lucide-react";
@@ -45,12 +47,13 @@ export const Route = createFileRoute("/invoices/")({
   },
   beforeLoad: () => ensureNamespacesLoaded(["invoices"]),
   head: () => ({
-    meta: [
-      { title: "Invoices — VegaPal" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Invoices — VegaPal" }, { name: "robots", content: "noindex" }],
   }),
-  component: () => <AppShell><InvoicesPage /></AppShell>,
+  component: () => (
+    <AppShell>
+      <InvoicesPage />
+    </AppShell>
+  ),
 });
 
 type Filter = "all" | InvoiceStatus;
@@ -122,7 +125,9 @@ function InvoicesPage() {
             {tc("buttons.exportExcel")}
           </Button>
           <Button asChild variant="hero">
-            <Link to="/invoices/new"><Plus className="h-4 w-4" /> {tc("buttons.newInvoice")}</Link>
+            <Link to="/invoices/new">
+              <Plus className="h-4 w-4" /> {tc("buttons.newInvoice")}
+            </Link>
           </Button>
         </div>
       </div>
@@ -136,7 +141,9 @@ function InvoicesPage() {
                   key={key}
                   onClick={() => setFilter(key as Filter)}
                   className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    filter === key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    filter === key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {label} <span className="ml-1 text-muted-foreground">{count}</span>
@@ -183,22 +190,22 @@ function InvoicesPage() {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">{t("list.loading")}</div>
+          <ListSkeleton rows={6} />
         ) : filtered.length === 0 ? (
-          <div className="p-16 text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <FileText className="h-6 w-6" />
-            </div>
-            <h3 className="mt-4 font-semibold">{t("list.empty.title")}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {all.length === 0 ? t("list.empty.noInvoices") : t("list.empty.tryDifferent")}
-            </p>
-            {all.length === 0 && (
-              <Button asChild variant="hero" className="mt-6">
-                <Link to="/invoices/new">{tc("buttons.createInvoice")}</Link>
-              </Button>
-            )}
-          </div>
+          <EmptyState
+            icon={FileText}
+            title={t("list.empty.title")}
+            description={
+              all.length === 0 ? t("list.empty.noInvoices") : t("list.empty.tryDifferent")
+            }
+            action={
+              all.length === 0 ? (
+                <Button asChild variant="hero">
+                  <Link to="/invoices/new">{tc("buttons.createInvoice")}</Link>
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="divide-y divide-border">
             <div
@@ -211,7 +218,9 @@ function InvoicesPage() {
               <span className="text-right">{tc("labels.amount")}</span>
               <span className="sr-only">{tc("labels.action")}</span>
             </div>
-            {filtered.map((inv) => <Row key={inv.id} inv={inv} />)}
+            {filtered.map((inv) => (
+              <Row key={inv.id} inv={inv} />
+            ))}
           </div>
         )}
       </div>

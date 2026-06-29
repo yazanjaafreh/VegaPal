@@ -2,6 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { PageLoading } from "@/components/ui/page-loading";
 import { ConfirmEmailPending } from "@/components/auth/ConfirmEmailPending";
 import { auth, useSession } from "@/lib/vegapal-store";
 import { LayoutDashboard, FilePlus2, Settings, LogOut, FileText, Shield } from "lucide-react";
@@ -19,7 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (!loading && !user && !pendingEmailConfirmation) navigate({ to: "/login" });
   }, [loading, user, pendingEmailConfirmation, navigate]);
 
-  if (loading) return null;
+  if (loading) return <PageLoading message={t("buttons.loading")} />;
   if (pendingEmailConfirmation) return <ConfirmEmailPending email={authEmail} />;
   if (!user) return null;
 
@@ -30,14 +31,16 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/settings", label: t("nav.settings"), icon: Settings },
   ];
 
-  const isActive = (n: typeof nav[number]) =>
+  const isActive = (n: (typeof nav)[number]) =>
     n.exact ? pathname === n.to : pathname === n.to || pathname.startsWith(n.to + "/");
 
   return (
     <div className="min-h-screen bg-muted/30 flex">
       <aside className="hidden lg:flex w-64 flex-col border-r border-border bg-background sticky top-0 h-screen">
         <div className="p-6">
-          <Link to="/dashboard"><Logo /></Link>
+          <Link to="/dashboard">
+            <Logo />
+          </Link>
         </div>
         <nav className="flex-1 px-3 space-y-1">
           {nav.map((n) => {
@@ -64,7 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Shield className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div>
               <p className="text-xs font-semibold">{t("securePayments.title")}</p>
-              <p className="text-xs text-muted-foreground leading-snug mt-0.5">{t("securePayments.tagline")}</p>
+              <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+                {t("securePayments.tagline")}
+              </p>
             </div>
           </div>
         </div>
@@ -81,7 +86,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ThemeToggle />
           </div>
           <button
-            onClick={async () => { await auth.signOut(); navigate({ to: "/" }); }}
+            onClick={async () => {
+              await auth.signOut();
+              navigate({ to: "/" });
+            }}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground w-full px-2 py-1.5 rounded-md hover:bg-muted"
           >
             <LogOut className="h-4 w-4" /> {t("nav.signOut")}
@@ -91,13 +99,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="lg:hidden h-16 border-b border-border bg-background flex items-center justify-between px-4 sticky top-0 z-30">
-          <Link to="/dashboard"><Logo /></Link>
+          <Link to="/dashboard">
+            <Logo />
+          </Link>
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
             <ThemeToggle />
           </div>
         </header>
-        <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex pb-[env(safe-area-inset-bottom,0px)]" aria-label="App navigation">
+        <nav
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur flex pb-[env(safe-area-inset-bottom,0px)]"
+          aria-label="App navigation"
+        >
           {nav.map((n) => {
             const active = isActive(n);
             return (

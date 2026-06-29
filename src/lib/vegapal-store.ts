@@ -84,23 +84,38 @@ const DEFAULT_WALLET = "TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE";
 const DEFAULT_NETWORK = "TRC20";
 const DEFAULT_BRAND = "#16C784";
 
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
 function addDaysISO(base: string, days: number) {
-  const d = new Date(base); d.setDate(d.getDate() + days);
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
   return d.toISOString().slice(0, 10);
 }
 function computeTotals(items: InvoiceItem[], discount: number, tax: number) {
-  const subtotal = items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0), 0);
+  const subtotal = items.reduce(
+    (s, i) => s + (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0),
+    0,
+  );
   const total = Math.max(0, subtotal - (discount || 0) + (tax || 0));
   return { subtotal, total };
 }
 
 // ---------- Row mappers ----------
 type ProfileRow = {
-  id: string; email: string | null; name: string; business: string | null;
-  company_address: string | null; website: string | null; contact_email: string | null;
-  logo_url: string | null; brand_color: string; wallet: string; network: string;
-  email_notifications: boolean; invoice_updates: boolean;
+  id: string;
+  email: string | null;
+  name: string;
+  business: string | null;
+  company_address: string | null;
+  website: string | null;
+  contact_email: string | null;
+  logo_url: string | null;
+  brand_color: string;
+  wallet: string;
+  network: string;
+  email_notifications: boolean;
+  invoice_updates: boolean;
 };
 function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
   return {
@@ -121,13 +136,29 @@ function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
 }
 
 type InvoiceRow = {
-  id: string; number: string; client_name: string; client_email: string; client_company: string | null;
-  title: string; description: string; status: string; created_at: string;
-  issue_date: string; due_date: string;
-  subtotal: number | string; discount: number | string; tax: number | string; total: number | string;
-  wallet_address: string; network: string;
-  seller_name: string; seller_business: string | null; seller_email: string;
-  seller_address: string | null; seller_logo_url: string | null; brand_color: string;
+  id: string;
+  number: string;
+  client_name: string;
+  client_email: string;
+  client_company: string | null;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  issue_date: string;
+  due_date: string;
+  subtotal: number | string;
+  discount: number | string;
+  tax: number | string;
+  total: number | string;
+  wallet_address: string;
+  network: string;
+  seller_name: string;
+  seller_business: string | null;
+  seller_email: string;
+  seller_address: string | null;
+  seller_logo_url: string | null;
+  brand_color: string;
   invoice_currency?: string | null;
   po_number?: string | null;
   reference_number?: string | null;
@@ -137,8 +168,12 @@ type InvoiceRow = {
   payment_methods?: import("@/integrations/supabase/types").Json | null;
 };
 type ItemRow = {
-  invoice_id: string; position: number; description: string;
-  quantity: number | string; unit_price: number | string; total: number | string;
+  invoice_id: string;
+  position: number;
+  description: string;
+  quantity: number | string;
+  unit_price: number | string;
+  total: number | string;
 };
 
 function autoOverdue(status: string, dueDate: string): InvoiceStatus {
@@ -148,11 +183,7 @@ function autoOverdue(status: string, dueDate: string): InvoiceStatus {
 
 function rowToInvoice(r: InvoiceRow, items: ItemRow[]): Invoice {
   const total = Number(r.total);
-  const paymentMethods = normalizePaymentMethods(
-    r.payment_methods,
-    r.wallet_address,
-    r.network,
-  );
+  const paymentMethods = normalizePaymentMethods(r.payment_methods, r.wallet_address, r.network);
   const walletAddress = paymentMethods.crypto.walletAddress || r.wallet_address;
   const network = legacyNetworkFromCanonical(paymentMethods.crypto.network) || r.network;
 
@@ -205,7 +236,9 @@ let cachedProfile: User | null = null;
 let cachedPendingEmailConfirmation = false;
 let cachedAuthEmail: string | null = null;
 const sessionListeners = new Set<() => void>();
-function notifySession() { sessionListeners.forEach((cb) => cb()); }
+function notifySession() {
+  sessionListeners.forEach((cb) => cb());
+}
 
 async function loadProfile(supaUser: SupaUser): Promise<User | null> {
   const { data, error } = await supabase
@@ -219,11 +252,11 @@ async function loadProfile(supaUser: SupaUser): Promise<User | null> {
 
 export function useSession() {
   const [user, setUser] = useState<User | null>(cachedProfile);
-  const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState(cachedPendingEmailConfirmation);
-  const [authEmail, setAuthEmail] = useState<string | null>(cachedAuthEmail);
-  const [loading, setLoading] = useState(
-    cachedProfile === null && !cachedPendingEmailConfirmation,
+  const [pendingEmailConfirmation, setPendingEmailConfirmation] = useState(
+    cachedPendingEmailConfirmation,
   );
+  const [authEmail, setAuthEmail] = useState<string | null>(cachedAuthEmail);
+  const [loading, setLoading] = useState(cachedProfile === null && !cachedPendingEmailConfirmation);
 
   const refresh = useCallback(async () => {
     const { data } = await supabase.auth.getUser();
@@ -271,7 +304,10 @@ export function useSession() {
         refresh();
       }
     });
-    return () => { sessionListeners.delete(cb); sub.subscription.unsubscribe(); };
+    return () => {
+      sessionListeners.delete(cb);
+      sub.subscription.unsubscribe();
+    };
   }, [refresh]);
 
   return { user, loading, pendingEmailConfirmation, authEmail, refresh };
@@ -283,7 +319,8 @@ export const auth = {
     const redirectTo =
       typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
     const { data, error } = await supabase.auth.signUp({
-      email, password,
+      email,
+      password,
       options: { emailRedirectTo: redirectTo, data: { name, business: business ?? "" } },
     });
     if (error) throw error;
@@ -322,8 +359,19 @@ export const auth = {
     notifySession();
   },
   async resetPassword(email: string) {
-    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined;
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+  },
+  async resendConfirmationEmail(email: string) {
+    const redirectTo =
+      typeof window !== "undefined" ? `${window.location.origin}/dashboard` : undefined;
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: redirectTo },
+    });
     if (error) throw error;
   },
   async updateProfile(patch: Partial<User>) {
@@ -339,9 +387,15 @@ export const auth = {
     if (patch.brandColor !== undefined) update.brand_color = patch.brandColor;
     if (patch.wallet !== undefined) update.wallet = patch.wallet;
     if (patch.network !== undefined) update.network = patch.network;
-    if (patch.emailNotifications !== undefined) update.email_notifications = patch.emailNotifications;
+    if (patch.emailNotifications !== undefined)
+      update.email_notifications = patch.emailNotifications;
     if (patch.invoiceUpdates !== undefined) update.invoice_updates = patch.invoiceUpdates;
-    const { data, error } = await supabase.from("profiles").update(update as never).eq("id", u.user.id).select("*").maybeSingle();
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(update as never)
+      .eq("id", u.user.id)
+      .select("*")
+      .maybeSingle();
     if (error) throw error;
     if (data) {
       cachedProfile = profileToUser(data as ProfileRow, u.user.email ?? undefined);
@@ -361,7 +415,10 @@ async function fetchInvoiceWithItems(id: string): Promise<Invoice | null> {
 }
 
 async function nextInvoiceNumber(userId: string): Promise<string> {
-  const { count } = await supabase.from("invoices").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  const { count } = await supabase
+    .from("invoices")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
   return `INV-${String((count ?? 0) + 1).padStart(4, "0")}`;
 }
 
@@ -391,7 +448,10 @@ export const invoices = {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return [];
     const { data: invRows, error } = await supabase
-      .from("invoices").select("*").eq("user_id", u.user.id).order("created_at", { ascending: false });
+      .from("invoices")
+      .select("*")
+      .eq("user_id", u.user.id)
+      .order("created_at", { ascending: false });
     if (error || !invRows || invRows.length === 0) return [];
     const ids = invRows.map((r) => (r as InvoiceRow).id);
     const { data: items } = await supabase.from("invoice_items").select("*").in("invoice_id", ids);
@@ -400,7 +460,13 @@ export const invoices = {
     // Auto-promote overdue
     const stale = list.filter((i, idx) => i.status === "overdue" && rows[idx].status === "pending");
     if (stale.length > 0) {
-      await supabase.from("invoices").update({ status: "overdue" }).in("id", stale.map((i) => i.id));
+      await supabase
+        .from("invoices")
+        .update({ status: "overdue" })
+        .in(
+          "id",
+          stale.map((i) => i.id),
+        );
     }
     return list;
   },
@@ -409,7 +475,11 @@ export const invoices = {
     const inv = await fetchInvoiceWithItems(id);
     if (inv && inv.status === "overdue") {
       // persist overdue auto-promotion
-      await supabase.from("invoices").update({ status: "overdue" }).eq("id", id).eq("status", "pending");
+      await supabase
+        .from("invoices")
+        .update({ status: "overdue" })
+        .eq("id", id)
+        .eq("status", "pending");
     }
     return inv;
   },
@@ -432,37 +502,45 @@ export const invoices = {
 
     const walletAddress = profile.wallet || DEFAULT_WALLET;
     const legacyNetwork = profile.network || DEFAULT_NETWORK;
-    const paymentMethods = input.paymentMethods ?? buildDefaultPaymentMethods(walletAddress, legacyNetwork);
+    const paymentMethods =
+      input.paymentMethods ?? buildDefaultPaymentMethods(walletAddress, legacyNetwork);
     const displayOptions = input.displayOptions ?? DEFAULT_DISPLAY_OPTIONS;
 
-    const { data: invRow, error } = await supabase.from("invoices").insert({
-      user_id: u.user.id,
-      number,
-      client_name: input.clientName,
-      client_email: input.clientEmail,
-      client_company: input.clientCompany ?? null,
-      title: input.title,
-      description: input.description ?? "",
-      terms_and_conditions: input.termsAndConditions ?? "",
-      status: input.status ?? "pending",
-      issue_date: issueDate,
-      due_date: input.dueDate || addDaysISO(issueDate, 14),
-      subtotal, discount: input.discount || 0, tax: input.tax || 0, total,
-      invoice_currency: input.invoiceCurrency ?? DEFAULT_INVOICE_CURRENCY,
-      po_number: input.poNumber ?? null,
-      reference_number: input.referenceNumber ?? null,
-      project_code: input.projectCode ?? null,
-      display_options: displayOptionsToJson(displayOptions),
-      payment_methods: paymentMethodsToJson(paymentMethods),
-      wallet_address: paymentMethods.crypto.walletAddress || walletAddress,
-      network: legacyNetworkFromCanonical(paymentMethods.crypto.network) || legacyNetwork,
-      seller_name: profile.name,
-      seller_business: profile.business ?? null,
-      seller_email: profile.contactEmail || profile.email,
-      seller_address: profile.companyAddress ?? null,
-      seller_logo_url: profile.logoUrl ?? null,
-      brand_color: profile.brandColor || DEFAULT_BRAND,
-    }).select("*").single();
+    const { data: invRow, error } = await supabase
+      .from("invoices")
+      .insert({
+        user_id: u.user.id,
+        number,
+        client_name: input.clientName,
+        client_email: input.clientEmail,
+        client_company: input.clientCompany ?? null,
+        title: input.title,
+        description: input.description ?? "",
+        terms_and_conditions: input.termsAndConditions ?? "",
+        status: input.status ?? "pending",
+        issue_date: issueDate,
+        due_date: input.dueDate || addDaysISO(issueDate, 14),
+        subtotal,
+        discount: input.discount || 0,
+        tax: input.tax || 0,
+        total,
+        invoice_currency: input.invoiceCurrency ?? DEFAULT_INVOICE_CURRENCY,
+        po_number: input.poNumber ?? null,
+        reference_number: input.referenceNumber ?? null,
+        project_code: input.projectCode ?? null,
+        display_options: displayOptionsToJson(displayOptions),
+        payment_methods: paymentMethodsToJson(paymentMethods),
+        wallet_address: paymentMethods.crypto.walletAddress || walletAddress,
+        network: legacyNetworkFromCanonical(paymentMethods.crypto.network) || legacyNetwork,
+        seller_name: profile.name,
+        seller_business: profile.business ?? null,
+        seller_email: profile.contactEmail || profile.email,
+        seller_address: profile.companyAddress ?? null,
+        seller_logo_url: profile.logoUrl ?? null,
+        brand_color: profile.brandColor || DEFAULT_BRAND,
+      })
+      .select("*")
+      .single();
     if (error || !invRow) throw error ?? new Error("Failed to create invoice");
 
     if (items.length > 0) {
@@ -483,20 +561,25 @@ export const invoices = {
     return created;
   },
 
-  async update(id: string, patch: Partial<Invoice> & { items?: InvoiceItem[]; discount?: number; tax?: number }) {
+  async update(
+    id: string,
+    patch: Partial<Invoice> & { items?: InvoiceItem[]; discount?: number; tax?: number },
+  ) {
     const update: Record<string, unknown> = {};
     if (patch.clientName !== undefined) update.client_name = patch.clientName;
     if (patch.clientEmail !== undefined) update.client_email = patch.clientEmail;
     if (patch.clientCompany !== undefined) update.client_company = patch.clientCompany ?? null;
     if (patch.title !== undefined) update.title = patch.title;
     if (patch.description !== undefined) update.description = patch.description;
-    if (patch.termsAndConditions !== undefined) update.terms_and_conditions = patch.termsAndConditions;
+    if (patch.termsAndConditions !== undefined)
+      update.terms_and_conditions = patch.termsAndConditions;
     if (patch.status !== undefined) update.status = patch.status;
     if (patch.issueDate !== undefined) update.issue_date = patch.issueDate;
     if (patch.dueDate !== undefined) update.due_date = patch.dueDate;
     if (patch.invoiceCurrency !== undefined) update.invoice_currency = patch.invoiceCurrency;
     if (patch.poNumber !== undefined) update.po_number = patch.poNumber ?? null;
-    if (patch.referenceNumber !== undefined) update.reference_number = patch.referenceNumber ?? null;
+    if (patch.referenceNumber !== undefined)
+      update.reference_number = patch.referenceNumber ?? null;
     if (patch.projectCode !== undefined) update.project_code = patch.projectCode ?? null;
     if (patch.displayOptions !== undefined) {
       update.display_options = displayOptionsToJson(patch.displayOptions);
@@ -521,7 +604,8 @@ export const invoices = {
         }
       }
       const cleanItems = (items ?? []).map((i) => ({
-        ...i, total: (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0),
+        ...i,
+        total: (Number(i.quantity) || 0) * (Number(i.unitPrice) || 0),
       }));
       const { subtotal, total } = computeTotals(cleanItems, discount || 0, tax || 0);
       update.subtotal = subtotal;
@@ -532,16 +616,24 @@ export const invoices = {
       if (patch.items) {
         await supabase.from("invoice_items").delete().eq("invoice_id", id);
         if (cleanItems.length > 0) {
-          await supabase.from("invoice_items").insert(cleanItems.map((it, idx) => ({
-            invoice_id: id, position: idx,
-            description: it.description, quantity: it.quantity,
-            unit_price: it.unitPrice, total: it.total,
-          })));
+          await supabase.from("invoice_items").insert(
+            cleanItems.map((it, idx) => ({
+              invoice_id: id,
+              position: idx,
+              description: it.description,
+              quantity: it.quantity,
+              unit_price: it.unitPrice,
+              total: it.total,
+            })),
+          );
         }
       }
     }
     if (Object.keys(update).length > 0) {
-      const { error } = await supabase.from("invoices").update(update as never).eq("id", id);
+      const { error } = await supabase
+        .from("invoices")
+        .update(update as never)
+        .eq("id", id);
       if (error) throw error;
     }
   },
@@ -580,7 +672,9 @@ export const invoices = {
 
 // ---------- React hooks ----------
 const invoiceListeners = new Set<() => void>();
-export function notifyInvoices() { invoiceListeners.forEach((cb) => cb()); }
+export function notifyInvoices() {
+  invoiceListeners.forEach((cb) => cb());
+}
 
 export function useInvoices() {
   const [data, setData] = useState<Invoice[] | null>(null);
@@ -595,7 +689,9 @@ export function useInvoices() {
     refresh();
     const cb = () => refresh();
     invoiceListeners.add(cb);
-    return () => { invoiceListeners.delete(cb); };
+    return () => {
+      invoiceListeners.delete(cb);
+    };
   }, [refresh]);
   return { data: data ?? [], loading, refresh };
 }
@@ -604,7 +700,11 @@ export function useInvoice(id: string | undefined) {
   const [data, setData] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
   const refresh = useCallback(async () => {
-    if (!id) { setData(null); setLoading(false); return; }
+    if (!id) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const inv = await invoices.get(id);
     setData(inv);
@@ -614,7 +714,9 @@ export function useInvoice(id: string | undefined) {
     refresh();
     const cb = () => refresh();
     invoiceListeners.add(cb);
-    return () => { invoiceListeners.delete(cb); };
+    return () => {
+      invoiceListeners.delete(cb);
+    };
   }, [refresh]);
   return { data, loading, refresh };
 }

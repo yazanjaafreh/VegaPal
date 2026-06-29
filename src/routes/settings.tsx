@@ -4,6 +4,10 @@ import { useTranslation } from "react-i18next";
 import { AppShell } from "@/components/AppShell";
 import { auth, useSession } from "@/lib/vegapal-store";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { FormError } from "@/components/ui/form-error";
+import { formatAppError } from "@/lib/auth/errors";
+import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -15,12 +19,13 @@ import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 export const Route = createFileRoute("/settings")({
   beforeLoad: () => ensureNamespacesLoaded(["settings"]),
   head: () => ({
-    meta: [
-      { title: "Settings — VegaPal" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Settings — VegaPal" }, { name: "robots", content: "noindex" }],
   }),
-  component: () => <AppShell><Settings /></AppShell>,
+  component: () => (
+    <AppShell>
+      <Settings />
+    </AppShell>
+  ),
 });
 
 function Settings() {
@@ -44,6 +49,7 @@ function Settings() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const submitGuard = useSubmitGuard();
 
   useEffect(() => {
     if (!user) return;
@@ -76,6 +82,7 @@ function Settings() {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!submitGuard.begin()) return;
     setFormError("");
 
     const parsed = settingsSchema.safeParse({
@@ -89,6 +96,7 @@ function Settings() {
     });
     if (!parsed.success) {
       setFormError(firstZodError(parsed.error));
+      submitGuard.end();
       return;
     }
 
@@ -111,9 +119,10 @@ function Settings() {
       setSaved(true);
       setTimeout(() => setSaved(false), 1500);
     } catch (err) {
-      setFormError((err as Error).message);
+      setFormError(formatAppError(err));
     } finally {
       setSaving(false);
+      submitGuard.end();
     }
   };
 
@@ -134,8 +143,19 @@ function Settings() {
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onLogoChange} />
-                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onLogoChange}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileRef.current?.click()}
+                >
                   <Upload className="h-4 w-4" /> {tc("buttons.upload")}
                 </Button>
                 {logoUrl && (
@@ -161,7 +181,11 @@ function Settings() {
                 onChange={(e) => setBrandColor(e.target.value)}
                 className="h-10 w-12 rounded border border-border bg-transparent cursor-pointer"
               />
-              <Input value={brandColor} onChange={(e) => setBrandColor(e.target.value)} className="font-mono w-40" />
+              <Input
+                value={brandColor}
+                onChange={(e) => setBrandColor(e.target.value)}
+                className="font-mono w-40"
+              />
             </div>
           </Field>
         </Section>
@@ -174,7 +198,11 @@ function Settings() {
             <Input value={user.email} disabled />
           </Field>
           <Field label={t("fields.contactEmail")}>
-            <Input type="email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
+            <Input
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+            />
           </Field>
           <Field label={t("fields.website")}>
             <Input
@@ -247,23 +275,33 @@ function Settings() {
           </Button>
         </div>
 
-        <div className="flex items-center justify-end gap-3 sticky bottom-4">
-          {formError && <p className="text-sm text-destructive mr-auto">{formError}</p>}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3 sticky bottom-4">
+          <div className="sm:mr-auto w-full sm:w-auto">
+            <FormError message={formError} />
+          </div>
           {saved && (
-            <span className="text-sm text-primary inline-flex items-center gap-1">
-              <Check className="h-4 w-4" /> {tc("buttons.saved")}
+            <span className="text-sm text-primary inline-flex items-center gap-1" role="status">
+              <Check className="h-4 w-4" aria-hidden /> {tc("buttons.saved")}
             </span>
           )}
-          <Button type="submit" variant="hero" disabled={saving}>
+          <LoadingButton type="submit" variant="hero" loading={saving} disabled={saving}>
             {saving ? tc("buttons.saving") : tc("buttons.save")}
-          </Button>
+          </LoadingButton>
         </div>
       </form>
     </div>
   );
 }
 
-function Section({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) {
+function Section({
+  title,
+  desc,
+  children,
+}: {
+  title: string;
+  desc: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6 lg:p-8">
       <div className="mb-6">

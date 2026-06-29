@@ -127,7 +127,10 @@
     "pageNotFound": "Page not found",
     "pageNotFoundDesc": "The page you're looking for doesn't exist or has been moved.",
     "pageLoadFailed": "This page didn't load",
-    "pageLoadFailedDesc": "Something went wrong on our end. You can try refreshing or head back home."
+    "pageLoadFailedDesc": "Something went wrong on our end. You can try refreshing or head back home.",
+    "rateLimit": "Too many attempts. Try again in {{seconds}} seconds.",
+    "rateLimitCreate": "Too many requests. Try again in {{seconds}} seconds.",
+    "generic": "Something went wrong. Please try again."
   },
   "securePayments": {
     "title": "Secure Payments",

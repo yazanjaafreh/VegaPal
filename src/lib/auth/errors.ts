@@ -102,6 +102,56 @@ export function formatAuthError(err: unknown): string {
   return FALLBACK;
 }
 
+const POSTGREST_MESSAGES: Record<string, string> = {
+  PGRST116: "The requested item was not found.",
+  "23505": "This record already exists.",
+  "42501": "You don't have permission to perform this action.",
+  "23503": "This action could not be completed because related data is missing.",
+  "22P02": "Some values are invalid. Please check your input.",
+  "23514": "Some values are invalid. Please check your input.",
+};
+
+function mapDatabaseMessage(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("row-level security") || lower.includes("permission denied")) {
+    return POSTGREST_MESSAGES["42501"];
+  }
+  if (lower.includes("duplicate key") || lower.includes("already exists")) {
+    return POSTGREST_MESSAGES["23505"];
+  }
+  if (lower.includes("violates foreign key")) {
+    return POSTGREST_MESSAGES["23503"];
+  }
+  if (lower.includes("invalid input syntax")) {
+    return POSTGREST_MESSAGES["22P02"];
+  }
+  return message;
+}
+
+/** Friendly message for any app/API error (auth, Supabase, DB, Zod throws). */
+export function formatAppError(err: unknown): string {
+  if (!err) return FALLBACK;
+
+  if (typeof err === "object" && err !== null) {
+    const record = err as Record<string, unknown>;
+    const code = typeof record.code === "string" ? record.code : undefined;
+    if (code && POSTGREST_MESSAGES[code]) return POSTGREST_MESSAGES[code];
+
+    const message = typeof record.message === "string" ? record.message.trim() : "";
+    if (message) {
+      const mapped = mapDatabaseMessage(message);
+      if (mapped !== message) return mapped;
+      const fromAuth = mapSupabaseAuthMessage(message);
+      if (fromAuth !== message) return fromAuth;
+      if (!message.startsWith("{") && !message.includes("[object Object]")) {
+        return message;
+      }
+    }
+  }
+
+  return formatAuthError(err);
+}
+
 function issueToString(issue: z.ZodIssue): string {
   const raw = issue.message;
   if (typeof raw === "string" && raw.trim()) return raw.trim();

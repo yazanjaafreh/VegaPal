@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Logo } from "@/components/Logo";
 import { auth } from "@/lib/vegapal-store";
 import { ShieldCheck } from "lucide-react";
@@ -11,9 +11,11 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { loginSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
-import { AuthFormError } from "@/components/auth/AuthFormError";
+import { FormError } from "@/components/ui/form-error";
+import { EmailConfirmationActions } from "@/components/auth/EmailConfirmationActions";
 import { formatAuthError } from "@/lib/auth/errors";
 import { useTurnstile } from "@/hooks/use-turnstile";
+import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/login")({
@@ -21,12 +23,23 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign in — VegaPal" },
-      { name: "description", content: "Sign in to VegaPal to manage invoices, payments, and your business profile." },
+      {
+        name: "description",
+        content: "Sign in to VegaPal to manage invoices, payments, and your business profile.",
+      },
       { name: "robots", content: "index, follow" },
     ],
   }),
   component: LoginPage,
 });
+
+function isEmailNotConfirmedError(err: unknown): boolean {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    (err as { code?: string }).code === "email_not_confirmed"
+  );
+}
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -36,48 +49,64 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState<string | null>(null);
   const turnstile = useTurnstile();
+  const submitGuard = useSubmitGuard();
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!submitGuard.begin()) return;
     setError("");
+    setUnconfirmedEmail(null);
 
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
       setError(firstZodError(parsed.error));
+      submitGuard.end();
       return;
     }
 
     const rate = checkClientRateLimit("login", 10, 15 * 60_000);
     if (!rate.allowed) {
-      setError(`Too many attempts. Try again in ${rate.retryAfterSec} seconds.`);
+      setError(tc("errors.rateLimit", { seconds: rate.retryAfterSec }));
+      submitGuard.end();
       return;
     }
 
     setLoading(true);
+    const normalizedEmail = parsed.data.email.toLowerCase();
     try {
       await turnstile.verifyBeforeAuth();
-      await auth.signIn(parsed.data.email.toLowerCase(), parsed.data.password);
+      await auth.signIn(normalizedEmail, parsed.data.password);
       navigate({ to: "/dashboard" });
     } catch (err) {
       turnstile.reset();
       setError(formatAuthError(err));
+      if (isEmailNotConfirmedError(err)) {
+        setUnconfirmedEmail(normalizedEmail);
+      }
     } finally {
       setLoading(false);
+      submitGuard.end();
     }
   };
 
   return (
     <AuthLayout title={t("login.title")} subtitle={t("login.subtitle")}>
-      <form onSubmit={submit} className="space-y-5">
+      <form onSubmit={submit} className="space-y-5" noValidate>
         <div className="space-y-2">
           <Label htmlFor="email">{tc("labels.email")}</Label>
           <Input
             id="email"
             type="email"
             required
+            autoComplete="email"
+            disabled={loading}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (unconfirmedEmail) setUnconfirmedEmail(null);
+            }}
             placeholder={t("register.emailPlaceholder")}
           />
         </div>
@@ -92,12 +121,20 @@ function LoginPage() {
             id="password"
             type="password"
             required
+            autoComplete="current-password"
+            disabled={loading}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder={t("login.passwordPlaceholder")}
           />
         </div>
-        <AuthFormError message={error} />
+        <FormError message={error} />
+        {unconfirmedEmail ? (
+          <div className="space-y-2 rounded-xl border border-border bg-muted/30 p-4">
+            <p className="text-sm text-muted-foreground">{t("login.unconfirmedHint")}</p>
+            <EmailConfirmationActions email={unconfirmedEmail} />
+          </div>
+        ) : null}
         {turnstile.enabled && (
           <TurnstileWidget
             onToken={turnstile.setToken}
@@ -105,15 +142,16 @@ function LoginPage() {
             onExpire={() => turnstile.setToken("")}
           />
         )}
-        <Button
+        <LoadingButton
           type="submit"
           variant="hero"
           size="lg"
           className="w-full"
+          loading={loading}
           disabled={loading || (turnstile.enabled && !turnstile.token)}
         >
           {loading ? t("login.signingIn") : t("login.signIn")}
-        </Button>
+        </LoadingButton>
         <p className="text-sm text-muted-foreground text-center">
           {t("login.newToVegapal")}{" "}
           <Link to="/register" className="text-primary font-medium hover:underline">
@@ -140,7 +178,11 @@ export function AuthLayout({
     <div className="min-h-screen grid lg:grid-cols-2">
       <div className="hidden lg:flex bg-hero relative overflow-hidden p-12 flex-col justify-between text-navy-foreground">
         <div className="absolute inset-0 bg-mesh opacity-60" />
-        <div className="relative"><Link to="/"><Logo light size="auth" /></Link></div>
+        <div className="relative">
+          <Link to="/">
+            <Logo light size="auth" />
+          </Link>
+        </div>
         <div className="relative max-w-md">
           <ShieldCheck className="h-10 w-10 text-primary mb-6" />
           <h2 className="text-3xl font-bold tracking-tight text-balance">
@@ -159,7 +201,11 @@ export function AuthLayout({
           <LanguageSwitcher />
         </div>
         <div className="w-full max-w-sm min-w-0 px-1">
-          <div className="lg:hidden mb-8"><Link to="/"><Logo /></Link></div>
+          <div className="lg:hidden mb-8">
+            <Link to="/">
+              <Logo />
+            </Link>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{title}</h1>
           <p className="mt-2 text-muted-foreground">{subtitle}</p>
           <div className="mt-8">{children}</div>

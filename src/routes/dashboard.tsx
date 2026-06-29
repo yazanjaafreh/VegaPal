@@ -6,6 +6,8 @@ import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { useInvoices, type Invoice, type InvoiceStatus } from "@/lib/vegapal-store";
 import { formatInvoiceAmountWithCurrency } from "@/lib/invoice-display";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ListSkeleton, StatCardsSkeleton } from "@/components/ui/list-skeleton";
 import { StatusBadge } from "@/components/StatusBadge";
 import {
   FileText,
@@ -21,10 +23,7 @@ import {
 export const Route = createFileRoute("/dashboard")({
   beforeLoad: () => ensureNamespacesLoaded(["dashboard"]),
   head: () => ({
-    meta: [
-      { title: "Dashboard — VegaPal" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Dashboard — VegaPal" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <AppShell>
@@ -94,8 +93,7 @@ type StatCard = {
   renderValue?: () => ReactNode;
 };
 
-const STAT_CARD_CLASS =
-  "rounded-2xl border border-border bg-card p-6 text-left w-full";
+const STAT_CARD_CLASS = "rounded-2xl border border-border bg-card p-6 text-left w-full";
 
 const CLICKABLE_STAT_CARD_CLASS = `${STAT_CARD_CLASS} cursor-pointer transition hover:shadow-md hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`;
 
@@ -184,7 +182,9 @@ function Dashboard() {
     <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto min-w-0">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
         <div>
-          <p className="text-xs font-medium text-primary uppercase tracking-wider">{t("overview")}</p>
+          <p className="text-xs font-medium text-primary uppercase tracking-wider">
+            {t("overview")}
+          </p>
           <h1 className="text-3xl font-bold tracking-tight mt-1">{t("welcomeBack")}</h1>
           <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
         </div>
@@ -195,38 +195,42 @@ function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
-        {stats.map((s) => {
-          const body = (
-            <StatCardBody
-              icon={s.icon}
-              label={s.label}
-              accent={s.accent}
-              value={s.value}
-              renderValue={s.renderValue}
-            />
-          );
-
-          if (s.statusFilter !== undefined || s.label === t("stats.totalInvoices")) {
-            return (
-              <button
-                key={s.label}
-                type="button"
-                onClick={() => goToInvoices(s.statusFilter)}
-                className={CLICKABLE_STAT_CARD_CLASS}
-              >
-                {body}
-              </button>
+      {loading ? (
+        <StatCardsSkeleton />
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
+          {stats.map((s) => {
+            const body = (
+              <StatCardBody
+                icon={s.icon}
+                label={s.label}
+                accent={s.accent}
+                value={s.value}
+                renderValue={s.renderValue}
+              />
             );
-          }
 
-          return (
-            <div key={s.label} className={STAT_CARD_CLASS}>
-              {body}
-            </div>
-          );
-        })}
-      </div>
+            if (s.statusFilter !== undefined || s.label === t("stats.totalInvoices")) {
+              return (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => goToInvoices(s.statusFilter)}
+                  className={CLICKABLE_STAT_CARD_CLASS}
+                >
+                  {body}
+                </button>
+              );
+            }
+
+            return (
+              <div key={s.label} className={STAT_CARD_CLASS}>
+                {body}
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-[1.6fr_1fr] gap-6">
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
@@ -239,18 +243,18 @@ function Dashboard() {
             )}
           </div>
           {loading ? (
-            <div className="p-12 text-center text-sm text-muted-foreground">{tc("buttons.loading")}</div>
+            <ListSkeleton rows={4} />
           ) : all.length === 0 ? (
-            <div className="p-16 text-center">
-              <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <FileText className="h-6 w-6" />
-              </div>
-              <h3 className="mt-4 font-semibold">{t("empty.title")}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{t("empty.description")}</p>
-              <Button asChild variant="hero" className="mt-6">
-                <Link to="/invoices/new">{tc("buttons.createInvoice")}</Link>
-              </Button>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title={t("empty.title")}
+              description={t("empty.description")}
+              action={
+                <Button asChild variant="hero">
+                  <Link to="/invoices/new">{tc("buttons.createInvoice")}</Link>
+                </Button>
+              }
+            />
           ) : (
             <div className="divide-y divide-border">
               {all.slice(0, 6).map((inv) => (
@@ -265,8 +269,14 @@ function Dashboard() {
             <Activity className="h-4 w-4 text-primary" />
             <h2 className="font-semibold">{t("recentActivity")}</h2>
           </div>
-          {all.length === 0 ? (
-            <p className="px-6 py-8 text-sm text-muted-foreground text-center">{tc("empty.noActivity")}</p>
+          {loading ? (
+            <div className="px-6 py-8">
+              <ListSkeleton rows={3} />
+            </div>
+          ) : all.length === 0 ? (
+            <p className="px-6 py-8 text-sm text-muted-foreground text-center">
+              {tc("empty.noActivity")}
+            </p>
           ) : (
             <ul className="divide-y divide-border">
               {all.slice(0, 8).map((inv) => (
@@ -310,7 +320,9 @@ function Row({ inv }: { inv: Invoice }) {
       </div>
       <StatusBadge status={inv.status} />
       <div className="flex items-center gap-3">
-        <span className="font-semibold tabular-nums whitespace-nowrap">{formatInvoiceTotal(inv)}</span>
+        <span className="font-semibold tabular-nums whitespace-nowrap">
+          {formatInvoiceTotal(inv)}
+        </span>
       </div>
     </Link>
   );
