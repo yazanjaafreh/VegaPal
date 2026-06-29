@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { formatZodError } from "@/lib/auth/errors";
 
 const emailSchema = z.string().trim().email("Enter a valid email address.");
 const passwordSchema = z.string().min(6, "Password must be at least 6 characters.");
@@ -26,6 +27,16 @@ export const registerSchema = z
 export const forgotPasswordSchema = z.object({
   email: emailSchema,
 });
+
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Confirm your password."),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export const settingsSchema = z.object({
   name: shortText("Name", 120),
@@ -67,6 +78,6 @@ export const invoiceCreateSchema = z.object({
   cryptoWallet: z.string().trim().max(120).optional(),
 });
 
-export function firstZodError(error: z.ZodError): string {
-  return error.errors[0]?.message ?? "Please check your input.";
+export function firstZodError(error: z.ZodError, preferredField?: string): string {
+  return formatZodError(error, preferredField);
 }

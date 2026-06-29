@@ -7,6 +7,9 @@ import { Label } from "@/components/ui/label";
 import { AuthLayout } from "./login";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { AuthFormError } from "@/components/auth/AuthFormError";
+import { formatAuthError } from "@/lib/auth/errors";
+import { firstZodError, resetPasswordSchema } from "@/lib/validation/schemas";
 
 export const Route = createFileRoute("/reset-password")({
   beforeLoad: () => ensureNamespacesLoaded(["auth"]),
@@ -23,6 +26,7 @@ function ResetPassword() {
   const navigate = useNavigate();
   const { t } = useTranslation("auth");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
@@ -37,14 +41,25 @@ function ResetPassword() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) {
-      setError(error.message);
+
+    const parsed = resetPasswordSchema.safeParse({ password, confirmPassword });
+    if (!parsed.success) {
+      setError(firstZodError(parsed.error, "confirmPassword"));
       return;
     }
-    navigate({ to: "/dashboard" });
+
+    setLoading(true);
+    try {
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: parsed.data.password,
+      });
+      if (updateError) throw updateError;
+      navigate({ to: "/dashboard" });
+    } catch (err) {
+      setError(formatAuthError(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,7 +78,20 @@ function ResetPassword() {
             disabled={!ready}
           />
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">{t("register.confirmPassword")}</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            required
+            minLength={6}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder={t("register.confirmPasswordPlaceholder")}
+            disabled={!ready}
+          />
+        </div>
+        <AuthFormError message={error} />
         <Button type="submit" variant="hero" size="lg" className="w-full" disabled={loading || !ready}>
           {loading ? t("resetPassword.updating") : t("resetPassword.updatePassword")}
         </Button>

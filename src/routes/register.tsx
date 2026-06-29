@@ -9,6 +9,8 @@ import { AuthLayout } from "./login";
 import { registerSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
+import { AuthFormError } from "@/components/auth/AuthFormError";
+import { formatAuthError } from "@/lib/auth/errors";
 import { useTurnstile } from "@/hooks/use-turnstile";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
@@ -49,7 +51,7 @@ function RegisterPage() {
       confirmPassword,
     });
     if (!parsed.success) {
-      setError(firstZodError(parsed.error));
+      setError(firstZodError(parsed.error, "confirmPassword"));
       return;
     }
 
@@ -77,7 +79,7 @@ function RegisterPage() {
       navigate({ to: "/dashboard" });
     } catch (err) {
       turnstile.reset();
-      setError((err as Error).message);
+      setError(formatAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -143,7 +145,7 @@ function RegisterPage() {
             placeholder={t("register.confirmPasswordPlaceholder")}
           />
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        <AuthFormError message={error} />
         {turnstile.enabled && (
           <TurnstileWidget
             onToken={turnstile.setToken}
