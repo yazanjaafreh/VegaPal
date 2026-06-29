@@ -48,6 +48,7 @@ const SUPABASE_AUTH_MESSAGES: Record<string, string> = {
   user_not_found: "No account found with that email address.",
   validation_failed: "Please check your details and try again.",
   session_not_found: "Your session has expired. Please sign in again.",
+  session_missing: "Your reset link has expired. Please request a new password reset link.",
   flow_state_expired: "This link has expired. Please request a new one.",
   request_timeout: "The request timed out. Check your connection and try again.",
 };
@@ -69,6 +70,9 @@ function mapSupabaseAuthMessage(message: string): string {
   }
   if (lower.includes("email not confirmed")) {
     return SUPABASE_AUTH_MESSAGES.email_not_confirmed;
+  }
+  if (lower.includes("auth session missing") || lower.includes("session missing")) {
+    return SUPABASE_AUTH_MESSAGES.session_missing;
   }
   if (lower.includes("failed to fetch") || lower.includes("network")) {
     return "Network error. Check your connection and try again.";

@@ -7,23 +7,25 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { Button } from "@/components/ui/button";
 import { AuthLayout } from "./login";
 import { supabase } from "@/integrations/supabase/client";
+import { auth } from "@/lib/vegapal-store";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { FormError } from "@/components/ui/form-error";
-import { completeAuthFromUrl } from "@/lib/auth/complete-auth-from-url";
+import { FormSuccess } from "@/components/ui/form-success";
+import { establishPasswordRecoverySession } from "@/lib/auth/complete-auth-from-url";
 import { formatAuthError } from "@/lib/auth/errors";
 import { firstZodError, resetPasswordSchema } from "@/lib/validation/schemas";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/reset-password")({
   beforeLoad: () => ensureNamespacesLoaded(["auth"]),
   head: () => ({
-    meta: [{ title: "Set new password — VegaPal" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Reset your password — VegaPal" }, { name: "robots", content: "noindex" }],
   }),
   component: ResetPassword,
 });
 
-type SessionState = "checking" | "ready" | "invalid";
+type PageState = "checking" | "ready" | "invalid" | "success";
 
 function ResetPassword() {
   const navigate = useNavigate();
@@ -32,43 +34,30 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionState, setSessionState] = useState<SessionState>("checking");
+  const [pageState, setPageState] = useState<PageState>("checking");
   const submitGuard = useSubmitGuard();
 
   useEffect(() => {
     let cancelled = false;
 
-    const checkSession = async () => {
-      await completeAuthFromUrl();
-      const { data } = await supabase.auth.getSession();
+    void (async () => {
+      const ready = await establishPasswordRecoverySession();
       if (cancelled) return;
-      if (data.session) {
-        setSessionState("ready");
+      if (ready) {
+        setPageState("ready");
         return;
       }
-      setSessionState("invalid");
-      setError(t("resetPassword.invalidLink"));
-    };
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (cancelled) return;
-      if (event === "PASSWORD_RECOVERY" || session) {
-        setSessionState("ready");
-        setError("");
-      }
-    });
-
-    void checkSession();
+      setPageState("invalid");
+    })();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
     };
   }, [t]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (sessionState !== "ready" || !submitGuard.begin()) return;
+    if (pageState !== "ready" || !submitGuard.begin()) return;
     setError("");
 
     const parsed = resetPasswordSchema.safeParse({ password, confirmPassword });
@@ -80,11 +69,24 @@ function ResetPassword() {
 
     setLoading(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        const recovered = await establishPasswordRecoverySession();
+        if (!recovered) {
+          setPageState("invalid");
+          setError(t("resetPassword.sessionExpired"));
+          return;
+        }
+      }
+
       const { error: updateError } = await supabase.auth.updateUser({
         password: parsed.data.password,
       });
       if (updateError) throw updateError;
-      navigate({ to: "/dashboard" });
+
+      setPageState("success");
+      await auth.signOut();
+      window.setTimeout(() => navigate({ to: "/login" }), 2000);
     } catch (err) {
       setError(formatAuthError(err));
     } finally {
@@ -93,12 +95,13 @@ function ResetPassword() {
     }
   };
 
-  if (sessionState === "checking") {
+  if (pageState === "checking") {
     return (
       <AuthLayout title={t("resetPassword.title")} subtitle={t("resetPassword.subtitle")}>
         <div
           className="flex flex-col items-center justify-center gap-3 py-12 text-sm text-muted-foreground"
           role="status"
+          aria-busy="true"
         >
           <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden />
           <span>{t("resetPassword.checkingLink")}</span>
@@ -107,18 +110,37 @@ function ResetPassword() {
     );
   }
 
-  if (sessionState === "invalid") {
+  if (pageState === "invalid") {
     return (
       <AuthLayout title={t("resetPassword.title")} subtitle={t("resetPassword.subtitle")}>
         <div className="space-y-6 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
             <AlertTriangle className="h-6 w-6" aria-hidden />
           </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {t("resetPassword.invalidLink")}
+          </p>
           <FormError message={error} />
           <Button asChild variant="hero" size="lg" className="w-full">
             <Link to="/forgot-password">{t("resetPassword.requestNewLink")}</Link>
           </Button>
           <Button asChild variant="ghost" className="w-full">
+            <Link to="/login">{t("resetPassword.backToSignIn")}</Link>
+          </Button>
+        </div>
+      </AuthLayout>
+    );
+  }
+
+  if (pageState === "success") {
+    return (
+      <AuthLayout title={t("resetPassword.title")} subtitle={t("resetPassword.subtitle")}>
+        <div className="space-y-6 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary">
+            <CheckCircle2 className="h-6 w-6" aria-hidden />
+          </div>
+          <FormSuccess message={t("resetPassword.successMessage")} />
+          <Button asChild variant="hero" size="lg" className="w-full">
             <Link to="/login">{t("resetPassword.backToSignIn")}</Link>
           </Button>
         </div>
@@ -144,7 +166,7 @@ function ResetPassword() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">{t("register.confirmPassword")}</Label>
+          <Label htmlFor="confirmPassword">{t("resetPassword.confirmPassword")}</Label>
           <Input
             id="confirmPassword"
             type="password"
@@ -154,7 +176,7 @@ function ResetPassword() {
             disabled={loading}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder={t("register.confirmPasswordPlaceholder")}
+            placeholder={t("resetPassword.confirmPasswordPlaceholder")}
           />
         </div>
         <FormError message={error} />

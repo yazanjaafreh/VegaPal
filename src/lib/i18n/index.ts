@@ -10,6 +10,8 @@ import { BOOTSTRAP_NAMESPACES } from "./load-namespace";
 
 import enCommon from "../../../locales/en/common.json";
 import enLanding from "../../../locales/en/landing.json";
+import enAuth from "../../../locales/en/auth.json";
+import { markNamespacesLoaded } from "./load-namespace";
 
 export const I18N_NAMESPACES = [
   "common",
@@ -26,8 +28,11 @@ const resources = {
   en: {
     common: enCommon,
     landing: enLanding,
+    auth: enAuth,
   },
 } as const;
+
+markNamespacesLoaded(["auth"]);
 
 void i18n.use(initReactI18next).init({
   resources,
