@@ -16,6 +16,7 @@ import { useTurnstile } from "@/hooks/use-turnstile";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { MailCheck } from "lucide-react";
+import { CheckSpamHint } from "@/components/auth/CheckSpamHint";
 
 export const Route = createFileRoute("/forgot-password")({
   beforeLoad: () => ensureNamespacesLoaded(["auth"]),
@@ -90,6 +91,7 @@ function ForgotPassword() {
               />
             </p>
             <p className="mt-2 text-xs text-muted-foreground">{t("forgotPassword.followLink")}</p>
+            <CheckSpamHint className="mt-3 text-xs text-muted-foreground leading-relaxed" />
           </div>
           <Button
             onClick={() => navigate({ to: "/login" })}

@@ -19,8 +19,15 @@ export async function verifyTurnstileToken(
   }
 
   const secret = process.env.TURNSTILE_SECRET_KEY;
+  const isProductionHost = host && !shouldBypassTurnstile(serverTurnstilePolicy(host));
 
   if (!secret) {
+    if (isProductionHost) {
+      return { success: false, error: "Captcha verification failed. Please try again." };
+    }
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[turnstile] TURNSTILE_SECRET_KEY is not set — verification skipped");
+    }
     return { success: true, skipped: true };
   }
 
@@ -45,8 +52,11 @@ export async function verifyTurnstileToken(
     return { success: false, error: "Captcha verification failed. Please try again." };
   }
 
-  const data = (await response.json()) as { success?: boolean };
+  const data = (await response.json()) as { success?: boolean; "error-codes"?: string[] };
   if (!data.success) {
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[turnstile] siteverify failed", data["error-codes"] ?? []);
+    }
     return { success: false, error: "Captcha verification failed. Please try again." };
   }
 

@@ -1,5 +1,6 @@
 import type { AuthError, EmailOtpType, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { logAuthDebug } from "@/lib/auth/debug";
 
 export type PasswordRecoveryResult = {
   ok: boolean;
@@ -7,10 +8,6 @@ export type PasswordRecoveryResult = {
   error?: AuthError | Error | null;
   hasSession?: boolean;
 };
-
-function logRecovery(step: string, detail: Record<string, unknown>): void {
-  console.info(`[auth:recovery] ${step}`, detail);
-}
 
 function readAuthCallbackUrl(): URL {
   return new URL(window.location.href);
@@ -52,7 +49,7 @@ function isResetPasswordRoute(): boolean {
 
 function logUrlSnapshot(): void {
   const url = readAuthCallbackUrl();
-  logRecovery("url", {
+  logAuthDebug("recovery", {
     pathname: url.pathname,
     hasCode: url.searchParams.has("code"),
     hasTokenHash: url.searchParams.has("token_hash"),
@@ -77,7 +74,7 @@ function createRecoveryListener(timeoutMs = 8000) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      logRecovery("onAuthStateChange", { event, hasSession: !!session });
+      logAuthDebug("recovery", { event, hasSession: !!session });
       if (!session || settled) return;
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || event === "INITIAL_SESSION") {
         settled = true;
@@ -93,12 +90,45 @@ function createRecoveryListener(timeoutMs = 8000) {
 
 async function readSession(step: string): Promise<Session | null> {
   const { data, error } = await supabase.auth.getSession();
-  logRecovery(step, {
+  logAuthDebug(step, {
     hasSession: !!data.session,
     error: error?.message ?? null,
     code: error?.code ?? null,
   });
   return data.session;
+}
+
+/** Parse implicit-flow hash tokens when detectSessionInUrl has not run yet. */
+async function trySetSessionFromHash(step: string): Promise<Session | null> {
+  const hash = window.location.hash.replace(/^#/, "");
+  if (!hash.includes("access_token=")) return null;
+
+  const params = new URLSearchParams(hash);
+  const access_token = params.get("access_token");
+  const refresh_token = params.get("refresh_token");
+  if (!access_token || !refresh_token) return null;
+
+  const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
+  logAuthDebug(step, {
+    hasSession: !!data.session,
+    error: error?.message ?? null,
+    code: error?.code ?? null,
+  });
+  if (error || !data.session) return null;
+  return data.session;
+}
+
+async function waitForSession(step: string, attempts = 4): Promise<Session | null> {
+  const delays = [0, 100, 250, 500];
+  for (let i = 0; i < attempts; i++) {
+    const delay = delays[i] ?? 500;
+    if (delay > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, delay));
+    }
+    const session = await readSession(`${step}.attempt${i + 1}`);
+    if (session) return session;
+  }
+  return null;
 }
 
 /**
@@ -117,9 +147,10 @@ export async function completeAuthFromUrl(): Promise<boolean> {
       token_hash: tokenHash,
       type: type as EmailOtpType,
     });
-    logRecovery("completeAuthFromUrl.verifyOtp", {
+    logAuthDebug("confirm.verifyOtp", {
       hasSession: !!data.session,
       error: error?.message ?? null,
+      code: error?.code ?? null,
     });
     if (!error && data.session) {
       stripAuthParamsFromUrl();
@@ -127,7 +158,15 @@ export async function completeAuthFromUrl(): Promise<boolean> {
     }
   }
 
-  const session = await readSession("completeAuthFromUrl.getSession");
+  if (hasHashAccessToken()) {
+    const fromHash = await trySetSessionFromHash("confirm.setSession");
+    if (fromHash) {
+      stripAuthParamsFromUrl();
+      return true;
+    }
+  }
+
+  const session = await waitForSession("confirm.getSession", 3);
   if (session) {
     if (hasUrlAuthCallback()) stripAuthParamsFromUrl();
     return true;
@@ -136,7 +175,7 @@ export async function completeAuthFromUrl(): Promise<boolean> {
   const code = url.searchParams.get("code");
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    logRecovery("completeAuthFromUrl.exchangeCodeForSession", {
+    logAuthDebug("confirm.exchangeCodeForSession", {
       hasSession: !!data.session,
       error: error?.message ?? null,
       code: error?.code ?? null,
@@ -156,7 +195,7 @@ export function hasPendingAuthCallback(): boolean {
 
 /**
  * Establish a password-recovery session from the email link.
- * Uses implicit hash tokens (detectSessionInUrl) first; PKCE code exchange is last resort.
+ * Implicit hash tokens first; token_hash verifyOtp second; PKCE code exchange last.
  */
 export async function establishPasswordRecoverySession(): Promise<PasswordRecoveryResult> {
   if (typeof window === "undefined") {
@@ -169,7 +208,7 @@ export async function establishPasswordRecoverySession(): Promise<PasswordRecove
   const redirectError =
     url.searchParams.get("error_description") ?? url.searchParams.get("error");
   if (redirectError) {
-    logRecovery("redirectError", { redirectError });
+    logAuthDebug("recovery", { redirectError });
     return {
       ok: false,
       step: "redirectError",
@@ -179,19 +218,18 @@ export async function establishPasswordRecoverySession(): Promise<PasswordRecove
 
   const waitForEvent = createRecoveryListener();
 
-  let session = await readSession("getSession.initial");
-  if (session) {
-    stripAuthParamsFromUrl();
-    return { ok: true, step: "getSession.initial", hasSession: true };
+  if (hasHashAccessToken()) {
+    const fromHash = await trySetSessionFromHash("recovery.setSession");
+    if (fromHash) {
+      stripAuthParamsFromUrl();
+      return { ok: true, step: "setSession.fromHash", hasSession: true };
+    }
   }
 
-  if (hasHashAccessToken()) {
-    await new Promise((resolve) => window.setTimeout(resolve, 150));
-    session = await readSession("getSession.afterHashDelay");
-    if (session) {
-      stripAuthParamsFromUrl();
-      return { ok: true, step: "hash.detectSessionInUrl", hasSession: true };
-    }
+  let session = await waitForSession("recovery.getSession", 3);
+  if (session) {
+    stripAuthParamsFromUrl();
+    return { ok: true, step: "getSession", hasSession: true };
   }
 
   const tokenHash = url.searchParams.get("token_hash");
@@ -201,7 +239,7 @@ export async function establishPasswordRecoverySession(): Promise<PasswordRecove
       token_hash: tokenHash,
       type: type as EmailOtpType,
     });
-    logRecovery("verifyOtp", {
+    logAuthDebug("recovery.verifyOtp", {
       type,
       hasSession: !!data.session,
       error: error?.message ?? null,
@@ -217,8 +255,8 @@ export async function establishPasswordRecoverySession(): Promise<PasswordRecove
   }
 
   const eventReceived = await waitForEvent;
-  logRecovery("waitForRecoveryEvent", { eventReceived });
-  session = await readSession("getSession.afterEvent");
+  logAuthDebug("recovery", { waitForRecoveryEvent: eventReceived });
+  session = await readSession("recovery.getSession.afterEvent");
   if (session) {
     stripAuthParamsFromUrl();
     return { ok: true, step: "authStateChange", hasSession: true };
@@ -227,7 +265,7 @@ export async function establishPasswordRecoverySession(): Promise<PasswordRecove
   const code = url.searchParams.get("code");
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-    logRecovery("exchangeCodeForSession", {
+    logAuthDebug("recovery.exchangeCodeForSession", {
       hasSession: !!data.session,
       error: error?.message ?? null,
       code: error?.code ?? null,

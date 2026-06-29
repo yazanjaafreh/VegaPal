@@ -5,6 +5,7 @@ import { Mail } from "lucide-react";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Logo } from "@/components/Logo";
 import { EmailConfirmationActions } from "@/components/auth/EmailConfirmationActions";
+import { CheckSpamHint } from "@/components/auth/CheckSpamHint";
 import { auth } from "@/lib/vegapal-store";
 
 export function ConfirmEmailPending({ email }: { email?: string | null }) {
@@ -39,6 +40,7 @@ export function ConfirmEmailPending({ email }: { email?: string | null }) {
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
             {t("confirmEmail.message")}
           </p>
+          <CheckSpamHint className="mt-3 text-xs text-muted-foreground leading-relaxed" />
           {email ? (
             <p className="mt-3 text-sm font-medium text-foreground break-all">{email}</p>
           ) : null}

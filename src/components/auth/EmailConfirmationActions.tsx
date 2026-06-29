@@ -6,6 +6,7 @@ import { FormError } from "@/components/ui/form-error";
 import { FormSuccess } from "@/components/ui/form-success";
 import { useResendConfirmation } from "@/hooks/use-resend-confirmation";
 import { getEmailProviderUrl } from "@/lib/mail-provider";
+import { CheckSpamHint } from "@/components/auth/CheckSpamHint";
 
 type EmailConfirmationActionsProps = {
   email: string;
@@ -43,6 +44,7 @@ export function EmailConfirmationActions({ email }: EmailConfirmationActionsProp
       </LoadingButton>
       {success ? <FormSuccess message={t("confirmEmail.resendSuccess")} /> : null}
       <FormError message={error} />
+      <CheckSpamHint />
     </div>
   );
 }

@@ -12,7 +12,8 @@ import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { FormError } from "@/components/ui/form-error";
 import { FormSuccess } from "@/components/ui/form-success";
 import { establishPasswordRecoverySession } from "@/lib/auth/complete-auth-from-url";
-import { formatAuthError } from "@/lib/auth/errors";
+import { logAuthDebug } from "@/lib/auth/debug";
+import { formatAuthError, isExpiredAuthError } from "@/lib/auth/errors";
 import { firstZodError, resetPasswordSchema } from "@/lib/validation/schemas";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
 import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
@@ -27,13 +28,29 @@ export const Route = createFileRoute("/reset-password")({
 
 type PageState = "checking" | "ready" | "invalid" | "success";
 
+function recoveryFailureMessage(
+  error: unknown,
+  step: string,
+  t: (key: string) => string,
+): string {
+  if (error) {
+    if (isExpiredAuthError(error)) {
+      return t("resetPassword.invalidLink");
+    }
+    return formatAuthError(error);
+  }
+  if (step === "noCallbackParams") {
+    return t("resetPassword.openLinkFromEmail");
+  }
+  return formatAuthError(error);
+}
+
 function ResetPassword() {
   const navigate = useNavigate();
   const { t } = useTranslation("auth");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [recoveryStep, setRecoveryStep] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageState, setPageState] = useState<PageState>("checking");
   const submitGuard = useSubmitGuard();
@@ -45,8 +62,8 @@ function ResetPassword() {
       const result = await establishPasswordRecoverySession();
       if (cancelled) return;
 
-      console.info("[auth:recovery] establishPasswordRecoverySession result", {
-        ok: result.ok,
+      logAuthDebug("recovery", {
+        establishResult: result.ok,
         step: result.step,
         error: result.error?.message ?? null,
       });
@@ -56,8 +73,7 @@ function ResetPassword() {
         return;
       }
 
-      setRecoveryStep(result.step);
-      setError(formatAuthError(result.error ?? t("resetPassword.invalidLink")));
+      setError(recoveryFailureMessage(result.error, result.step, t));
       setPageState("invalid");
     })();
 
@@ -81,18 +97,22 @@ function ResetPassword() {
     setLoading(true);
     try {
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      console.info("[auth:recovery] getSession before updateUser", {
+      logAuthDebug("recovery.getSession", {
+        beforeUpdateUser: true,
         hasSession: !!sessionData.session,
         error: sessionError?.message ?? null,
       });
 
       if (!sessionData.session) {
         const recovered = await establishPasswordRecoverySession();
-        console.info("[auth:recovery] re-establish before updateUser", recovered);
+        logAuthDebug("recovery", {
+          reEstablishBeforeUpdate: recovered.ok,
+          step: recovered.step,
+          error: recovered.error?.message ?? null,
+        });
         if (!recovered.ok) {
           setPageState("invalid");
-          setRecoveryStep(recovered.step);
-          setError(formatAuthError(recovered.error ?? t("resetPassword.sessionExpired")));
+          setError(recoveryFailureMessage(recovered.error, recovered.step, t));
           return;
         }
       }
@@ -100,7 +120,7 @@ function ResetPassword() {
       const { data: updateData, error: updateError } = await supabase.auth.updateUser({
         password: parsed.data.password,
       });
-      console.info("[auth:recovery] updateUser", {
+      logAuthDebug("recovery.updateUser", {
         hasUser: !!updateData.user,
         error: updateError?.message ?? null,
         code: updateError?.code ?? null,
@@ -140,13 +160,7 @@ function ResetPassword() {
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-destructive/10 text-destructive">
             <AlertTriangle className="h-6 w-6" aria-hidden />
           </div>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {t("resetPassword.invalidLink")}
-          </p>
           <FormError message={error} />
-          {recoveryStep ? (
-            <p className="text-xs text-muted-foreground">Recovery step: {recoveryStep}</p>
-          ) : null}
           <Button asChild variant="hero" size="lg" className="w-full">
             <Link to="/forgot-password">{t("resetPassword.requestNewLink")}</Link>
           </Button>

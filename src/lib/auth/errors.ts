@@ -50,8 +50,29 @@ const SUPABASE_AUTH_MESSAGES: Record<string, string> = {
   session_not_found: "Your session has expired. Please sign in again.",
   session_missing: "Your reset link has expired. Please request a new password reset link.",
   flow_state_expired: "This link has expired. Please request a new one.",
+  otp_expired: "This link has expired. Please request a new one.",
   request_timeout: "The request timed out. Check your connection and try again.",
 };
+
+const EXPIRED_AUTH_CODES = new Set([
+  "otp_expired",
+  "flow_state_expired",
+  "session_missing",
+  "session_not_found",
+]);
+
+/** True when Supabase explicitly reports an expired OTP/session/link. */
+export function isExpiredAuthError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const code = (err as AuthError).code;
+  if (code && EXPIRED_AUTH_CODES.has(code)) return true;
+  const message = (err as Error).message?.toLowerCase() ?? "";
+  return (
+    message.includes("otp expired") ||
+    message.includes("link has expired") ||
+    message.includes("flow state has expired")
+  );
+}
 
 function mapSupabaseAuthCode(code: string): string | undefined {
   return SUPABASE_AUTH_MESSAGES[code];
@@ -73,6 +94,12 @@ function mapSupabaseAuthMessage(message: string): string {
   }
   if (lower.includes("auth session missing") || lower.includes("session missing")) {
     return SUPABASE_AUTH_MESSAGES.session_missing;
+  }
+  if (lower.includes("code verifier")) {
+    return "This reset link must be opened in the same browser where you requested it. Please request a new password reset link.";
+  }
+  if (lower.includes("no password recovery token")) {
+    return "Open the password reset link from your email, or request a new one.";
   }
   if (lower.includes("failed to fetch") || lower.includes("network")) {
     return "Network error. Check your connection and try again.";
