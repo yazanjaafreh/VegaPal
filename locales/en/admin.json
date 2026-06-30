@@ -47,6 +47,7 @@
     "view": "View",
     "empty": "No users found.",
     "emptySearch": "No users match your search or filters.",
+    "deleted": "User deleted successfully.",
     "pagination": {
       "previous": "Previous",
       "next": "Next",
@@ -96,7 +97,9 @@
       "created": "Created"
     },
     "noInvoices": "No invoices yet.",
+    "invoicesUnavailable": "Recent invoices could not be loaded.",
     "noAuditLogs": "No audit history for this user yet.",
+    "auditUnavailable": "Audit history could not be loaded.",
     "auditColumns": {
       "action": "Action",
       "admin": "Admin",
@@ -106,8 +109,19 @@
     "auditActions": {
       "plan_changed": "Plan changed",
       "user_disabled": "User disabled",
-      "user_enabled": "User enabled"
-    }
+      "user_enabled": "User enabled",
+      "user_deleted": "User deleted"
+    },
+    "dangerZone": {
+      "title": "Danger zone",
+      "description": "Permanent actions that cannot be undone.",
+      "deleteUser": "Delete user",
+      "deleteTitle": "Delete this user permanently?",
+      "deleteDescription": "This will permanently delete the user account, profile, invoices, invoice items, and audit history. This action cannot be undone.",
+      "typeDelete": "Type DELETE to confirm",
+      "cannotDeleteSelf": "You cannot delete your own account from the admin panel."
+    },
+    "successDeleted": "User deleted successfully."
   },
   "nav": {
     "dashboard": "Dashboard",

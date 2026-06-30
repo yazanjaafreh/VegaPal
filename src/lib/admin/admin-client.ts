@@ -61,6 +61,8 @@ export type AdminUserDetail = AdminUserRow & {
     createdAt: string;
   }[];
   auditLogs: AdminAuditLogEntry[];
+  auditLogsUnavailable?: boolean;
+  recentInvoicesUnavailable?: boolean;
 };
 
 export type AdminUsersPagination = {
@@ -137,5 +139,13 @@ export async function updateAdminUser(
   return adminFetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
     method: "PATCH",
     body: JSON.stringify(patch),
+  });
+}
+
+export async function deleteAdminUser(
+  userId: string,
+): Promise<{ ok: true; id: string; email: string }> {
+  return adminFetch(`/api/admin/users/${encodeURIComponent(userId)}`, {
+    method: "DELETE",
   });
 }

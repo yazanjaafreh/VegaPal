@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormError } from "@/components/ui/form-error";
+import { FormSuccess } from "@/components/ui/form-success";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AccountStatusBadge, PlanBadge } from "@/components/admin/AdminBadges";
 import {
@@ -26,12 +27,17 @@ import {
 
 export const Route = createFileRoute("/admin/users/")({
   beforeLoad: () => ensureNamespacesLoaded(["admin"]),
+  validateSearch: (search: Record<string, unknown>) => ({
+    deleted: search.deleted === "1" || search.deleted === 1 || search.deleted === true,
+  }),
   component: AdminUsersPage,
 });
 
 function AdminUsersPage() {
   const { t } = useTranslation("admin");
   const { t: tc } = useTranslation("common");
+  const { deleted } = Route.useSearch();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [pagination, setPagination] = useState<AdminUsersPagination | null>(null);
   const [error, setError] = useState("");
@@ -76,6 +82,14 @@ function AdminUsersPage() {
     setPage(1);
   }, [search, planFilter, statusFilter]);
 
+  useEffect(() => {
+    if (!deleted) return;
+    const timer = window.setTimeout(() => {
+      navigate({ to: "/admin/users", search: {}, replace: true });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [deleted, navigate]);
+
   const hasFilters = Boolean(search || planFilter || statusFilter);
   const emptyTitle = hasFilters ? t("users.emptySearch") : t("users.empty");
 
@@ -86,6 +100,9 @@ function AdminUsersPage() {
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">{t("users.title")}</h1>
         <p className="text-muted-foreground mt-1">{t("users.subtitle")}</p>
       </div>
+
+      {deleted ? <FormSuccess message={t("users.deleted")} /> : null}
+      <FormError message={error} />
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 min-w-0">
@@ -129,8 +146,6 @@ function AdminUsersPage() {
           </SelectContent>
         </Select>
       </div>
-
-      {error ? <FormError message={error} /> : null}
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
         <div className="overflow-x-auto">

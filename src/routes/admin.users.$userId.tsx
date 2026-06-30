@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
@@ -23,12 +23,15 @@ import {
 import {
   fetchAdminUser,
   updateAdminUser,
+  deleteAdminUser,
   type AdminAuditLogEntry,
   type AdminUserDetail,
 } from "@/lib/admin/admin-client";
 import { PLAN_LIMITS, USER_PLANS, type UserPlan } from "@/lib/admin/plans";
 import { formatAppError } from "@/lib/auth/errors";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { Input } from "@/components/ui/input";
+import { useSession } from "@/lib/vegapal-store";
 
 export const Route = createFileRoute("/admin/users/$userId")({
   beforeLoad: () => ensureNamespacesLoaded(["admin"]),
@@ -37,6 +40,8 @@ export const Route = createFileRoute("/admin/users/$userId")({
 
 function AdminUserDetailPage() {
   const { userId } = Route.useParams();
+  const navigate = useNavigate();
+  const { user: sessionUser } = useSession();
   const { t } = useTranslation("admin");
   const { t: tc } = useTranslation("common");
   const [user, setUser] = useState<AdminUserDetail | null>(null);
@@ -45,6 +50,9 @@ function AdminUserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [savingPlan, setSavingPlan] = useState<UserPlan | null>(null);
   const [savingStatus, setSavingStatus] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -90,6 +98,24 @@ function AdminUserDetailPage() {
     }
   }
 
+  async function deleteUser() {
+    if (deleteConfirm !== "DELETE") return;
+    setDeleting(true);
+    setSuccess("");
+    setError("");
+    try {
+      await deleteAdminUser(userId);
+      setDeleteDialogOpen(false);
+      navigate({ to: "/admin/users", search: { deleted: "1" } });
+    } catch (err) {
+      setError(formatAppError(err));
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  const isSelf = sessionUser?.id === userId;
+
   if (loading && !user) {
     return <div className="p-6 text-sm text-muted-foreground">{t("userDetail.loading")}</div>;
   }
@@ -99,7 +125,7 @@ function AdminUserDetailPage() {
       <div className="p-4 sm:p-6 max-w-3xl mx-auto">
         <FormError message={error || t("userDetail.notFound")} />
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/admin/users">{t("userDetail.back")}</Link>
+          <Link to="/admin/users">{t("userDetail.back", { defaultValue: "Back to users" })}</Link>
         </Button>
       </div>
     );
@@ -117,7 +143,7 @@ function AdminUserDetailPage() {
         <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
           <Link to="/admin/users">
             <ArrowLeft className="h-4 w-4" />
-            {t("userDetail.back")}
+            {t("userDetail.back", { defaultValue: "Back to users" })}
           </Link>
         </Button>
         <div className="flex flex-wrap items-center gap-2">
@@ -227,7 +253,11 @@ function AdminUserDetailPage() {
         <div className="px-5 sm:px-6 py-4 border-b border-border">
           <h2 className="font-semibold">{t("userDetail.recentInvoices")}</h2>
         </div>
-        {user.recentInvoices.length === 0 ? (
+        {user.recentInvoicesUnavailable ? (
+          <div className="px-5 sm:px-6 py-8">
+            <EmptyState title={t("userDetail.invoicesUnavailable")} />
+          </div>
+        ) : user.recentInvoices.length === 0 ? (
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.noInvoices")} />
           </div>
@@ -271,7 +301,11 @@ function AdminUserDetailPage() {
         <div className="px-5 sm:px-6 py-4 border-b border-border">
           <h2 className="font-semibold">{t("userDetail.auditLog")}</h2>
         </div>
-        {!user.auditLogs?.length ? (
+        {user.auditLogsUnavailable ? (
+          <div className="px-5 sm:px-6 py-8">
+            <EmptyState title={t("userDetail.auditUnavailable")} />
+          </div>
+        ) : !user.auditLogs?.length ? (
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.noAuditLogs")} />
           </div>
@@ -292,6 +326,61 @@ function AdminUserDetailPage() {
               </tbody>
             </table>
           </div>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-destructive/30 bg-destructive/5 p-5 sm:p-6 space-y-4">
+        <div>
+          <h2 className="font-semibold text-destructive">{t("userDetail.dangerZone.title")}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{t("userDetail.dangerZone.description")}</p>
+        </div>
+        {isSelf ? (
+          <p className="text-sm text-muted-foreground">{t("userDetail.dangerZone.cannotDeleteSelf")}</p>
+        ) : (
+          <AlertDialog
+            open={deleteDialogOpen}
+            onOpenChange={(open) => {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteConfirm("");
+            }}
+          >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={deleting || savingPlan !== null || savingStatus}>
+                {t("userDetail.dangerZone.deleteUser")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t("userDetail.dangerZone.deleteTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("userDetail.dangerZone.deleteDescription")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="space-y-2">
+                <label htmlFor="delete-confirm" className="text-sm font-medium">
+                  {t("userDetail.dangerZone.typeDelete")}
+                </label>
+                <Input
+                  id="delete-confirm"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  placeholder="DELETE"
+                  autoComplete="off"
+                />
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t("userDetail.cancel")}</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={deleteConfirm !== "DELETE" || deleting}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    void deleteUser();
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {t("userDetail.dangerZone.deleteUser")}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </section>
     </div>
@@ -321,6 +410,9 @@ function formatAuditDetails(entry: AdminAuditLogEntry) {
   }
   if (entry.action === "user_disabled" || entry.action === "user_enabled") {
     return String(newVal?.is_disabled ?? "");
+  }
+  if (entry.action === "user_deleted") {
+    return String(oldVal?.email ?? oldVal?.name ?? "—");
   }
   return JSON.stringify(newVal ?? {});
 }

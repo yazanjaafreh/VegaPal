@@ -237,7 +237,23 @@ async function getUsersList(query: AdminUsersQuery) {
   };
 }
 
-async function getAuditLogsForUser(userId: string, limit = 50) {
+async function getAuditLogsForUser(
+  userId: string,
+  limit = 50,
+): Promise<{
+  logs: {
+    id: string;
+    adminUserId: string;
+    targetUserId: string;
+    action: string;
+    oldValue: unknown;
+    newValue: unknown;
+    ipAddress: string | null;
+    userAgent: string | null;
+    createdAt: string;
+  }[];
+  unavailable: boolean;
+}> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("admin_audit_logs")
@@ -247,11 +263,18 @@ async function getAuditLogsForUser(userId: string, limit = 50) {
     .limit(limit);
 
   if (error) {
-    if (error.code === "42P01") return [];
-    throw error;
+    console.error("[admin-api] audit logs fetch failed");
+    return { logs: [], unavailable: true };
   }
 
-  return (data as AuditLogRow[]).map((row) => ({
+  return {
+    logs: (data as AuditLogRow[]).map(mapAuditLogRow),
+    unavailable: false,
+  };
+}
+
+function mapAuditLogRow(row: AuditLogRow) {
+  return {
     id: row.id,
     adminUserId: row.admin_user_id,
     targetUserId: row.target_user_id,
@@ -261,39 +284,45 @@ async function getAuditLogsForUser(userId: string, limit = 50) {
     ipAddress: row.ip_address,
     userAgent: row.user_agent,
     createdAt: row.created_at,
-  }));
+  };
 }
 
 async function getUserDetail(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ data: profile, error: profileError }, { data: invoices, error: invoicesError }, authMap, auditLogs] =
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .select(
+      "id, email, name, business, company_address, website, contact_email, plan, role, is_disabled, created_at, updated_at",
+    )
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  if (!profile) return null;
+
+  const [authMap, auditResult, recentInvoicesResult, allInvoicesResult, invoiceCountThisMonth] =
     await Promise.all([
-      supabaseAdmin
-        .from("profiles")
-        .select(
-          "id, email, name, business, company_address, website, contact_email, plan, role, is_disabled, created_at, updated_at",
-        )
-        .eq("id", userId)
-        .maybeSingle(),
+      getAuthInfoForUserIds([userId]),
+      getAuditLogsForUser(userId),
       supabaseAdmin
         .from("invoices")
         .select("id, user_id, number, title, client_name, status, total, created_at")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10),
-      getAuthInfoForUserIds([userId]),
-      getAuditLogsForUser(userId),
+      supabaseAdmin.from("invoices").select("status").eq("user_id", userId),
+      countInvoicesThisMonth(supabaseAdmin, userId).catch(() => 0),
     ]);
 
-  if (profileError) throw profileError;
-  if (invoicesError) throw invoicesError;
-  if (!profile) return null;
+  if (recentInvoicesResult.error) {
+    console.error("[admin-api] recent invoices fetch failed");
+  }
+  if (allInvoicesResult.error) {
+    console.error("[admin-api] invoice stats fetch failed");
+  }
 
-  const allInvoices = await supabaseAdmin.from("invoices").select("status").eq("user_id", userId);
-  if (allInvoices.error) throw allInvoices.error;
-
-  const invoiceRows = allInvoices.data ?? [];
+  const invoiceRows = allInvoicesResult.error ? [] : (allInvoicesResult.data ?? []);
   const auth = authMap.get(userId);
 
   return {
@@ -312,20 +341,122 @@ async function getUserDetail(userId: string) {
     updatedAt: profile.updated_at,
     lastSignInAt: auth?.last_sign_in_at ?? null,
     invoiceCount: invoiceRows.length,
-    invoiceCountThisMonth: await countInvoicesThisMonth(supabaseAdmin, userId),
+    invoiceCountThisMonth,
     paidInvoiceCount: invoiceRows.filter((i) => i.status === "paid").length,
     pendingInvoiceCount: invoiceRows.filter((i) => i.status === "pending").length,
-    recentInvoices: (invoices as InvoiceRow[]).map((inv) => ({
-      id: inv.id,
-      number: inv.number,
-      title: inv.title,
-      clientName: inv.client_name,
-      status: inv.status,
-      total: Number(inv.total),
-      createdAt: inv.created_at,
-    })),
-    auditLogs,
+    recentInvoices: recentInvoicesResult.error
+      ? []
+      : (recentInvoicesResult.data as InvoiceRow[]).map((inv) => ({
+          id: inv.id,
+          number: inv.number,
+          title: inv.title,
+          clientName: inv.client_name,
+          status: inv.status,
+          total: Number(inv.total),
+          createdAt: inv.created_at,
+        })),
+    recentInvoicesUnavailable: !!recentInvoicesResult.error,
+    auditLogs: auditResult.logs,
+    auditLogsUnavailable: auditResult.unavailable,
     status: profile.is_disabled ? ("disabled" as const) : ("active" as const),
+  };
+}
+
+async function countAdminProfiles() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { count, error } = await supabaseAdmin
+    .from("profiles")
+    .select("id", { count: "exact", head: true })
+    .eq("role", "admin");
+  if (error) throw error;
+  return count ?? 0;
+}
+
+async function deleteUser(targetUserId: string, adminUserId: string, request: Request) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+  if (targetUserId === adminUserId) {
+    throw new Error("You cannot delete your own account.");
+  }
+
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .select("id, email, name, business, plan, role")
+    .eq("id", targetUserId)
+    .maybeSingle();
+
+  if (profileError) throw profileError;
+  if (!profile) return null;
+
+  if (profile.role === "admin") {
+    const adminCount = await countAdminProfiles();
+    if (adminCount <= 1) {
+      throw new Error("Cannot delete the last admin account.");
+    }
+  }
+
+  const meta = getRequestMeta(request);
+  await writeAdminAuditLog(supabaseAdmin, {
+    adminUserId,
+    targetUserId,
+    action: "user_deleted",
+    oldValue: {
+      email: profile.email,
+      name: profile.name,
+      business: profile.business,
+      plan: profile.plan,
+      role: profile.role,
+    },
+    newValue: null,
+    ...meta,
+  });
+
+  const { data: invoiceRows, error: invoiceListError } = await supabaseAdmin
+    .from("invoices")
+    .select("id")
+    .eq("user_id", targetUserId);
+
+  if (invoiceListError) throw invoiceListError;
+
+  const invoiceIds = (invoiceRows ?? []).map((row) => row.id);
+  if (invoiceIds.length > 0) {
+    const { error: itemsError } = await supabaseAdmin
+      .from("invoice_items")
+      .delete()
+      .in("invoice_id", invoiceIds);
+    if (itemsError) throw itemsError;
+
+    const { error: invoicesError } = await supabaseAdmin
+      .from("invoices")
+      .delete()
+      .eq("user_id", targetUserId);
+    if (invoicesError) throw invoicesError;
+  }
+
+  const { error: auditByAdminError } = await supabaseAdmin
+    .from("admin_audit_logs")
+    .delete()
+    .eq("admin_user_id", targetUserId);
+  if (auditByAdminError) throw auditByAdminError;
+
+  const { error: auditByTargetError } = await supabaseAdmin
+    .from("admin_audit_logs")
+    .delete()
+    .eq("target_user_id", targetUserId);
+  if (auditByTargetError) throw auditByTargetError;
+
+  const { error: profileDeleteError } = await supabaseAdmin
+    .from("profiles")
+    .delete()
+    .eq("id", targetUserId);
+  if (profileDeleteError) throw profileDeleteError;
+
+  const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(targetUserId);
+  if (authDeleteError) throw authDeleteError;
+
+  return {
+    id: targetUserId,
+    email: profile.email ?? "",
   };
 }
 
@@ -454,9 +585,29 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
       const userId = decodeURIComponent(userMatch[1]);
 
       if (request.method === "GET") {
-        const detail = await getUserDetail(userId);
-        if (!detail) return json({ error: "User not found" }, 404);
-        return json(detail);
+        try {
+          const detail = await getUserDetail(userId);
+          if (!detail) return json({ error: "User not found" }, 404);
+          return json(detail);
+        } catch (err) {
+          console.error("[admin-api] get user detail failed", err);
+          return json({ error: "Could not load this user. Please refresh and try again." }, 500);
+        }
+      }
+
+      if (request.method === "DELETE") {
+        try {
+          const deleted = await deleteUser(userId, admin.userId, request);
+          if (!deleted) return json({ error: "User not found" }, 404);
+          return json({ ok: true, id: deleted.id, email: deleted.email });
+        } catch (err) {
+          const message =
+            err instanceof Error ? friendlyError(err.message) : "Could not delete this user.";
+          const status = message.includes("cannot delete") || message.includes("Cannot delete")
+            ? 400
+            : 500;
+          return json({ error: message }, status);
+        }
       }
 
       if (request.method === "PATCH") {
