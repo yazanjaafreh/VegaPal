@@ -5,14 +5,16 @@ import { useTranslation } from "react-i18next";
 import { PageLoading } from "@/components/ui/page-loading";
 import { ConfirmEmailPending } from "@/components/auth/ConfirmEmailPending";
 import { auth, useSession } from "@/lib/vegapal-store";
-import { LayoutDashboard, FilePlus2, Settings, LogOut, FileText, Shield } from "lucide-react";
+import { LayoutDashboard, FilePlus2, Settings, LogOut, FileText, Shield, ShieldCheck } from "lucide-react";
 import { Logo } from "./Logo";
 import { ThemeToggle } from "@/lib/theme";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { user, loading, pendingEmailConfirmation, authEmail } = useSession();
+  const { isAdmin } = useIsAdmin();
   const { t } = useTranslation("common");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -29,6 +31,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/invoices", label: t("nav.invoices"), icon: FileText, exact: true },
     { to: "/invoices/new", label: t("nav.createInvoice"), icon: FilePlus2 },
     { to: "/settings", label: t("nav.settings"), icon: Settings },
+    ...(isAdmin
+      ? [{ to: "/admin", label: t("nav.adminPanel"), icon: ShieldCheck, exact: false } as const]
+      : []),
   ];
 
   const isActive = (n: (typeof nav)[number]) =>
@@ -103,6 +108,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <Link
+                to="/admin"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                aria-label={t("nav.adminPanel")}
+              >
+                <ShieldCheck className="h-4 w-4" />
+              </Link>
+            ) : null}
             <LanguageSwitcher />
             <ThemeToggle />
           </div>

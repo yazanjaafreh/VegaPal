@@ -1,6 +1,7 @@
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { UserPlan } from "@/lib/admin/plans";
 import { requireAdminFromRequest } from "@/lib/admin/admin-auth.server";
+import { getRequestMeta, writeAdminAuditLog } from "@/lib/admin/admin-audit.server";
 
 type ProfileRow = {
   id: string;
@@ -25,11 +26,39 @@ type InvoiceRow = {
   created_at: string;
 };
 
+type AuditLogRow = {
+  id: string;
+  admin_user_id: string;
+  target_user_id: string;
+  action: string;
+  old_value: unknown;
+  new_value: unknown;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+};
+
+export type AdminUsersQuery = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  plan?: UserPlan;
+  status?: "active" | "disabled";
+};
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json" },
   });
+}
+
+function friendlyError(message?: string): string {
+  if (!message) return "Could not complete this action. Please try again.";
+  if (message.includes("Cannot change")) return "Profile updates are restricted.";
+  if (message.includes("duplicate") || message.includes("violates"))
+    return "Could not complete this action. Please try again.";
+  return message;
 }
 
 function startOfUtcMonth() {
@@ -40,6 +69,15 @@ function startOfUtcMonth() {
 function startOfNextUtcMonth() {
   const d = new Date();
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1)).toISOString();
+}
+
+function startOfUtcToday() {
+  const d = new Date();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).toISOString();
+}
+
+function startOfUtcNextMonth() {
+  return startOfNextUtcMonth();
 }
 
 async function countInvoicesThisMonth(
@@ -56,38 +94,35 @@ async function countInvoicesThisMonth(
   return count ?? 0;
 }
 
-async function loadAuthUsersMap() {
+async function getAuthInfoForUserIds(userIds: string[]) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const map = new Map<string, { last_sign_in_at: string | null; email: string | null }>();
-  let page = 1;
-  const perPage = 200;
 
-  while (true) {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
-    if (error) throw error;
-    for (const user of data.users) {
-      map.set(user.id, {
-        last_sign_in_at: user.last_sign_in_at ?? null,
-        email: user.email ?? null,
-      });
-    }
-    if (data.users.length < perPage) break;
-    page += 1;
-  }
+  await Promise.all(
+    userIds.map(async (id) => {
+      const { data, error } = await supabaseAdmin.auth.admin.getUserById(id);
+      if (!error && data.user) {
+        map.set(id, {
+          last_sign_in_at: data.user.last_sign_in_at ?? null,
+          email: data.user.email ?? null,
+        });
+      }
+    }),
+  );
 
   return map;
 }
 
 async function getStats() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const todayStart = new Date(
-    Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate()),
-  ).toISOString();
+  const todayStart = startOfUtcToday();
+  const monthStart = startOfUtcMonth();
+  const nextMonthStart = startOfUtcNextMonth();
 
   const [{ data: profiles, error: profilesError }, { data: invoices, error: invoicesError }] =
     await Promise.all([
-      supabaseAdmin.from("profiles").select("id, plan, created_at"),
-      supabaseAdmin.from("invoices").select("id, status"),
+      supabaseAdmin.from("profiles").select("id, plan, is_disabled, created_at"),
+      supabaseAdmin.from("invoices").select("id, status, created_at"),
     ]);
 
   if (profilesError) throw profilesError;
@@ -99,29 +134,62 @@ async function getStats() {
   return {
     totalUsers: profileRows.length,
     newUsersToday: profileRows.filter((p) => p.created_at >= todayStart).length,
+    newUsersThisMonth: profileRows.filter((p) => p.created_at >= monthStart).length,
     freeUsers: profileRows.filter((p) => p.plan === "free").length,
     proUsers: profileRows.filter((p) => p.plan === "pro").length,
     businessUsers: profileRows.filter((p) => p.plan === "business").length,
+    disabledUsers: profileRows.filter((p) => p.is_disabled).length,
     totalInvoices: invoiceRows.length,
+    invoicesThisMonth: invoiceRows.filter(
+      (i) => i.created_at >= monthStart && i.created_at < nextMonthStart,
+    ).length,
     paidInvoices: invoiceRows.filter((i) => i.status === "paid").length,
     pendingInvoices: invoiceRows.filter((i) => i.status === "pending").length,
   };
 }
 
-async function getUsersList() {
+async function getUsersList(query: AdminUsersQuery) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ data: profiles, error: profilesError }, { data: invoices, error: invoicesError }, authMap] =
-    await Promise.all([
-      supabaseAdmin
-        .from("profiles")
-        .select("id, email, name, business, plan, role, is_disabled, created_at, updated_at")
-        .order("created_at", { ascending: false }),
-      supabaseAdmin.from("invoices").select("user_id, status"),
-      loadAuthUsersMap(),
-    ]);
+  const page = Math.max(1, query.page ?? 1);
+  const pageSize = Math.min(100, Math.max(1, query.pageSize ?? 20));
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let profileQuery = supabaseAdmin
+    .from("profiles")
+    .select("id, email, name, business, plan, role, is_disabled, created_at, updated_at", {
+      count: "exact",
+    });
+
+  if (query.plan) profileQuery = profileQuery.eq("plan", query.plan);
+  if (query.status === "disabled") profileQuery = profileQuery.eq("is_disabled", true);
+  if (query.status === "active") profileQuery = profileQuery.eq("is_disabled", false);
+
+  const search = query.search?.trim();
+  if (search) {
+    const escaped = search.replace(/[%_]/g, "\\$&");
+    profileQuery = profileQuery.or(
+      `name.ilike.%${escaped}%,email.ilike.%${escaped}%,business.ilike.%${escaped}%`,
+    );
+  }
+
+  const { data: profiles, error: profilesError, count } = await profileQuery
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (profilesError) throw profilesError;
+
+  const profileRows = (profiles ?? []) as ProfileRow[];
+  const userIds = profileRows.map((p) => p.id);
+
+  const [{ data: invoices, error: invoicesError }, authMap] = await Promise.all([
+    userIds.length
+      ? supabaseAdmin.from("invoices").select("user_id, status").in("user_id", userIds)
+      : Promise.resolve({ data: [], error: null }),
+    getAuthInfoForUserIds(userIds),
+  ]);
+
   if (invoicesError) throw invoicesError;
 
   const invoiceCounts = new Map<string, { total: number; paid: number; pending: number }>();
@@ -133,7 +201,7 @@ async function getUsersList() {
     invoiceCounts.set(inv.user_id, current);
   }
 
-  return (profiles as ProfileRow[]).map((profile) => {
+  const users = profileRows.map((profile) => {
     const counts = invoiceCounts.get(profile.id) ?? { total: 0, paid: 0, pending: 0 };
     const auth = authMap.get(profile.id);
     return {
@@ -149,15 +217,57 @@ async function getUsersList() {
       invoiceCount: counts.total,
       paidInvoiceCount: counts.paid,
       pendingInvoiceCount: counts.pending,
-      status: profile.is_disabled ? "disabled" : "active",
+      status: profile.is_disabled ? ("disabled" as const) : ("active" as const),
     };
   });
+
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  return {
+    users,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrevious: page > 1,
+    },
+  };
+}
+
+async function getAuditLogsForUser(userId: string, limit = 50) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("admin_audit_logs")
+    .select("id, admin_user_id, target_user_id, action, old_value, new_value, ip_address, user_agent, created_at")
+    .eq("target_user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    if (error.code === "42P01") return [];
+    throw error;
+  }
+
+  return (data as AuditLogRow[]).map((row) => ({
+    id: row.id,
+    adminUserId: row.admin_user_id,
+    targetUserId: row.target_user_id,
+    action: row.action,
+    oldValue: row.old_value,
+    newValue: row.new_value,
+    ipAddress: row.ip_address,
+    userAgent: row.user_agent,
+    createdAt: row.created_at,
+  }));
 }
 
 async function getUserDetail(userId: string) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-  const [{ data: profile, error: profileError }, { data: invoices, error: invoicesError }, authMap] =
+  const [{ data: profile, error: profileError }, { data: invoices, error: invoicesError }, authMap, auditLogs] =
     await Promise.all([
       supabaseAdmin
         .from("profiles")
@@ -172,7 +282,8 @@ async function getUserDetail(userId: string) {
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(10),
-      loadAuthUsersMap(),
+      getAuthInfoForUserIds([userId]),
+      getAuditLogsForUser(userId),
     ]);
 
   if (profileError) throw profileError;
@@ -213,16 +324,41 @@ async function getUserDetail(userId: string) {
       total: Number(inv.total),
       createdAt: inv.created_at,
     })),
-    status: profile.is_disabled ? "disabled" : "active",
+    auditLogs,
+    status: profile.is_disabled ? ("disabled" as const) : ("active" as const),
   };
 }
 
-async function patchUser(userId: string, body: { plan?: UserPlan; isDisabled?: boolean }) {
+async function syncAuthBan(userId: string, isDisabled: boolean) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+    ban_duration: isDisabled ? "876000h" : "none",
+  });
+  if (error) {
+    console.error("[admin-api] auth ban failed");
+  }
+}
+
+async function patchUser(
+  userId: string,
+  body: { plan?: UserPlan; isDisabled?: boolean },
+  adminUserId: string,
+  request: Request,
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   if (body.plan === undefined && body.isDisabled === undefined) {
     throw new Error("No updates provided");
   }
+
+  const { data: before, error: beforeError } = await supabaseAdmin
+    .from("profiles")
+    .select("plan, is_disabled")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (beforeError) throw beforeError;
+  if (!before) return null;
 
   const updates: TablesUpdate<"profiles"> = { updated_at: new Date().toISOString() };
   if (body.plan !== undefined) updates.plan = body.plan;
@@ -235,19 +371,52 @@ async function patchUser(userId: string, body: { plan?: UserPlan; isDisabled?: b
     .select("id, plan, is_disabled")
     .maybeSingle();
 
-  if (error) {
-    const message = error.message?.includes("Cannot change")
-      ? "Profile updates are restricted."
-      : error.message;
-    throw new Error(message || "Failed to update user");
-  }
+  if (error) throw new Error(friendlyError(error.message));
   if (!data) return null;
+
+  const meta = getRequestMeta(request);
+
+  if (body.plan !== undefined && before.plan !== body.plan) {
+    await writeAdminAuditLog(supabaseAdmin, {
+      adminUserId,
+      targetUserId: userId,
+      action: "plan_changed",
+      oldValue: { plan: before.plan },
+      newValue: { plan: body.plan },
+      ...meta,
+    });
+  }
+
+  if (body.isDisabled !== undefined && before.is_disabled !== body.isDisabled) {
+    await syncAuthBan(userId, body.isDisabled);
+    await writeAdminAuditLog(supabaseAdmin, {
+      adminUserId,
+      targetUserId: userId,
+      action: body.isDisabled ? "user_disabled" : "user_enabled",
+      oldValue: { is_disabled: before.is_disabled },
+      newValue: { is_disabled: body.isDisabled },
+      ...meta,
+    });
+  }
 
   return {
     id: data.id,
     plan: data.plan,
     isDisabled: data.is_disabled,
     status: data.is_disabled ? "disabled" : "active",
+  };
+}
+
+function parseUsersQuery(url: URL): AdminUsersQuery {
+  const plan = url.searchParams.get("plan");
+  const status = url.searchParams.get("status");
+  return {
+    page: Number(url.searchParams.get("page") ?? "1"),
+    pageSize: Number(url.searchParams.get("pageSize") ?? "20"),
+    search: url.searchParams.get("search") ?? undefined,
+    plan: plan && ["free", "pro", "business"].includes(plan) ? (plan as UserPlan) : undefined,
+    status:
+      status === "active" || status === "disabled" ? status : undefined,
   };
 }
 
@@ -270,14 +439,14 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
       }
     }
 
-    await requireAdminFromRequest(request);
+    const admin = await requireAdminFromRequest(request);
 
     if (path === "/api/admin/stats" && request.method === "GET") {
       return json(await getStats());
     }
 
     if (path === "/api/admin/users" && request.method === "GET") {
-      return json({ users: await getUsersList() });
+      return json(await getUsersList(parseUsersQuery(url)));
     }
 
     const userMatch = path.match(/^\/api\/admin\/users\/([^/]+)$/);
@@ -291,7 +460,14 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
       }
 
       if (request.method === "PATCH") {
-        const body = (await request.json()) as { plan?: UserPlan; isDisabled?: boolean };
+        const rawBody = (await request.json()) as Record<string, unknown>;
+        const allowedKeys = new Set(["plan", "isDisabled"]);
+        const extraKeys = Object.keys(rawBody).filter((k) => !allowedKeys.has(k));
+        if (extraKeys.length > 0) {
+          return json({ error: "Invalid request fields." }, 400);
+        }
+
+        const body = rawBody as { plan?: UserPlan; isDisabled?: boolean };
         if (body.plan !== undefined && !["free", "pro", "business"].includes(body.plan)) {
           return json({ error: "Invalid plan. Choose Free, Pro, or Business." }, 400);
         }
@@ -302,11 +478,11 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
           return json({ error: "No updates provided." }, 400);
         }
         try {
-          const updated = await patchUser(userId, body);
+          const updated = await patchUser(userId, body, admin.userId, request);
           if (!updated) return json({ error: "User not found" }, 404);
           return json(updated);
         } catch (err) {
-          const message = err instanceof Error ? err.message : "Failed to update user";
+          const message = err instanceof Error ? friendlyError(err.message) : "Failed to update user";
           return json({ error: message }, 400);
         }
       }
@@ -317,7 +493,7 @@ export async function handleAdminApiRequest(request: Request): Promise<Response>
     return json({ error: "Not found" }, 404);
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error("[admin-api]", error);
+    console.error("[admin-api] unexpected error");
     return json({ error: "Internal server error" }, 500);
   }
 }

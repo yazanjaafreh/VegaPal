@@ -134,7 +134,7 @@ function Settings() {
       <p className="text-muted-foreground mt-1">{t("subtitle")}</p>
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <PlanBadge plan={user.plan} />
-        <InvoicePlanUsageIndicator />
+        <InvoicePlanUsageIndicator showUpgradeWhenLimited />
       </div>
 
       <form onSubmit={save} className="mt-8 space-y-6">

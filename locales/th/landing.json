@@ -122,8 +122,8 @@
         "description": "สำหรับฟรีแลนซ์และธุรกิจขนาดเล็กที่กำลังเติบโต",
         "cta": "ชำระด้วย USDT",
         "features": {
-          "invoices": "90 ใบแจ้งหนี้ / เดือน",
-          "users": "1 ผู้ใช้",
+          "invoices": "ใบแจ้งหนี้ไม่จำกัด",
+          "users": "2 ผู้ใช้",
           "everythingFree": "ทุกอย่างใน Free",
           "prioritySupport": "ซัพพอร์ตพิเศษ",
           "earlyAccess": "เข้าถึงฟีเจอร์ใหม่ก่อนใคร",
@@ -136,7 +136,7 @@
         "cta": "ชำระด้วย USDT",
         "features": {
           "invoices": "ใบแจ้งหนี้ไม่จำกัด",
-          "users": "2 ผู้ใช้",
+          "users": "4 ผู้ใช้",
           "everythingPro": "ทุกอย่างใน Pro",
           "teamManagement": "จัดการทีม",
           "multipleWallets": "หลายกระเป๋า",

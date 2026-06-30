@@ -58,6 +58,12 @@ export default {
         return await applySecurityHeaders(response);
       }
 
+      if (url.pathname === "/api/health") {
+        const { handleHealthCheckRequest } = await import("@/lib/health/health-check.server");
+        const response = await handleHealthCheckRequest();
+        return await applySecurityHeaders(response);
+      }
+
       if (url.pathname.startsWith("/api/admin")) {
         const { handleAdminApiRequest } = await import("@/lib/admin/admin-api.server");
         const response = await handleAdminApiRequest(request);

@@ -1,0 +1,114 @@
+{
+  "meta": { "title": "الإدارة — VegaPal" },
+  "eyebrow": "الإدارة",
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "نظرة عامة على المستخدمين والخطط والفواتير.",
+    "loading": "جارٍ تحميل الإحصائيات…",
+    "stats": {
+      "totalUsers": "إجمالي المستخدمين",
+      "newUsersToday": "مستخدمون جدد اليوم",
+      "newUsersThisMonth": "مستخدمون جدد هذا الشهر",
+      "freeUsers": "مستخدمون مجانيون",
+      "proUsers": "مستخدمون Pro",
+      "businessUsers": "مستخدمون Business",
+      "disabledUsers": "مستخدمون معطّلون",
+      "totalInvoices": "إجمالي الفواتير",
+      "invoicesThisMonth": "فواتير هذا الشهر",
+      "paidInvoices": "فواتير مدفوعة",
+      "pendingInvoices": "فواتير قيد الانتظار"
+    }
+  },
+  "users": {
+    "title": "المستخدمون",
+    "subtitle": "إدارة الحسابات والخطط وحالة الوصول.",
+    "loading": "جارٍ تحميل المستخدمين…",
+    "searchPlaceholder": "بحث بالاسم أو البريد أو النشاط التجاري",
+    "filters": {
+      "plan": "الخطة",
+      "status": "الحالة",
+      "allPlans": "كل الخطط",
+      "allStatuses": "كل الحالات",
+      "active": "نشط",
+      "disabled": "معطّل"
+    },
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد",
+      "plan": "الخطة",
+      "joined": "تاريخ الانضمام",
+      "lastSignIn": "آخر تسجيل دخول",
+      "invoices": "الفواتير",
+      "status": "الحالة",
+      "actions": "إجراءات"
+    },
+    "view": "عرض",
+    "empty": "لم يتم العثور على مستخدمين.",
+    "emptySearch": "لا يوجد مستخدمون يطابقون البحث أو الفلاتر.",
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة {{page}} من {{totalPages}}"
+    }
+  },
+  "userDetail": {
+    "back": "العودة إلى المستخدمين",
+    "eyebrow": "تفاصيل المستخدم",
+    "loading": "جارٍ تحميل المستخدم…",
+    "notFound": "المستخدم غير موجود.",
+    "profile": "الملف الشخصي",
+    "planManagement": "إدارة الخطة",
+    "accountStatus": "حالة الحساب",
+    "recentInvoices": "الفواتير الأخيرة",
+    "auditLog": "سجل التدقيق",
+    "fields": {
+      "name": "الاسم",
+      "email": "البريد",
+      "business": "النشاط التجاري",
+      "plan": "الخطة",
+      "joined": "تاريخ الانضمام",
+      "lastSignIn": "آخر تسجيل دخول",
+      "invoicesThisMonth": "فواتير هذا الشهر",
+      "totalInvoices": "إجمالي الفواتير",
+      "paid": "مدفوعة",
+      "pending": "قيد الانتظار"
+    },
+    "planSummary": "{{users}} مستخدم(ون)، {{invoices}}.",
+    "planSummaryUnlimited": "فواتير غير محدودة",
+    "planSummaryLimited": "{{count}} فاتورة شهرياً",
+    "setPlan": "تعيين {{plan}}",
+    "enableUser": "تفعيل المستخدم",
+    "disableUser": "تعطيل المستخدم",
+    "disableTitle": "تعطيل هذا المستخدم؟",
+    "disableDescription": "سيتم تسجيل خروج {{email}} ولن يتمكن من تسجيل الدخول حتى إعادة التفعيل.",
+    "cancel": "إلغاء",
+    "successPlan": "تم تحديث الخطة إلى {{plan}}.",
+    "successDisabled": "تم تعطيل المستخدم.",
+    "successEnabled": "تم إعادة تفعيل المستخدم.",
+    "invoiceColumns": {
+      "number": "الرقم",
+      "title": "العنوان",
+      "client": "العميل",
+      "status": "الحالة",
+      "total": "الإجمالي",
+      "created": "تاريخ الإنشاء"
+    },
+    "noInvoices": "لا توجد فواتير بعد.",
+    "noAuditLogs": "لا يوجد سجل تدقيق لهذا المستخدم بعد.",
+    "auditColumns": {
+      "action": "الإجراء",
+      "admin": "المسؤول",
+      "details": "التفاصيل",
+      "when": "الوقت"
+    },
+    "auditActions": {
+      "plan_changed": "تغيير الخطة",
+      "user_disabled": "تعطيل المستخدم",
+      "user_enabled": "تفعيل المستخدم"
+    }
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون"
+  }
+}

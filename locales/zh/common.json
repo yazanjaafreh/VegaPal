@@ -15,6 +15,7 @@
     "createInvoice": "创建发票",
     "settings": "设置",
     "signOut": "退出登录",
+    "adminPanel": "管理面板",
     "openMenu": "打开导航菜单"
   },
   "language": {
@@ -135,6 +136,15 @@
   "securePayments": {
     "title": "安全付款",
     "tagline": "链上可信 USDT 交易。"
+  },
+  "plan": {
+    "usageUnlimited": "无限发票",
+    "usageFree": "本月已使用 {{used}} / {{limit}} 张发票",
+    "warningNearLimit": "您本月已使用 {{used}} / {{limit}} 张发票。",
+    "limitReached": "您已达到 Free 套餐每月 5 张发票的上限。升级到 Pro 可创建无限发票。",
+    "upgradePlan": "升级套餐",
+    "badges": { "free": "Free", "pro": "Pro", "business": "Business" },
+    "status": { "active": "正常", "disabled": "已禁用" }
   },
   "empty": {
     "noActivity": "暂无活动。",

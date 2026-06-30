@@ -15,7 +15,7 @@
     "createInvoice": "Create Invoice",
     "settings": "Settings",
     "signOut": "Sign out",
-    "adminPanel": "Admin Panel",
+    "adminPanel": "لوحة الإدارة",
     "openMenu": "Open navigation menu"
   },
   "language": {
@@ -138,20 +138,13 @@
     "tagline": "Trusted USDT deals on-chain."
   },
   "plan": {
-    "usageUnlimited": "Unlimited invoices",
-    "usageFree": "{{used}} / {{limit}} invoices used this month",
-    "warningNearLimit": "You have used {{used}} of {{limit}} invoices this month.",
-    "limitReached": "You have reached the Free plan limit of 5 invoices this month. Upgrade to Pro to create unlimited invoices.",
-    "upgradePlan": "Upgrade plan",
-    "badges": {
-      "free": "Free",
-      "pro": "Pro",
-      "business": "Business"
-    },
-    "status": {
-      "active": "Active",
-      "disabled": "Disabled"
-    }
+    "usageUnlimited": "فواتير غير محدودة",
+    "usageFree": "{{used}} / {{limit}} فاتورة مستخدمة هذا الشهر",
+    "warningNearLimit": "لقد استخدمت {{used}} من {{limit}} فواتير هذا الشهر.",
+    "limitReached": "لقد وصلت إلى حد الخطة المجانية البالغ 5 فواتير هذا الشهر. قم بالترقية إلى Pro لإنشاء فواتير غير محدودة.",
+    "upgradePlan": "ترقية الخطة",
+    "badges": { "free": "مجاني", "pro": "Pro", "business": "Business" },
+    "status": { "active": "نشط", "disabled": "معطّل" }
   },
   "empty": {
     "noActivity": "No activity yet.",

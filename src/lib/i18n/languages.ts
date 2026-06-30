@@ -2,6 +2,7 @@ export const LANGUAGE_STORAGE_KEY = "vegapal-language";
 
 export const SUPPORTED_LANGUAGES = [
   { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "ar", label: "العربية", flag: "🇸🇦" },
   { code: "th", label: "ไทย", flag: "🇹🇭" },
   { code: "zh", label: "中文", flag: "🇨🇳" },
   { code: "ru", label: "Русский", flag: "🇷🇺" },

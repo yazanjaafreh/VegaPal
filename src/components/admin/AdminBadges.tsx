@@ -1,5 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
-import { PLAN_LIMITS, type UserPlan } from "@/lib/admin/plans";
+import type { UserPlan } from "@/lib/admin/plans";
 import { cn } from "@/lib/utils";
 
 const PLAN_STYLES: Record<UserPlan, string> = {
@@ -9,9 +10,10 @@ const PLAN_STYLES: Record<UserPlan, string> = {
 };
 
 export function PlanBadge({ plan, className }: { plan: UserPlan; className?: string }) {
+  const { t } = useTranslation("common");
   return (
     <Badge variant="outline" className={cn(PLAN_STYLES[plan], className)}>
-      {PLAN_LIMITS[plan].label}
+      {t(`plan.badges.${plan}`)}
     </Badge>
   );
 }
@@ -23,6 +25,7 @@ export function AccountStatusBadge({
   status: "active" | "disabled";
   className?: string;
 }) {
+  const { t } = useTranslation("common");
   const active = status === "active";
   return (
     <Badge
@@ -32,7 +35,7 @@ export function AccountStatusBadge({
         className,
       )}
     >
-      {active ? "Active" : "Disabled"}
+      {active ? t("plan.status.active") : t("plan.status.disabled")}
     </Badge>
   );
 }

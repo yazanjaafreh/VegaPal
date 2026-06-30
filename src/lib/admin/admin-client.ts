@@ -4,10 +4,13 @@ import type { UserPlan } from "@/lib/admin/plans";
 export type AdminStats = {
   totalUsers: number;
   newUsersToday: number;
+  newUsersThisMonth: number;
   freeUsers: number;
   proUsers: number;
   businessUsers: number;
+  disabledUsers: number;
   totalInvoices: number;
+  invoicesThisMonth: number;
   paidInvoices: number;
   pendingInvoices: number;
 };
@@ -28,6 +31,18 @@ export type AdminUserRow = {
   status: "active" | "disabled";
 };
 
+export type AdminAuditLogEntry = {
+  id: string;
+  adminUserId: string;
+  targetUserId: string;
+  action: string;
+  oldValue: unknown;
+  newValue: unknown;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+};
+
 export type AdminUserDetail = AdminUserRow & {
   companyAddress: string | null;
   website: string | null;
@@ -45,6 +60,29 @@ export type AdminUserDetail = AdminUserRow & {
     total: number;
     createdAt: string;
   }[];
+  auditLogs: AdminAuditLogEntry[];
+};
+
+export type AdminUsersPagination = {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+};
+
+export type AdminUsersQuery = {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  plan?: UserPlan | "";
+  status?: "active" | "disabled" | "";
+};
+
+export type AdminUsersResponse = {
+  users: AdminUserRow[];
+  pagination: AdminUsersPagination;
 };
 
 async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -77,8 +115,15 @@ export async function fetchAdminStats(): Promise<AdminStats> {
   return adminFetch("/api/admin/stats");
 }
 
-export async function fetchAdminUsers(): Promise<{ users: AdminUserRow[] }> {
-  return adminFetch("/api/admin/users");
+export async function fetchAdminUsers(query: AdminUsersQuery = {}): Promise<AdminUsersResponse> {
+  const params = new URLSearchParams();
+  if (query.page) params.set("page", String(query.page));
+  if (query.pageSize) params.set("pageSize", String(query.pageSize));
+  if (query.search?.trim()) params.set("search", query.search.trim());
+  if (query.plan) params.set("plan", query.plan);
+  if (query.status) params.set("status", query.status);
+  const qs = params.toString();
+  return adminFetch(`/api/admin/users${qs ? `?${qs}` : ""}`);
 }
 
 export async function fetchAdminUser(userId: string): Promise<AdminUserDetail> {

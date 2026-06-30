@@ -1,6 +1,8 @@
 /**
  * SQL verification after migrations.
- * Usage: node scripts/verify-supabase-sql.mjs "<connection-string>"
+ * Usage:
+ *   node scripts/verify-supabase-sql.mjs "<connection-string>"
+ *   SUPABASE_DB_PASSWORD=... node scripts/verify-supabase-sql.mjs
  */
 import pg from "pg";
 
@@ -19,8 +21,13 @@ const regions = [
 
 async function discoverConnectionString(explicit) {
   if (explicit) return explicit;
-  const ref = "rudqfhqawqmhclqmaflj";
-  const password = "Hanaa@yazan1";
+  const password = process.env.SUPABASE_DB_PASSWORD;
+  if (!password) {
+    throw new Error(
+      "Set SUPABASE_DB_PASSWORD in .env.local or pass a connection string as the first argument.",
+    );
+  }
+  const ref = process.env.SUPABASE_PROJECT_REF || "rudqfhqawqmhclqmaflj";
   const encoded = encodeURIComponent(password);
   const candidates = [
     `postgresql://postgres:${encoded}@db.${ref}.supabase.co:5432/postgres`,
@@ -58,7 +65,7 @@ async function main() {
 
   const tables = await client.query(`
     SELECT table_name FROM information_schema.tables
-    WHERE table_schema = 'public' AND table_name IN ('profiles','invoices','invoice_items')
+    WHERE table_schema = 'public' AND table_name IN ('profiles','invoices','invoice_items','admin_audit_logs')
     ORDER BY 1
   `);
   console.log("=== Tables ===");
@@ -82,6 +89,14 @@ async function main() {
   console.log("\n=== Admin columns ===");
   admin.rows.forEach((r) => console.log("  OK:", r.column_name));
 
+  const audit = await client.query(`
+    SELECT column_name FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'admin_audit_logs'
+    ORDER BY ordinal_position
+  `);
+  console.log("\n=== Admin audit log columns ===");
+  audit.rows.forEach((r) => console.log("  OK:", r.column_name));
+
   const enums = await client.query(`
     SELECT typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
     WHERE n.nspname = 'public' AND typname IN ('user_plan','user_role')
@@ -92,7 +107,7 @@ async function main() {
 
   const policies = await client.query(`
     SELECT tablename, policyname FROM pg_policies
-    WHERE schemaname = 'public' AND tablename IN ('profiles','invoices','invoice_items')
+    WHERE schemaname = 'public' AND tablename IN ('profiles','invoices','invoice_items','admin_audit_logs')
     ORDER BY tablename, policyname
   `);
   console.log("\n=== RLS policies ===");
@@ -104,7 +119,7 @@ async function main() {
     JOIN pg_class c ON c.oid = t.tgrelid
     JOIN pg_namespace n ON n.oid = c.relnamespace
     WHERE NOT t.tgisinternal AND n.nspname IN ('public','auth')
-      AND (tgname LIKE '%updated_at%' OR tgname LIKE '%new_user%' OR tgname LIKE '%privileged%')
+      AND (tgname LIKE '%updated_at%' OR tgname LIKE '%new_user%' OR tgname LIKE '%privileged%' OR tgname LIKE '%invoice_plan%')
     ORDER BY relname, tgname
   `);
   console.log("\n=== Triggers ===");
@@ -112,7 +127,7 @@ async function main() {
 
   const functions = await client.query(`
     SELECT proname FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
-    WHERE n.nspname = 'public' AND proname IN ('handle_new_user','set_updated_at','protect_profile_privileged_fields')
+    WHERE n.nspname = 'public' AND proname IN ('handle_new_user','set_updated_at','protect_profile_privileged_fields','get_invoice_plan_usage')
     ORDER BY 1
   `);
   console.log("\n=== Functions ===");

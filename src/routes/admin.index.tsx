@@ -9,17 +9,24 @@ import {
   Crown,
   Building2,
   Sparkles,
+  UserX,
+  CalendarDays,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { fetchAdminStats, type AdminStats } from "@/lib/admin/admin-client";
 import { formatAppError } from "@/lib/auth/errors";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
+import { FormError } from "@/components/ui/form-error";
 
 export const Route = createFileRoute("/admin/")({
+  beforeLoad: () => ensureNamespacesLoaded(["admin"]),
   component: AdminDashboardPage,
 });
 
 const STAT_CARD_CLASS = "rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-soft";
 
 function AdminDashboardPage() {
+  const { t } = useTranslation("admin");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,25 +39,28 @@ function AdminDashboardPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto min-w-0">
       <div className="mb-8">
-        <p className="text-xs font-medium text-primary uppercase tracking-wider">Admin</p>
-        <h1 className="text-3xl font-bold tracking-tight mt-1">Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Platform overview for users, plans, and invoices.</p>
+        <p className="text-xs font-medium text-primary uppercase tracking-wider">{t("eyebrow")}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-1">{t("dashboard.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("dashboard.subtitle")}</p>
       </div>
 
       {error ? (
-        <p className="text-sm text-destructive">{error}</p>
+        <FormError message={error} />
       ) : !stats ? (
-        <p className="text-sm text-muted-foreground">Loading metrics…</p>
+        <p className="text-sm text-muted-foreground">{t("dashboard.loading")}</p>
       ) : (
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard label="Total users" value={stats.totalUsers} icon={Users} accent="bg-primary/10 text-primary" />
-          <StatCard label="New users today" value={stats.newUsersToday} icon={UserPlus} accent="bg-navy/5 text-navy dark:text-foreground" />
-          <StatCard label="Free users" value={stats.freeUsers} icon={Sparkles} accent="bg-muted text-foreground" />
-          <StatCard label="Pro users" value={stats.proUsers} icon={Crown} accent="bg-warning/15 text-warning" />
-          <StatCard label="Business users" value={stats.businessUsers} icon={Building2} accent="bg-success/10 text-success" />
-          <StatCard label="Total invoices" value={stats.totalInvoices} icon={FileText} accent="bg-navy/5 text-navy dark:text-foreground" />
-          <StatCard label="Paid invoices" value={stats.paidInvoices} icon={CheckCircle2} accent="bg-success/10 text-success" />
-          <StatCard label="Pending invoices" value={stats.pendingInvoices} icon={Clock} accent="bg-warning/15 text-warning" />
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+          <StatCard label={t("dashboard.stats.totalUsers")} value={stats.totalUsers} icon={Users} accent="bg-primary/10 text-primary" />
+          <StatCard label={t("dashboard.stats.newUsersToday")} value={stats.newUsersToday} icon={UserPlus} accent="bg-navy/5 text-navy dark:text-foreground" />
+          <StatCard label={t("dashboard.stats.newUsersThisMonth")} value={stats.newUsersThisMonth} icon={CalendarDays} accent="bg-navy/5 text-navy dark:text-foreground" />
+          <StatCard label={t("dashboard.stats.freeUsers")} value={stats.freeUsers} icon={Sparkles} accent="bg-muted text-foreground" />
+          <StatCard label={t("dashboard.stats.proUsers")} value={stats.proUsers} icon={Crown} accent="bg-warning/15 text-warning" />
+          <StatCard label={t("dashboard.stats.businessUsers")} value={stats.businessUsers} icon={Building2} accent="bg-success/10 text-success" />
+          <StatCard label={t("dashboard.stats.disabledUsers")} value={stats.disabledUsers} icon={UserX} accent="bg-destructive/10 text-destructive" />
+          <StatCard label={t("dashboard.stats.totalInvoices")} value={stats.totalInvoices} icon={FileText} accent="bg-navy/5 text-navy dark:text-foreground" />
+          <StatCard label={t("dashboard.stats.invoicesThisMonth")} value={stats.invoicesThisMonth} icon={FileText} accent="bg-primary/10 text-primary" />
+          <StatCard label={t("dashboard.stats.paidInvoices")} value={stats.paidInvoices} icon={CheckCircle2} accent="bg-success/10 text-success" />
+          <StatCard label={t("dashboard.stats.pendingInvoices")} value={stats.pendingInvoices} icon={Clock} accent="bg-warning/15 text-warning" />
         </div>
       )}
     </div>

@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { FormError } from "@/components/ui/form-error";
 import { FormSuccess } from "@/components/ui/form-success";
+import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AccountStatusBadge, PlanBadge } from "@/components/admin/AdminBadges";
 import {
@@ -21,17 +23,22 @@ import {
 import {
   fetchAdminUser,
   updateAdminUser,
+  type AdminAuditLogEntry,
   type AdminUserDetail,
 } from "@/lib/admin/admin-client";
 import { PLAN_LIMITS, USER_PLANS, type UserPlan } from "@/lib/admin/plans";
 import { formatAppError } from "@/lib/auth/errors";
+import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 
 export const Route = createFileRoute("/admin/users/$userId")({
+  beforeLoad: () => ensureNamespacesLoaded(["admin"]),
   component: AdminUserDetailPage,
 });
 
 function AdminUserDetailPage() {
   const { userId } = Route.useParams();
+  const { t } = useTranslation("admin");
+  const { t: tc } = useTranslation("common");
   const [user, setUser] = useState<AdminUserDetail | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -59,7 +66,7 @@ function AdminUserDetailPage() {
     setError("");
     try {
       await updateAdminUser(userId, { plan });
-      setSuccess(`Plan updated to ${PLAN_LIMITS[plan].label}.`);
+      setSuccess(t("userDetail.successPlan", { plan: tc(`plan.badges.${plan}`) }));
       load();
     } catch (err) {
       setError(formatAppError(err));
@@ -74,7 +81,7 @@ function AdminUserDetailPage() {
     setError("");
     try {
       await updateAdminUser(userId, { isDisabled });
-      setSuccess(isDisabled ? "User disabled." : "User re-enabled.");
+      setSuccess(isDisabled ? t("userDetail.successDisabled") : t("userDetail.successEnabled"));
       load();
     } catch (err) {
       setError(formatAppError(err));
@@ -84,21 +91,25 @@ function AdminUserDetailPage() {
   }
 
   if (loading && !user) {
-    return <div className="p-6 text-sm text-muted-foreground">Loading user…</div>;
+    return <div className="p-6 text-sm text-muted-foreground">{t("userDetail.loading")}</div>;
   }
 
   if (!user) {
     return (
       <div className="p-4 sm:p-6 max-w-3xl mx-auto">
-        <FormError message={error || "User not found."} />
+        <FormError message={error || t("userDetail.notFound")} />
         <Button asChild variant="outline" className="mt-4">
-          <Link to="/admin/users">Back to users</Link>
+          <Link to="/admin/users">{t("userDetail.back")}</Link>
         </Button>
       </div>
     );
   }
 
   const planInfo = PLAN_LIMITS[user.plan];
+  const invoiceLimitLabel =
+    planInfo.maxInvoicesPerMonth === "unlimited"
+      ? t("userDetail.planSummaryUnlimited")
+      : t("userDetail.planSummaryLimited", { count: planInfo.maxInvoicesPerMonth });
 
   return (
     <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto min-w-0 space-y-8">
@@ -106,12 +117,12 @@ function AdminUserDetailPage() {
         <Button asChild variant="ghost" size="sm" className="mb-4 -ml-2">
           <Link to="/admin/users">
             <ArrowLeft className="h-4 w-4" />
-            Back to users
+            {t("userDetail.back")}
           </Link>
         </Button>
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-medium text-primary uppercase tracking-wider w-full sm:w-auto">
-            User detail
+            {t("userDetail.eyebrow")}
           </p>
           <PlanBadge plan={user.plan} />
           <AccountStatusBadge status={user.status} />
@@ -127,32 +138,31 @@ function AdminUserDetailPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-soft space-y-4">
-          <h2 className="font-semibold">Profile</h2>
+          <h2 className="font-semibold">{t("userDetail.profile")}</h2>
           <dl className="grid sm:grid-cols-2 gap-4 text-sm">
-            <DetailItem label="Name" value={user.name || "—"} />
-            <DetailItem label="Email" value={user.email || "—"} />
-            <DetailItem label="Business" value={user.business || "—"} />
-            <DetailItem label="Plan" value={planInfo.label} />
-            <DetailItem label="Joined" value={formatDateTime(user.joinedAt)} />
+            <DetailItem label={t("userDetail.fields.name")} value={user.name || "—"} />
+            <DetailItem label={t("userDetail.fields.email")} value={user.email || "—"} />
+            <DetailItem label={t("userDetail.fields.business")} value={user.business || "—"} />
+            <DetailItem label={t("userDetail.fields.plan")} value={tc(`plan.badges.${user.plan}`)} />
+            <DetailItem label={t("userDetail.fields.joined")} value={formatDateTime(user.joinedAt)} />
             <DetailItem
-              label="Last sign in"
+              label={t("userDetail.fields.lastSignIn")}
               value={user.lastSignInAt ? formatDateTime(user.lastSignInAt) : "—"}
             />
-            <DetailItem label="Invoices this month" value={String(user.invoiceCountThisMonth)} />
-            <DetailItem label="Total invoices" value={String(user.invoiceCount)} />
-            <DetailItem label="Paid" value={String(user.paidInvoiceCount)} />
-            <DetailItem label="Pending" value={String(user.pendingInvoiceCount)} />
+            <DetailItem label={t("userDetail.fields.invoicesThisMonth")} value={String(user.invoiceCountThisMonth)} />
+            <DetailItem label={t("userDetail.fields.totalInvoices")} value={String(user.invoiceCount)} />
+            <DetailItem label={t("userDetail.fields.paid")} value={String(user.paidInvoiceCount)} />
+            <DetailItem label={t("userDetail.fields.pending")} value={String(user.pendingInvoiceCount)} />
           </dl>
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-soft space-y-5">
-          <h2 className="font-semibold">Plan management</h2>
+          <h2 className="font-semibold">{t("userDetail.planManagement")}</h2>
           <p className="text-sm text-muted-foreground">
-            {planInfo.maxUsers} user{planInfo.maxUsers === 1 ? "" : "s"},{" "}
-            {planInfo.maxInvoicesPerMonth === "unlimited"
-              ? "unlimited invoices"
-              : `${planInfo.maxInvoicesPerMonth} invoices per month`}
-            .
+            {t("userDetail.planSummary", {
+              users: planInfo.maxUsers,
+              invoices: invoiceLimitLabel,
+            })}
           </p>
           <div className="flex flex-wrap gap-2">
             {USER_PLANS.map((plan) => (
@@ -164,13 +174,13 @@ function AdminUserDetailPage() {
                 loading={savingPlan === plan}
                 onClick={() => changePlan(plan)}
               >
-                Set {PLAN_LIMITS[plan].label}
+                {t("userDetail.setPlan", { plan: tc(`plan.badges.${plan}`) })}
               </LoadingButton>
             ))}
           </div>
 
           <div className="border-t border-border pt-5 space-y-3">
-            <h3 className="font-medium text-sm">Account status</h3>
+            <h3 className="font-medium text-sm">{t("userDetail.accountStatus")}</h3>
             {user.isDisabled ? (
               <LoadingButton
                 size="sm"
@@ -179,7 +189,7 @@ function AdminUserDetailPage() {
                 disabled={savingPlan !== null}
                 onClick={() => setDisabled(false)}
               >
-                Enable user
+                {t("userDetail.enableUser")}
               </LoadingButton>
             ) : (
               <AlertDialog>
@@ -190,20 +200,20 @@ function AdminUserDetailPage() {
                     loading={savingStatus}
                     disabled={savingPlan !== null}
                   >
-                    Disable user
+                    {t("userDetail.disableUser")}
                   </LoadingButton>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Disable this user?</AlertDialogTitle>
+                    <AlertDialogTitle>{t("userDetail.disableTitle")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      {user.email} will be signed out and unable to sign in until re-enabled.
+                      {t("userDetail.disableDescription", { email: user.email })}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t("userDetail.cancel")}</AlertDialogCancel>
                     <AlertDialogAction onClick={() => setDisabled(true)}>
-                      Disable user
+                      {t("userDetail.disableUser")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -215,21 +225,23 @@ function AdminUserDetailPage() {
 
       <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
         <div className="px-5 sm:px-6 py-4 border-b border-border">
-          <h2 className="font-semibold">Recent invoices</h2>
+          <h2 className="font-semibold">{t("userDetail.recentInvoices")}</h2>
         </div>
         {user.recentInvoices.length === 0 ? (
-          <p className="px-5 sm:px-6 py-8 text-sm text-muted-foreground">No invoices yet.</p>
+          <div className="px-5 sm:px-6 py-8">
+            <EmptyState title={t("userDetail.noInvoices")} />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/20 text-left">
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Number</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Title</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Client</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Total</th>
-                  <th className="px-4 py-3 font-medium text-muted-foreground">Created</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.number")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.title")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.client")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.status")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.total")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.invoiceColumns.created")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -254,8 +266,63 @@ function AdminUserDetailPage() {
           </div>
         )}
       </section>
+
+      <section className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
+        <div className="px-5 sm:px-6 py-4 border-b border-border">
+          <h2 className="font-semibold">{t("userDetail.auditLog")}</h2>
+        </div>
+        {!user.auditLogs?.length ? (
+          <div className="px-5 sm:px-6 py-8">
+            <EmptyState title={t("userDetail.noAuditLogs")} />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/20 text-left">
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.auditColumns.action")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.auditColumns.details")}</th>
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{t("userDetail.auditColumns.when")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user.auditLogs.map((entry) => (
+                  <AuditLogRow key={entry.id} entry={entry} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
+}
+
+function AuditLogRow({ entry }: { entry: AdminAuditLogEntry }) {
+  const { t } = useTranslation("admin");
+  const actionKey = `userDetail.auditActions.${entry.action}` as const;
+  const actionLabel = t(actionKey, { defaultValue: entry.action });
+  const details = formatAuditDetails(entry);
+
+  return (
+    <tr className="border-b border-border last:border-0">
+      <td className="px-4 py-3 font-medium">{actionLabel}</td>
+      <td className="px-4 py-3 text-muted-foreground break-words">{details}</td>
+      <td className="px-4 py-3 whitespace-nowrap">{formatDateTime(entry.createdAt)}</td>
+    </tr>
+  );
+}
+
+function formatAuditDetails(entry: AdminAuditLogEntry) {
+  const oldVal = entry.oldValue as Record<string, unknown> | null;
+  const newVal = entry.newValue as Record<string, unknown> | null;
+  if (entry.action === "plan_changed") {
+    return `${String(oldVal?.plan ?? "—")} → ${String(newVal?.plan ?? "—")}`;
+  }
+  if (entry.action === "user_disabled" || entry.action === "user_enabled") {
+    return String(newVal?.is_disabled ?? "");
+  }
+  return JSON.stringify(newVal ?? {});
 }
 
 function DetailItem({ label, value }: { label: string; value: string }) {

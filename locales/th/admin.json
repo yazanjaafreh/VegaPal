@@ -1,0 +1,116 @@
+{
+  "meta": {
+    "title": "Admin — VegaPal"
+  },
+  "eyebrow": "Admin",
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Platform overview for users, plans, and invoices.",
+    "loading": "Loading metrics…",
+    "stats": {
+      "totalUsers": "Total users",
+      "newUsersToday": "New users today",
+      "newUsersThisMonth": "New users this month",
+      "freeUsers": "Free users",
+      "proUsers": "Pro users",
+      "businessUsers": "Business users",
+      "disabledUsers": "Disabled users",
+      "totalInvoices": "Total invoices",
+      "invoicesThisMonth": "Invoices this month",
+      "paidInvoices": "Paid invoices",
+      "pendingInvoices": "Pending invoices"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Manage accounts, plans, and access status.",
+    "loading": "Loading users…",
+    "searchPlaceholder": "Search by name, email, or business",
+    "filters": {
+      "plan": "Plan",
+      "status": "Status",
+      "allPlans": "All plans",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "plan": "Plan",
+      "joined": "Joined",
+      "lastSignIn": "Last sign in",
+      "invoices": "Invoices",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "view": "View",
+    "empty": "No users found.",
+    "emptySearch": "No users match your search or filters.",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} of {{totalPages}}"
+    }
+  },
+  "userDetail": {
+    "back": "Back to users",
+    "eyebrow": "User detail",
+    "loading": "Loading user…",
+    "notFound": "User not found.",
+    "profile": "Profile",
+    "planManagement": "Plan management",
+    "accountStatus": "Account status",
+    "recentInvoices": "Recent invoices",
+    "auditLog": "Audit log",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "business": "Business",
+      "plan": "Plan",
+      "joined": "Joined",
+      "lastSignIn": "Last sign in",
+      "invoicesThisMonth": "Invoices this month",
+      "totalInvoices": "Total invoices",
+      "paid": "Paid",
+      "pending": "Pending"
+    },
+    "planSummary": "{{users}} user(s), {{invoices}}.",
+    "planSummaryUnlimited": "unlimited invoices",
+    "planSummaryLimited": "{{count}} invoices per month",
+    "setPlan": "Set {{plan}}",
+    "enableUser": "Enable user",
+    "disableUser": "Disable user",
+    "disableTitle": "Disable this user?",
+    "disableDescription": "{{email}} will be signed out and unable to sign in until re-enabled.",
+    "cancel": "Cancel",
+    "successPlan": "Plan updated to {{plan}}.",
+    "successDisabled": "User disabled.",
+    "successEnabled": "User re-enabled.",
+    "invoiceColumns": {
+      "number": "Number",
+      "title": "Title",
+      "client": "Client",
+      "status": "Status",
+      "total": "Total",
+      "created": "Created"
+    },
+    "noInvoices": "No invoices yet.",
+    "noAuditLogs": "No audit history for this user yet.",
+    "auditColumns": {
+      "action": "Action",
+      "admin": "Admin",
+      "details": "Details",
+      "when": "When"
+    },
+    "auditActions": {
+      "plan_changed": "Plan changed",
+      "user_disabled": "User disabled",
+      "user_enabled": "User enabled"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users"
+  }
+}

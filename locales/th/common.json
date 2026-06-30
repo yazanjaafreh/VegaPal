@@ -15,6 +15,7 @@
     "createInvoice": "สร้างใบแจ้งหนี้",
     "settings": "ตั้งค่า",
     "signOut": "ออกจากระบบ",
+    "adminPanel": "แผงผู้ดูแล",
     "openMenu": "เปิดเมนูนำทาง"
   },
   "language": {
@@ -135,6 +136,15 @@
   "securePayments": {
     "title": "ชำระเงินอย่างปลอดภัย",
     "tagline": "รับ USDT ตรงกระเป๋า บนเชนอย่างมั่นใจ"
+  },
+  "plan": {
+    "usageUnlimited": "ใบแจ้งหนี้ไม่จำกัด",
+    "usageFree": "ใช้ใบแจ้งหนี้ {{used}} / {{limit}} ใบในเดือนนี้",
+    "warningNearLimit": "คุณใช้ใบแจ้งหนี้ {{used}} จาก {{limit}} ใบในเดือนนี้",
+    "limitReached": "คุณถึงขีดจำกัดแพ็กเกจ Free ที่ 5 ใบแจ้งหนี้ต่อเดือนแล้ว อัปเกรดเป็น Pro เพื่อสร้างใบแจ้งหนี้ไม่จำกัด",
+    "upgradePlan": "อัปเกรดแพ็กเกจ",
+    "badges": { "free": "Free", "pro": "Pro", "business": "Business" },
+    "status": { "active": "ใช้งาน", "disabled": "ปิดใช้งาน" }
   },
   "empty": {
     "noActivity": "ยังไม่มีกิจกรรม",

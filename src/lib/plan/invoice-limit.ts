@@ -36,4 +36,13 @@ export function isAtFreePlanInvoiceLimit(usage: InvoicePlanUsage): boolean {
   );
 }
 
+export function isNearFreePlanInvoiceLimit(usage: InvoicePlanUsage): boolean {
+  return (
+    usage.plan === "free" &&
+    usage.monthlyLimit !== null &&
+    usage.invoicesThisMonth >= usage.monthlyLimit - 1 &&
+    usage.invoicesThisMonth < usage.monthlyLimit
+  );
+}
+
 export { FREE_PLAN_MONTHLY_INVOICE_LIMIT };

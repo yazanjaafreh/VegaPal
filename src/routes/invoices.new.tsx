@@ -5,7 +5,6 @@ import { invoiceCreateSchema, firstZodError } from "@/lib/validation/schemas";
 import { checkClientRateLimit } from "@/lib/client-rate-limit";
 import { formatAppError } from "@/lib/auth/errors";
 import {
-  FREE_PLAN_LIMIT_MESSAGE,
   isAtFreePlanInvoiceLimit,
 } from "@/lib/plan/invoice-limit";
 import { useSubmitGuard } from "@/hooks/use-submit-guard";
@@ -374,7 +373,7 @@ function CreateInvoice() {
         return;
       }
       if (atInvoiceLimit) {
-        setFormError(FREE_PLAN_LIMIT_MESSAGE);
+        setFormError(tc("plan.limitReached"));
         submitGuard.end();
         return;
       }
@@ -453,14 +452,17 @@ function CreateInvoice() {
         <div className="mt-4 rounded-xl border border-border bg-muted/20 px-4 py-3">
           <p className="text-sm text-muted-foreground">
             {planUsage.monthlyLimit === null
-              ? "Unlimited invoices"
-              : `${planUsage.invoicesThisMonth}/${planUsage.monthlyLimit} invoices used this month`}
+              ? tc("plan.usageUnlimited")
+              : tc("plan.usageFree", {
+                  used: planUsage.invoicesThisMonth,
+                  limit: planUsage.monthlyLimit,
+                })}
           </p>
           {atInvoiceLimit ? (
             <div className="mt-3 space-y-3">
-              <p className="text-sm leading-relaxed">{FREE_PLAN_LIMIT_MESSAGE}</p>
+              <p className="text-sm leading-relaxed">{tc("plan.limitReached")}</p>
               <Button asChild size="sm" variant="hero">
-                <Link to="/pricing">Upgrade plan</Link>
+                <Link to="/pricing">{tc("plan.upgradePlan")}</Link>
               </Button>
             </div>
           ) : null}
