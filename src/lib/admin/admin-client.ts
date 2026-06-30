@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { UserPlan } from "@/lib/admin/plans";
+import { normalizeUserPlan } from "@/lib/admin/plans";
 
 export type AdminStats = {
   totalUsers: number;
@@ -109,6 +110,51 @@ async function adminFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function normalizeAdminUserDetail(raw: AdminUserDetail): AdminUserDetail {
+  const plan = normalizeUserPlan(raw.plan);
+  const status: "active" | "disabled" = raw.isDisabled || raw.status === "disabled" ? "disabled" : "active";
+
+  return {
+    ...raw,
+    plan,
+    status,
+    name: raw.name ?? "",
+    email: raw.email ?? "",
+    business: raw.business ?? null,
+    isDisabled: Boolean(raw.isDisabled),
+    invoiceCount: Number(raw.invoiceCount) || 0,
+    invoiceCountThisMonth: Number(raw.invoiceCountThisMonth) || 0,
+    paidInvoiceCount: Number(raw.paidInvoiceCount) || 0,
+    pendingInvoiceCount: Number(raw.pendingInvoiceCount) || 0,
+    recentInvoices: Array.isArray(raw.recentInvoices)
+      ? raw.recentInvoices.map((inv) => ({
+          id: inv.id ?? "",
+          number: inv.number ?? "",
+          title: inv.title ?? "",
+          clientName: inv.clientName ?? "",
+          status: inv.status ?? "draft",
+          total: Number(inv.total) || 0,
+          createdAt: inv.createdAt ?? "",
+        }))
+      : [],
+    auditLogs: Array.isArray(raw.auditLogs)
+      ? raw.auditLogs.map((entry) => ({
+          id: entry.id ?? "",
+          adminUserId: entry.adminUserId ?? "",
+          targetUserId: entry.targetUserId ?? "",
+          action: entry.action ?? "unknown",
+          oldValue: entry.oldValue ?? null,
+          newValue: entry.newValue ?? null,
+          ipAddress: entry.ipAddress ?? null,
+          userAgent: entry.userAgent ?? null,
+          createdAt: entry.createdAt ?? "",
+        }))
+      : [],
+    auditLogsUnavailable: Boolean(raw.auditLogsUnavailable),
+    recentInvoicesUnavailable: Boolean(raw.recentInvoicesUnavailable),
+  };
+}
+
 export async function fetchAdminMe(): Promise<{ isAdmin: boolean }> {
   return adminFetch("/api/admin/me");
 }
@@ -129,7 +175,8 @@ export async function fetchAdminUsers(query: AdminUsersQuery = {}): Promise<Admi
 }
 
 export async function fetchAdminUser(userId: string): Promise<AdminUserDetail> {
-  return adminFetch(`/api/admin/users/${encodeURIComponent(userId)}`);
+  const data = await adminFetch<AdminUserDetail>(`/api/admin/users/${encodeURIComponent(userId)}`);
+  return normalizeAdminUserDetail(data);
 }
 
 export async function updateAdminUser(

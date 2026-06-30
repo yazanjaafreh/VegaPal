@@ -1,5 +1,6 @@
 import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { UserPlan } from "@/lib/admin/plans";
+import { normalizeUserPlan } from "@/lib/admin/plans";
 import { requireAdminFromRequest } from "@/lib/admin/admin-auth.server";
 import { getRequestMeta, writeAdminAuditLog } from "@/lib/admin/admin-audit.server";
 
@@ -324,18 +325,19 @@ async function getUserDetail(userId: string) {
 
   const invoiceRows = allInvoicesResult.error ? [] : (allInvoicesResult.data ?? []);
   const auth = authMap.get(userId);
+  const plan = normalizeUserPlan(profile.plan);
 
   return {
     id: profile.id,
-    name: profile.name,
+    name: profile.name ?? "",
     email: profile.email ?? auth?.email ?? "",
-    business: profile.business,
-    companyAddress: profile.company_address,
-    website: profile.website,
-    contactEmail: profile.contact_email,
-    plan: profile.plan as UserPlan,
-    role: profile.role,
-    isDisabled: profile.is_disabled,
+    business: profile.business ?? null,
+    companyAddress: profile.company_address ?? null,
+    website: profile.website ?? null,
+    contactEmail: profile.contact_email ?? null,
+    plan,
+    role: profile.role ?? "user",
+    isDisabled: Boolean(profile.is_disabled),
     joinedAt: profile.created_at,
     createdAt: profile.created_at,
     updatedAt: profile.updated_at,
@@ -346,14 +348,14 @@ async function getUserDetail(userId: string) {
     pendingInvoiceCount: invoiceRows.filter((i) => i.status === "pending").length,
     recentInvoices: recentInvoicesResult.error
       ? []
-      : (recentInvoicesResult.data as InvoiceRow[]).map((inv) => ({
+      : (recentInvoicesResult.data ?? []).map((inv) => ({
           id: inv.id,
-          number: inv.number,
-          title: inv.title,
-          clientName: inv.client_name,
-          status: inv.status,
-          total: Number(inv.total),
-          createdAt: inv.created_at,
+          number: inv.number ?? "",
+          title: inv.title ?? "",
+          clientName: inv.client_name ?? "",
+          status: inv.status ?? "draft",
+          total: Number(inv.total) || 0,
+          createdAt: inv.created_at ?? "",
         })),
     recentInvoicesUnavailable: !!recentInvoicesResult.error,
     auditLogs: auditResult.logs,

@@ -11,6 +11,10 @@ export type PlanLimits = {
   features: string[];
 };
 
+export function normalizeUserPlan(value: unknown): UserPlan {
+  return USER_PLANS.includes(value as UserPlan) ? (value as UserPlan) : "free";
+}
+
 export const PLAN_LIMITS: Record<UserPlan, PlanLimits> = {
   free: {
     label: "Free",

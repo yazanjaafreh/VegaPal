@@ -27,16 +27,37 @@ import {
   type AdminAuditLogEntry,
   type AdminUserDetail,
 } from "@/lib/admin/admin-client";
-import { PLAN_LIMITS, USER_PLANS, type UserPlan } from "@/lib/admin/plans";
+import { PLAN_LIMITS, USER_PLANS, normalizeUserPlan, type UserPlan } from "@/lib/admin/plans";
 import { formatAppError } from "@/lib/auth/errors";
 import { ensureNamespacesLoaded } from "@/lib/i18n/load-namespace";
 import { Input } from "@/components/ui/input";
 import { useSession } from "@/lib/vegapal-store";
 
 export const Route = createFileRoute("/admin/users/$userId")({
-  beforeLoad: () => ensureNamespacesLoaded(["admin"]),
+  beforeLoad: async () => {
+    await ensureNamespacesLoaded(["admin"]);
+  },
   component: AdminUserDetailPage,
+  errorComponent: AdminUserDetailRouteError,
 });
+
+function AdminUserDetailRouteError() {
+  const { t } = useTranslation("admin");
+  return (
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+      <FormError
+        message={t("userDetail.loadError", {
+          defaultValue: "Could not load this user. Please try again.",
+        })}
+      />
+      <Button asChild variant="outline" className="mt-4">
+        <Link to="/admin/users">
+          {t("userDetail.back", { defaultValue: "Back to users" })}
+        </Link>
+      </Button>
+    </div>
+  );
+}
 
 function AdminUserDetailPage() {
   const { userId } = Route.useParams();
@@ -131,7 +152,10 @@ function AdminUserDetailPage() {
     );
   }
 
-  const planInfo = PLAN_LIMITS[user.plan];
+  const userPlan = normalizeUserPlan(user.plan);
+  const planInfo = PLAN_LIMITS[userPlan];
+  const recentInvoices = user.recentInvoices ?? [];
+  const auditLogs = user.auditLogs ?? [];
   const invoiceLimitLabel =
     planInfo.maxInvoicesPerMonth === "unlimited"
       ? t("userDetail.planSummaryUnlimited")
@@ -150,8 +174,8 @@ function AdminUserDetailPage() {
           <p className="text-xs font-medium text-primary uppercase tracking-wider w-full sm:w-auto">
             {t("userDetail.eyebrow")}
           </p>
-          <PlanBadge plan={user.plan} />
-          <AccountStatusBadge status={user.status} />
+          <PlanBadge plan={userPlan} />
+          <AccountStatusBadge status={user.status === "disabled" ? "disabled" : "active"} />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mt-2 break-words">
           {user.name || user.email}
@@ -169,7 +193,7 @@ function AdminUserDetailPage() {
             <DetailItem label={t("userDetail.fields.name")} value={user.name || "—"} />
             <DetailItem label={t("userDetail.fields.email")} value={user.email || "—"} />
             <DetailItem label={t("userDetail.fields.business")} value={user.business || "—"} />
-            <DetailItem label={t("userDetail.fields.plan")} value={tc(`plan.badges.${user.plan}`)} />
+            <DetailItem label={t("userDetail.fields.plan")} value={tc(`plan.badges.${userPlan}`)} />
             <DetailItem label={t("userDetail.fields.joined")} value={formatDateTime(user.joinedAt)} />
             <DetailItem
               label={t("userDetail.fields.lastSignIn")}
@@ -191,16 +215,16 @@ function AdminUserDetailPage() {
             })}
           </p>
           <div className="flex flex-wrap gap-2">
-            {USER_PLANS.map((plan) => (
+            {USER_PLANS.map((planOption) => (
               <LoadingButton
-                key={plan}
+                key={planOption}
                 size="sm"
-                variant={user.plan === plan ? "default" : "outline"}
-                disabled={user.plan === plan || savingPlan !== null || savingStatus}
-                loading={savingPlan === plan}
-                onClick={() => changePlan(plan)}
+                variant={userPlan === planOption ? "default" : "outline"}
+                disabled={userPlan === planOption || savingPlan !== null || savingStatus}
+                loading={savingPlan === planOption}
+                onClick={() => changePlan(planOption)}
               >
-                {t("userDetail.setPlan", { plan: tc(`plan.badges.${plan}`) })}
+                {t("userDetail.setPlan", { plan: tc(`plan.badges.${planOption}`) })}
               </LoadingButton>
             ))}
           </div>
@@ -257,7 +281,7 @@ function AdminUserDetailPage() {
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.invoicesUnavailable")} />
           </div>
-        ) : user.recentInvoices.length === 0 ? (
+        ) : recentInvoices.length === 0 ? (
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.noInvoices")} />
           </div>
@@ -275,7 +299,7 @@ function AdminUserDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {user.recentInvoices.map((invoice) => (
+                {recentInvoices.map((invoice) => (
                   <tr key={invoice.id} className="border-b border-border last:border-0">
                     <td className="px-4 py-3 font-mono text-xs">{invoice.number}</td>
                     <td className="px-4 py-3">{invoice.title}</td>
@@ -287,7 +311,7 @@ function AdminUserDetailPage() {
                         }
                       />
                     </td>
-                    <td className="px-4 py-3 tabular-nums">{invoice.total.toFixed(2)}</td>
+                    <td className="px-4 py-3 tabular-nums">{(Number(invoice.total) || 0).toFixed(2)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{formatDateTime(invoice.createdAt)}</td>
                   </tr>
                 ))}
@@ -305,7 +329,7 @@ function AdminUserDetailPage() {
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.auditUnavailable")} />
           </div>
-        ) : !user.auditLogs?.length ? (
+        ) : auditLogs.length === 0 ? (
           <div className="px-5 sm:px-6 py-8">
             <EmptyState title={t("userDetail.noAuditLogs")} />
           </div>
@@ -320,7 +344,7 @@ function AdminUserDetailPage() {
                 </tr>
               </thead>
               <tbody>
-                {user.auditLogs.map((entry) => (
+                {auditLogs.map((entry) => (
                   <AuditLogRow key={entry.id} entry={entry} />
                 ))}
               </tbody>
@@ -344,11 +368,14 @@ function AdminUserDetailPage() {
               if (!open) setDeleteConfirm("");
             }}
           >
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={deleting || savingPlan !== null || savingStatus}>
-                {t("userDetail.dangerZone.deleteUser")}
-              </Button>
-            </AlertDialogTrigger>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleting || savingPlan !== null || savingStatus}
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              {t("userDetail.dangerZone.deleteUser")}
+            </Button>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>{t("userDetail.dangerZone.deleteTitle")}</AlertDialogTitle>
@@ -426,6 +453,9 @@ function DetailItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
 }

@@ -59,6 +59,7 @@
     "eyebrow": "User detail",
     "loading": "Loading user…",
     "notFound": "User not found.",
+    "loadError": "Could not load this user. Please try again.",
     "profile": "Profile",
     "planManagement": "Plan management",
     "accountStatus": "Account status",

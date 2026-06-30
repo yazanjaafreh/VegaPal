@@ -19,13 +19,16 @@ export async function ensureNamespacesLoaded(namespaces: I18nNamespace[]) {
   if (lng !== "en" && isSupportedLanguage(lng)) {
     const { ensureLanguageLoaded } = await import("./load-locale");
     await ensureLanguageLoaded(lng);
-    return;
   }
 
+  const stillPending = namespaces.filter((ns) => !loadedNamespaces.has(ns));
+  if (stillPending.length === 0) return;
+
+  const loadLng = lng !== "en" && isSupportedLanguage(lng) ? lng : "en";
   await Promise.all(
-    pending.map(async (ns) => {
-      const mod = await import(`../../../locales/en/${ns}.json`);
-      i18n.addResourceBundle("en", ns, mod.default, true, true);
+    stillPending.map(async (ns) => {
+      const mod = await import(`../../../locales/${loadLng}/${ns}.json`);
+      i18n.addResourceBundle(loadLng, ns, mod.default, true, true);
       loadedNamespaces.add(ns);
     }),
   );
